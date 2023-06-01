@@ -22,9 +22,9 @@
 
 ## Structure
 
-- [`/packages/client`](./packages/client) An implementation of IPFS in JavaScript
-- [`/packages/interop`](./packages/interop) An implementation of IPFS in JavaScript
-- [`/packages/server`](./packages/server) An implementation of IPFS in JavaScript
+- [`/packages/client`](./packages/client) A Routing V1 HTTP API client
+- [`/packages/interop`](./packages/interop) Interop tests for the Routing V1 HTTP API server powered by Helia
+- [`/packages/server`](./packages/server) A Routing V1 HTTP API server powered by Helia
 
 ## API Docs
 
