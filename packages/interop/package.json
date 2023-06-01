@@ -1,6 +1,6 @@
 {
   "name": "@helia/routing-v1-http-api-client-interop",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Interop tests for the Routing V1 HTTP API server powered by Helia",
   "license": "Apache-2.0 OR MIT",
   "homepage": "https://github.com/ipfs/helia-routing-v1-http-api/tree/master/packages/interop#readme",
