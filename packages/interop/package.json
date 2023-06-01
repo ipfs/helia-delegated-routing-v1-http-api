@@ -1,0 +1,144 @@
+{
+  "name": "@helia/routing-v1-http-api-client-interop",
+  "version": "0.0.0",
+  "description": "An implementation of IPFS in JavaScript",
+  "license": "Apache-2.0 OR MIT",
+  "homepage": "https://github.com/ipfs/helia-routing-v1-http-api/tree/master/packages/interop#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ipfs/helia-routing-v1-http-api.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ipfs/helia-routing-v1-http-api/issues"
+  },
+  "keywords": [
+    "IPFS"
+  ],
+  "type": "module",
+  "types": "./dist/src/index.d.ts",
+  "files": [
+    "src",
+    "dist",
+    "!dist/test",
+    "!**/*.tsbuildinfo"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js"
+    }
+  },
+  "eslintConfig": {
+    "extends": "ipfs",
+    "parserOptions": {
+      "sourceType": "module"
+    }
+  },
+  "release": {
+    "branches": [
+      "main"
+    ],
+    "plugins": [
+      [
+        "@semantic-release/commit-analyzer",
+        {
+          "preset": "conventionalcommits",
+          "releaseRules": [
+            {
+              "breaking": true,
+              "release": "major"
+            },
+            {
+              "revert": true,
+              "release": "patch"
+            },
+            {
+              "type": "feat",
+              "release": "minor"
+            },
+            {
+              "type": "fix",
+              "release": "patch"
+            },
+            {
+              "type": "docs",
+              "release": "patch"
+            },
+            {
+              "type": "test",
+              "release": "patch"
+            },
+            {
+              "type": "deps",
+              "release": "patch"
+            },
+            {
+              "scope": "no-release",
+              "release": false
+            }
+          ]
+        }
+      ],
+      [
+        "@semantic-release/release-notes-generator",
+        {
+          "preset": "conventionalcommits",
+          "presetConfig": {
+            "types": [
+              {
+                "type": "feat",
+                "section": "Features"
+              },
+              {
+                "type": "fix",
+                "section": "Bug Fixes"
+              },
+              {
+                "type": "chore",
+                "section": "Trivial Changes"
+              },
+              {
+                "type": "docs",
+                "section": "Documentation"
+              },
+              {
+                "type": "deps",
+                "section": "Dependencies"
+              },
+              {
+                "type": "test",
+                "section": "Tests"
+              }
+            ]
+          }
+        }
+      ],
+      "@semantic-release/changelog",
+      "@semantic-release/npm",
+      "@semantic-release/github",
+      "@semantic-release/git"
+    ]
+  },
+  "scripts": {
+    "clean": "aegir clean",
+    "lint": "aegir lint",
+    "dep-check": "aegir dep-check",
+    "build": "aegir build --bundle false",
+    "test": "aegir test -t node",
+    "test:node": "aegir test -t node --cov",
+    "release": "aegir release"
+  },
+  "dependencies": {
+    "@helia/routing-v1-http-api-client": "~0.0.0",
+    "@helia/routing-v1-http-api-server": "~0.0.0",
+    "helia": "^1.2.0"
+  },
+  "devDependencies": {
+    "aegir": "^39.0.4",
+    "why-is-node-running": "^2.2.2"
+  },
+  "private": true,
+  "typedoc": {
+    "entryPoint": "./src/index.ts"
+  }
+}
