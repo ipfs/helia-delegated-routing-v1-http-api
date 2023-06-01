@@ -132,10 +132,6 @@
     "@helia/interface": "^1.1.1",
     "@libp2p/interfaces": "^3.3.2",
     "fastify": "^4.17.0",
-    "helia": "^1.2.0",
-    "it-all": "^3.0.2",
-    "it-map": "^3.0.3",
-    "it-take": "^3.0.2",
     "multiformats": "^11.0.2"
   },
   "devDependencies": {
