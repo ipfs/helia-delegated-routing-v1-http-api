@@ -129,7 +129,7 @@
     "release": "aegir release"
   },
   "dependencies": {
-    "@helia/routing-v1-http-api-client": "~0.0.0",
+    "@helia/routing-v1-http-api-client": "^1.0.0",
     "@helia/routing-v1-http-api-server": "^1.0.0",
     "helia": "^1.2.0"
   },
