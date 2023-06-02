@@ -1,3 +1,10 @@
+## [@helia/routing-v1-http-api-server-v1.0.1](https://github.com/ipfs/helia-routing-v1-http-api/compare/@helia/routing-v1-http-api-server-v1.0.0...@helia/routing-v1-http-api-server-v1.0.1) (2023-06-02)
+
+
+### Bug Fixes
+
+* add CORS plugin ([5913f9d](https://github.com/ipfs/helia-routing-v1-http-api/commit/5913f9d656da0ab540e5238088394ca8ff44c2f4))
+
 ## @helia/routing-v1-http-api-server-v1.0.0 (2023-06-01)
 
 
