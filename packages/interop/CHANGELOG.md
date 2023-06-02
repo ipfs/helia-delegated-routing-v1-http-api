@@ -1,4 +1,4 @@
-## @helia/routing-v1-http-api-client-interop-v1.0.0 (2023-06-01)
+## @helia/routing-v1-http-api-interop-v1.0.0 (2023-06-01)
 
 
 ### Documentation

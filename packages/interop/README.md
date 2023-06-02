@@ -23,7 +23,7 @@
 ## Install
 
 ```console
-$ npm i @helia/routing-v1-http-api-client-interop
+$ npm i @helia/routing-v1-http-api-interop
 ```
 
 ## API Docs
