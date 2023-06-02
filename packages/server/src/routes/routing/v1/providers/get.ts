@@ -38,29 +38,53 @@ export default function getProvidersV1 (fastify: FastifyInstance, helia: Helia):
       }
     },
     handler: async (request, reply) => {
-      const { cid: cidStr } = request.params
-      const cid = CID.parse(cidStr)
+      let cid: CID
+
+      try {
+        const { cid: cidStr } = request.params
+        cid = CID.parse(cidStr)
+      } catch (err) {
+        // these are .thenables but not .catchables?
+        reply.code(422).type('text/html').send('Unprocessable Entity') // eslint-disable-line @typescript-eslint/no-floating-promises
+        return
+      }
 
       if (request.headers.accept?.includes('application/x-ndjson') === true) {
         const stream = new PassThrough()
 
-        // these are .thenables but not .catchables?
-        reply.header('Content-Type', 'application/x-ndjson') // eslint-disable-line @typescript-eslint/no-floating-promises
-        reply.send(stream) // eslint-disable-line @typescript-eslint/no-floating-promises
-
         try {
+          let found = 0
+
           for await (const prov of streamingHandler(cid, helia)) {
+            if (found === 0) {
+              // these are .thenables but not .catchables?
+              reply.header('Content-Type', 'application/x-ndjson') // eslint-disable-line @typescript-eslint/no-floating-promises
+              reply.send(stream) // eslint-disable-line @typescript-eslint/no-floating-promises
+            }
+
+            found++
+
             stream.push(JSON.stringify(prov) + '\n')
+          }
+
+          if (found > 0) {
+            return
           }
         } finally {
           stream.end()
         }
       } else {
-        // this is .thenable but not .catchable?
-        reply.header('Content-Type', 'application/json') // eslint-disable-line @typescript-eslint/no-floating-promises
+        const result = await nonStreamingHandler(cid, helia)
 
-        return nonStreamingHandler(cid, helia)
+        if (result.Providers.length > 0) {
+          // this is .thenable but not .catchable?
+          reply.header('Content-Type', 'application/json') // eslint-disable-line @typescript-eslint/no-floating-promises
+
+          return reply.send(result)
+        }
       }
+
+      reply.callNotFound()
     }
   })
 }
