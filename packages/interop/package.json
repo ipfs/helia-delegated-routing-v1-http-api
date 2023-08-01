@@ -51,7 +51,7 @@
     "@helia/interface": "^1.1.1",
     "@libp2p/interface-libp2p": "^3.2.0",
     "@libp2p/kad-dht": "^9.3.6",
-    "aegir": "^39.0.4",
+    "aegir": "^40.0.8",
     "fastify": "^4.17.0",
     "libp2p": "^0.45.4",
     "multiformats": "^11.0.2"
