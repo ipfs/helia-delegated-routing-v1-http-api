@@ -146,8 +146,5 @@
     "@libp2p/peer-id-factory": "^2.0.3",
     "aegir": "^40.0.8",
     "body-parser": "^1.20.2"
-  },
-  "typedoc": {
-    "entryPoint": "./src/index.ts"
   }
 }

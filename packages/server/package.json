@@ -163,8 +163,5 @@
     "aegir": "^40.0.8",
     "sinon": "^15.1.0",
     "sinon-ts": "^1.0.0"
-  },
-  "typedoc": {
-    "entryPoint": "./src/index.ts"
   }
 }

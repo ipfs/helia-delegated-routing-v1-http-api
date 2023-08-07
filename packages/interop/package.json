@@ -56,8 +56,5 @@
     "libp2p": "^0.45.4",
     "multiformats": "^11.0.2"
   },
-  "private": true,
-  "typedoc": {
-    "entryPoint": "./src/index.ts"
-  }
+  "private": true
 }
