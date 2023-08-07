@@ -11,9 +11,6 @@
  *
  * const helia = await createHelia()
  * const server = await createRoutingV1HttpApiServer(helia, {
- *   fastify: {
- *     // fastify options
- *   },
  *   listen: {
  *     // fastify listen options
  *   }
@@ -68,7 +65,7 @@ export interface ServerInit {
 }
 
 /**
- * Create and return a Helia node
+ * Create and return a Routing V1 HTTP API server
  */
 export async function createRoutingV1HttpApiServer (helia: Helia, init: ServerInit = {}): Promise<FastifyInstance> {
   const server = init.fastify ?? fastify()

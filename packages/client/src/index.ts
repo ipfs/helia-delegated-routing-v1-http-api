@@ -1,23 +1,19 @@
 /**
  * @packageDocumentation
  *
- * Create a Helia node.
+ * Create a client to use with a Routing V1 HTTP API server.
  *
  * @example
  *
  * ```typescript
- * import { MemoryDatastore } from 'datastore-core'
- * import { MemoryBlockstore } from 'blockstore-core'
- * import { createHelia } from 'helia'
- * import { unixfs } from '@helia/unixfs'
+ * import { createRoutingV1HttpApiClient } from '@helia/routing-v1-http-api-client'
  * import { CID } from 'multiformats/cid'
  *
- * const node = await createHelia({
- *   blockstore: new MemoryBlockstore(),
- *   datastore: new MemoryDatastore()
- * })
- * const fs = unixfs(node)
- * fs.cat(CID.parse('bafyFoo'))
+ * const client = createRoutingV1HttpApiClient(new URL('https://example.org'))
+ *
+ * for await (const prov of getProviders(CID.parse('QmFoo'))) {
+ *   // ...
+ * }
  * ```
  */
 
@@ -41,12 +37,21 @@ export interface RoutingV1HttpApiClientInit {
 }
 
 export interface RoutingV1HttpApiClient {
+  /**
+   * Returns an async generator of PeerInfos that can provide the content
+   * for the passed CID
+   */
   getProviders: (cid: CID, options?: AbortOptions) => AsyncGenerator<PeerInfo>
+
+  /**
+   * Shut down any currently running HTTP requests and clear up any resources
+   * that are in use
+   */
   stop: () => void
 }
 
 /**
- * Create and return a Helia node
+ * Create and return a client to use with a Routing V1 HTTP API server
  */
 export function createRoutingV1HttpApiClient (url: URL, init: RoutingV1HttpApiClientInit = {}): RoutingV1HttpApiClient {
   return new DefaultRoutingV1HttpApiClient(url, init)
