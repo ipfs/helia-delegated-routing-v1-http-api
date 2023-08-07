@@ -50,7 +50,7 @@
   "devDependencies": {
     "@helia/interface": "^1.1.1",
     "@libp2p/interface-libp2p": "^3.2.0",
-    "@libp2p/kad-dht": "^9.3.6",
+    "@libp2p/kad-dht": "^10.0.2",
     "aegir": "^40.0.8",
     "fastify": "^4.17.0",
     "libp2p": "^0.45.4",
