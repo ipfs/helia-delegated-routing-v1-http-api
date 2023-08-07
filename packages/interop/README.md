@@ -16,7 +16,6 @@
 ## Table of contents <!-- omit in toc -->
 
 - [Install](#install)
-- [API Docs](#api-docs)
 - [License](#license)
 - [Contribute](#contribute)
 
@@ -25,10 +24,6 @@
 ```console
 $ npm i @helia/routing-v1-http-api-interop
 ```
-
-## API Docs
-
-- <https://ipfs.github.io/helia-routing-v1-http-api/modules/_helia_routing_v1_http_api_client_interop.html>
 
 ## License
 

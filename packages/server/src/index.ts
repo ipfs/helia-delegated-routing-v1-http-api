@@ -11,9 +11,6 @@
  *
  * const helia = await createHelia()
  * const server = await createRoutingV1HttpApiServer(helia, {
- *   fastify: {
- *     // fastify options
- *   },
  *   listen: {
  *     // fastify listen options
  *   }
@@ -55,22 +52,23 @@
  */
 
 import cors from '@fastify/cors'
-import fastify, { type FastifyListenOptions, type FastifyHttpOptions, type FastifyHttpsOptions, type FastifyInstance } from 'fastify'
+import fastify, {
+  type FastifyListenOptions,
+  type FastifyInstance
+} from 'fastify'
 import routes from './routes/index.js'
 import type { Helia } from '@helia/interface'
-import type * as http from 'node:http'
-import type * as https from 'node:https'
 
 export interface ServerInit {
-  fastify?: FastifyHttpOptions<http.Server> | FastifyHttpsOptions<https.Server>
+  fastify?: FastifyInstance
   listen?: FastifyListenOptions
 }
 
 /**
- * Create and return a Helia node
+ * Create and return a Routing V1 HTTP API server
  */
 export async function createRoutingV1HttpApiServer (helia: Helia, init: ServerInit = {}): Promise<FastifyInstance> {
-  const server = fastify(init.fastify)
+  const server = init.fastify ?? fastify()
   await server.register(cors, {
     origin: '*',
     methods: ['GET', 'OPTIONS'],
