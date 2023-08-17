@@ -45,7 +45,7 @@
   "dependencies": {
     "@helia/routing-v1-http-api-client": "^1.0.0",
     "@helia/routing-v1-http-api-server": "^1.0.0",
-    "helia": "^1.2.0"
+    "helia": "^2.0.1"
   },
   "devDependencies": {
     "@helia/interface": "^1.1.1",
