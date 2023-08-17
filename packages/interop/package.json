@@ -48,7 +48,7 @@
     "helia": "^1.2.0"
   },
   "devDependencies": {
-    "@helia/interface": "^1.1.1",
+    "@helia/interface": "^2.0.0",
     "@libp2p/interface-libp2p": "^3.2.0",
     "@libp2p/kad-dht": "^9.3.6",
     "aegir": "^40.0.8",

@@ -150,7 +150,7 @@
   },
   "dependencies": {
     "@fastify/cors": "^8.3.0",
-    "@helia/interface": "^1.1.1",
+    "@helia/interface": "^2.0.0",
     "@libp2p/interfaces": "^3.3.2",
     "fastify": "^4.17.0",
     "multiformats": "^11.0.2"
