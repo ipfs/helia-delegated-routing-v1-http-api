@@ -54,7 +54,7 @@
     "aegir": "^40.0.8",
     "fastify": "^4.17.0",
     "libp2p": "^0.45.4",
-    "multiformats": "^11.0.2"
+    "multiformats": "^12.1.0"
   },
   "private": true
 }
