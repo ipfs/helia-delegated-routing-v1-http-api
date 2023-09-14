@@ -18,8 +18,8 @@
  */
 
 import { DefaultRoutingV1HttpApiClient } from './client.js'
-import type { PeerInfo } from '@libp2p/interface-peer-info'
-import type { AbortOptions } from '@libp2p/interfaces'
+import type { AbortOptions } from '@libp2p/interface'
+import type { PeerInfo } from '@libp2p/interface/peer-info'
 import type { CID } from 'multiformats/cid'
 
 export interface RoutingV1HttpApiClientInit {

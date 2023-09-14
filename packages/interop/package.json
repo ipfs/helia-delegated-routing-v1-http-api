@@ -45,16 +45,16 @@
   "dependencies": {
     "@helia/routing-v1-http-api-client": "^1.0.0",
     "@helia/routing-v1-http-api-server": "^1.0.0",
-    "helia": "^1.2.0"
+    "helia": "^2.0.1"
   },
   "devDependencies": {
-    "@helia/interface": "^1.1.1",
-    "@libp2p/interface-libp2p": "^3.2.0",
-    "@libp2p/kad-dht": "^9.3.6",
+    "@helia/interface": "^2.0.0",
+    "@libp2p/interface": "^0.1.2",
+    "@libp2p/kad-dht": "^10.0.6",
     "aegir": "^40.0.8",
     "fastify": "^4.17.0",
-    "libp2p": "^0.45.4",
-    "multiformats": "^11.0.2"
+    "libp2p": "^0.46.10",
+    "multiformats": "^12.1.1"
   },
   "private": true
 }

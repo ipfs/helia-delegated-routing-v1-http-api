@@ -1,7 +1,7 @@
 import { PassThrough } from 'node:stream'
 import { CID } from 'multiformats/cid'
 import type { Helia } from '@helia/interface'
-import type { AbortOptions } from '@libp2p/interfaces'
+import type { AbortOptions } from '@libp2p/interface'
 import type { FastifyInstance } from 'fastify'
 
 interface Params {

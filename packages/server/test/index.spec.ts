@@ -6,7 +6,7 @@ import { expect } from 'aegir/chai'
 import { stubInterface } from 'sinon-ts'
 import { createRoutingV1HttpApiServer } from '../src/index.js'
 import type { Helia } from '@helia/interface'
-import type { PeerInfo } from '@libp2p/interface-peer-info'
+import type { PeerInfo } from '@libp2p/interface/peer-info'
 import type { FastifyInstance } from 'fastify'
 import type { StubbedInstance } from 'sinon-ts'
 

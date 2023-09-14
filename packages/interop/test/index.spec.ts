@@ -9,7 +9,7 @@ import { sha256 } from 'multiformats/hashes/sha2'
 import { createHelia } from './fixtures/create-helia.js'
 import type { Helia } from '@helia/interface'
 import type { RoutingV1HttpApiClient } from '@helia/routing-v1-http-api-client'
-import type { Libp2p } from '@libp2p/interface-libp2p'
+import type { Libp2p } from '@libp2p/interface'
 import type { KadDHT } from '@libp2p/kad-dht'
 import type { FastifyInstance } from 'fastify'
 
