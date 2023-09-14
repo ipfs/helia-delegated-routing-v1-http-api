@@ -150,18 +150,17 @@
   },
   "dependencies": {
     "@fastify/cors": "^8.3.0",
-    "@helia/interface": "^1.1.1",
-    "@libp2p/interfaces": "^3.3.2",
+    "@helia/interface": "^2.0.0",
+    "@libp2p/interface": "^0.1.2",
     "fastify": "^4.17.0",
-    "multiformats": "^11.0.2"
+    "multiformats": "^12.1.1"
   },
   "devDependencies": {
-    "@libp2p/interface-peer-info": "^1.0.10",
-    "@libp2p/peer-id-factory": "^2.0.3",
+    "@libp2p/peer-id-factory": "^3.0.3",
     "@multiformats/multiaddr": "^12.1.3",
     "@types/sinon": "^10.0.15",
     "aegir": "^40.0.8",
-    "sinon": "^15.1.0",
+    "sinon": "^16.0.0",
     "sinon-ts": "^1.0.0"
   }
 }
