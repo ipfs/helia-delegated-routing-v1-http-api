@@ -1,3 +1,10 @@
+## [@helia/routing-v1-http-api-client-v1.0.2](https://github.com/ipfs/helia-routing-v1-http-api/compare/@helia/routing-v1-http-api-client-v1.0.1...@helia/routing-v1-http-api-client-v1.0.2) (2023-10-07)
+
+
+### Dependencies
+
+* **dev:** bump aegir from 40.0.13 to 41.0.0 ([#39](https://github.com/ipfs/helia-routing-v1-http-api/issues/39)) ([c01a33e](https://github.com/ipfs/helia-routing-v1-http-api/commit/c01a33eecf137c6773cf9b34ca05c12f18d04b09))
+
 ## [@helia/routing-v1-http-api-client-v1.0.1](https://github.com/ipfs/helia-routing-v1-http-api/compare/@helia/routing-v1-http-api-client-v1.0.0...@helia/routing-v1-http-api-client-v1.0.1) (2023-09-14)
 
 
