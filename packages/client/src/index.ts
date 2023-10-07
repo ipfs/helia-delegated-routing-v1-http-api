@@ -41,13 +41,13 @@ export interface RoutingV1HttpApiClient {
    * Returns an async generator of PeerInfos that can provide the content
    * for the passed CID
    */
-  getProviders: (cid: CID, options?: AbortOptions) => AsyncGenerator<PeerInfo>
+  getProviders(cid: CID, options?: AbortOptions): AsyncGenerator<PeerInfo>
 
   /**
    * Shut down any currently running HTTP requests and clear up any resources
    * that are in use
    */
-  stop: () => void
+  stop(): void
 }
 
 /**
