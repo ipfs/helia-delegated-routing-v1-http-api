@@ -11,7 +11,7 @@
 [![codecov](https://img.shields.io/codecov/c/github/ipfs/helia-routing-v1-http-api.svg?style=flat-square)](https://codecov.io/gh/ipfs/helia-routing-v1-http-api)
 [![CI](https://img.shields.io/github/actions/workflow/status/ipfs/helia-routing-v1-http-api/js-test-and-release.yml?branch=main\&style=flat-square)](https://github.com/ipfs/helia-routing-v1-http-api/actions/workflows/js-test-and-release.yml?query=branch%3Amain)
 
-> A [Delegated Routing V1](https://specs.ipfs.tech/routing/http-routing-v1/) HTTP API client
+> A Delegated Routing V1 HTTP API client
 
 ## Table of contents <!-- omit in toc -->
 

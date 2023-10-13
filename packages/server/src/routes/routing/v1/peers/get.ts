@@ -6,39 +6,39 @@ import type { PeerId } from '@libp2p/interface/peer-id'
 import type { FastifyInstance } from 'fastify'
 
 interface Params {
-  pid: string
+  peerId: string
 }
 
 export default function getPeersV1 (fastify: FastifyInstance, helia: Helia): void {
   fastify.route<{ Params: Params }>({
     method: 'GET',
-    url: '/routing/v1/peers/:pid',
+    url: '/routing/v1/peers/:peerId',
     schema: {
       // request needs to have a querystring with a `name` parameter
       params: {
         type: 'object',
         properties: {
-          pid: {
+          peerId: {
             type: 'string'
           }
         },
-        required: ['pid']
+        required: ['peerId']
       }
     },
     handler: async (request, reply) => {
-      let pid: PeerId
+      let peerId: PeerId
 
       try {
-        const { pid: cidStr } = request.params
+        const { peerId: cidStr } = request.params
         const peerCid = CID.parse(cidStr)
-        pid = peerIdFromCID(peerCid)
+        peerId = peerIdFromCID(peerCid)
       } catch (err) {
         // these are .thenables but not .catchables?
         reply.code(422).type('text/html').send('Unprocessable Entity') // eslint-disable-line @typescript-eslint/no-floating-promises
         return
       }
 
-      const peerInfo = await helia.libp2p.peerRouting.findPeer(pid)
+      const peerInfo = await helia.libp2p.peerRouting.findPeer(peerId)
       const peerRecord = {
         Schema: 'peer',
         Protocols: ['transport-bitswap'],

@@ -25,15 +25,14 @@ import type { IPNSRecord } from 'ipns'
 import type { CID } from 'multiformats/cid'
 
 export interface PeerRecord {
-  Schema: string
+  Schema: 'peer'
   ID: PeerId
   Addrs: Multiaddr[]
   Protocols: string[]
 }
 
-// Deprecated: please use PeerRecord instead.
 export interface BitswapRecord {
-  Schema: string
+  Schema: 'bitswap'
   Protocol: string
   ID: PeerId
   Addrs: Multiaddr[]
@@ -65,17 +64,17 @@ export interface RoutingV1HttpApiClient {
   /**
    * Returns an async generator of PeerInfos for the provided PeerId
    */
-  getPeers(pid: PeerId, options?: AbortOptions): AsyncGenerator<Record>
+  getPeerInfo(peerId: PeerId, options?: AbortOptions): AsyncGenerator<PeerRecord>
 
   /**
    * Returns a promise of a IPNSRecord for the given PeerId
    */
-  getIPNS(pid: PeerId, options?: AbortOptions): Promise<IPNSRecord>
+  getIPNS(peerId: PeerId, options?: AbortOptions): Promise<IPNSRecord>
 
   /**
    * Publishes the given IPNSRecorded for the provided PeerId
    */
-  putIPNS(pid: PeerId, record: IPNSRecord, options?: AbortOptions): Promise<void>
+  putIPNS(peerId: PeerId, record: IPNSRecord, options?: AbortOptions): Promise<void>
 
   /**
    * Shut down any currently running HTTP requests and clear up any resources
