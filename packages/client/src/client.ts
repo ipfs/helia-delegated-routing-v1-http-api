@@ -4,8 +4,8 @@ import { peerIdFromString } from '@libp2p/peer-id'
 import { multiaddr } from '@multiformats/multiaddr'
 import { anySignal } from 'any-signal'
 import toIt from 'browser-readablestream-to-it'
-import { unmarshal, type IPNSRecord, marshal } from 'ipns'
-import toBuffer from 'it-to-buffer'
+import { unmarshal, type IPNSRecord, marshal, peerIdToRoutingKey } from 'ipns'
+import { ipnsValidator } from 'ipns/validator'
 // @ts-expect-error no types
 import ndjson from 'iterable-ndjson'
 import defer from 'p-defer'
@@ -74,15 +74,15 @@ export class DefaultRoutingV1HttpApiClient implements RoutingV1HttpApiClient {
       // https://specs.ipfs.tech/routing/http-routing-v1/
       const resource = `${this.clientUrl}routing/v1/providers/${cid.toString()}`
       const getOptions = { headers: { Accept: 'application/x-ndjson' }, signal }
-      const a = await fetch(resource, getOptions)
+      const res = await fetch(resource, getOptions)
 
-      if (a.body == null) {
+      if (res.body == null) {
         throw new CodeError('Routing response had no body', 'ERR_BAD_RESPONSE')
       }
 
-      const contentType = a.headers.get('Content-Type')
+      const contentType = res.headers.get('Content-Type')
       if (contentType === 'application/json') {
-        const body = await a.json()
+        const body = await res.json()
 
         for (const provider of body.Providers) {
           const record = this.#handleProviderRecords(provider)
@@ -91,7 +91,7 @@ export class DefaultRoutingV1HttpApiClient implements RoutingV1HttpApiClient {
           }
         }
       } else {
-        for await (const provider of ndjson(toIt(a.body))) {
+        for await (const provider of ndjson(toIt(res.body))) {
           const record = this.#handleProviderRecords(provider)
           if (record !== null) {
             yield record
@@ -125,25 +125,25 @@ export class DefaultRoutingV1HttpApiClient implements RoutingV1HttpApiClient {
       // https://specs.ipfs.tech/routing/http-routing-v1/
       const resource = `${this.clientUrl}routing/v1/peers/${peerId.toCID().toString()}`
       const getOptions = { headers: { Accept: 'application/x-ndjson' }, signal }
-      const a = await fetch(resource, getOptions)
+      const res = await fetch(resource, getOptions)
 
-      if (a.body == null) {
+      if (res.body == null) {
         throw new CodeError('Routing response had no body', 'ERR_BAD_RESPONSE')
       }
 
-      const contentType = a.headers.get('Content-Type')
+      const contentType = res.headers.get('Content-Type')
       if (contentType === 'application/json') {
-        const body = await a.json()
+        const body = await res.json()
 
         for (const peer of body.Peers) {
-          const record = this.#handlePeerRecords(peer)
+          const record = this.#handlePeerRecords(peerId, peer)
           if (record !== null) {
             yield record
           }
         }
       } else {
-        for await (const peer of ndjson(toIt(a.body))) {
-          const record = this.#handlePeerRecords(peer)
+        for await (const peer of ndjson(toIt(res.body))) {
+          const record = this.#handlePeerRecords(peerId, peer)
           if (record !== null) {
             yield record
           }
@@ -176,13 +176,14 @@ export class DefaultRoutingV1HttpApiClient implements RoutingV1HttpApiClient {
       // https://specs.ipfs.tech/routing/http-routing-v1/
       const resource = `${this.clientUrl}routing/v1/ipns/${peerId.toCID().toString()}`
       const getOptions = { headers: { Accept: 'application/vnd.ipfs.ipns-record' }, signal }
-      const a = await fetch(resource, getOptions)
+      const res = await fetch(resource, getOptions)
 
-      if (a.body == null) {
+      if (res.body == null) {
         throw new CodeError('GET ipns response had no body', 'ERR_BAD_RESPONSE')
       }
 
-      const body = await toBuffer(toIt(a.body))
+      const body = new Uint8Array(await res.arrayBuffer())
+      await ipnsValidator(peerIdToRoutingKey(peerId), body)
       return unmarshal(body)
     } finally {
       signal.clear()
@@ -241,12 +242,14 @@ export class DefaultRoutingV1HttpApiClient implements RoutingV1HttpApiClient {
     return null
   }
 
-  #handlePeerRecords (record: any): PeerRecord | null {
+  #handlePeerRecords (peerId: PeerId, record: any): PeerRecord | null {
     if (record.Schema === 'peer') {
       // Peer schema can have additional, user-defined, fields.
       record.ID = peerIdFromString(record.ID)
       record.Addrs = record.Addrs.map(multiaddr)
-      return record
+      if (peerId.equals(record.ID)) {
+        return record
+      }
     }
 
     return null
