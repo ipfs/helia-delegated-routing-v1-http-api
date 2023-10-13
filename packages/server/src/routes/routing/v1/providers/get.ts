@@ -8,15 +8,15 @@ interface Params {
   cid: string
 }
 
-interface Provider {
-  Protocol: string
+interface PeerRecord {
   Schema: string
+  Protocols: string[]
   ID: string
   Addrs: string[]
 }
 
 interface Providers {
-  Providers: Provider[]
+  Providers: PeerRecord[]
 }
 
 const MAX_PROVIDERS = 100
@@ -89,13 +89,13 @@ export default function getProvidersV1 (fastify: FastifyInstance, helia: Helia):
   })
 }
 
-async function * streamingHandler (cid: CID, helia: Helia, options?: AbortOptions): AsyncGenerator<Provider, void, unknown> {
+async function * streamingHandler (cid: CID, helia: Helia, options?: AbortOptions): AsyncGenerator<PeerRecord, void, unknown> {
   let provs = 0
 
   for await (const prov of helia.libp2p.contentRouting.findProviders(cid, options)) {
     yield {
-      Protocol: 'transport-bitswap',
-      Schema: 'bitswap',
+      Schema: 'peer',
+      Protocols: ['transport-bitswap'],
       ID: prov.id.toString(),
       Addrs: prov.multiaddrs.map(ma => ma.toString())
     }
@@ -114,8 +114,8 @@ async function nonStreamingHandler (cid: CID, helia: Helia, options?: AbortOptio
   try {
     for await (const prov of helia.libp2p.contentRouting.findProviders(cid, options)) {
       providers.push({
-        Protocol: 'transport-bitswap',
-        Schema: 'bitswap',
+        Schema: 'peer',
+        Protocols: ['transport-bitswap'],
         ID: prov.id.toString(),
         Addrs: prov.multiaddrs.map(ma => ma.toString())
       })
