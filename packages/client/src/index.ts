@@ -19,8 +19,27 @@
 
 import { DefaultRoutingV1HttpApiClient } from './client.js'
 import type { AbortOptions } from '@libp2p/interface'
-import type { PeerInfo } from '@libp2p/interface/peer-info'
+import type { PeerId } from '@libp2p/interface/peer-id'
+import type { Multiaddr } from '@multiformats/multiaddr'
+import type { IPNSRecord } from 'ipns'
 import type { CID } from 'multiformats/cid'
+
+export interface PeerRecord {
+  Schema: string
+  ID: PeerId
+  Addrs: Multiaddr[]
+  Protocols: string[]
+}
+
+// Deprecated: please use PeerRecord instead.
+export interface BitswapRecord {
+  Schema: string
+  Protocol: string
+  ID: PeerId
+  Addrs: Multiaddr[]
+}
+
+export type Record = PeerRecord | BitswapRecord
 
 export interface RoutingV1HttpApiClientInit {
   /**
@@ -41,7 +60,22 @@ export interface RoutingV1HttpApiClient {
    * Returns an async generator of PeerInfos that can provide the content
    * for the passed CID
    */
-  getProviders(cid: CID, options?: AbortOptions): AsyncGenerator<PeerInfo>
+  getProviders(cid: CID, options?: AbortOptions): AsyncGenerator<Record>
+
+  /**
+   * Returns an async generator of PeerInfos for the provided PeerId
+   */
+  getPeers(pid: PeerId, options?: AbortOptions): AsyncGenerator<Record>
+
+  /**
+   * Returns a promise of a IPNSRecord for the given PeerId
+   */
+  getIPNS(pid: PeerId, options?: AbortOptions): Promise<IPNSRecord>
+
+  /**
+   * Publishes the given IPNSRecorded for the provided PeerId
+   */
+  putIPNS(pid: PeerId, record: IPNSRecord, options?: AbortOptions): Promise<void>
 
   /**
    * Shut down any currently running HTTP requests and clear up any resources

@@ -64,7 +64,7 @@ describe('routing-v1-http-api interop', () => {
 
     for await (const prov of client.getProviders(cid)) {
       // should be a node in this test network
-      if (network.map(node => node.libp2p.peerId.toString()).includes(prov.id.toString())) {
+      if (network.map(node => node.libp2p.peerId.toString()).includes(prov.ID.toString())) {
         foundProvider = true
         break
       }

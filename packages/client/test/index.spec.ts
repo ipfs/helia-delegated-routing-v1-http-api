@@ -33,8 +33,8 @@ describe('routing-v1-http-api-client', () => {
       ID: (await createEd25519PeerId()).toString(),
       Addrs: ['/ip4/41.41.41.41/tcp/1234']
     }, {
-      Protocol: 'transport-bitswap',
-      Schema: 'bitswap',
+      Protocols: ['transport-bitswap'],
+      Schema: 'peer',
       Metadata: 'gBI=',
       ID: (await createEd25519PeerId()).toString(),
       Addrs: ['/ip4/42.42.42.42/tcp/1234']
@@ -50,8 +50,8 @@ describe('routing-v1-http-api-client', () => {
 
     const provs = await all(client.getProviders(cid))
     expect(provs.map(prov => ({
-      id: prov.id.toString(),
-      addrs: prov.multiaddrs.map(ma => ma.toString())
+      id: prov.ID.toString(),
+      addrs: prov.Addrs.map(ma => ma.toString())
     }))).to.deep.equal(providers.map(prov => ({
       id: prov.ID,
       addrs: prov.Addrs
