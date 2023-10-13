@@ -29,8 +29,8 @@ export default function getPeersV1 (fastify: FastifyInstance, helia: Helia): voi
       let pid: PeerId
 
       try {
-        const { pid: pidStr } = request.params
-        const peerCid = CID.parse(pidStr)
+        const { pid: cidStr } = request.params
+        const peerCid = CID.parse(cidStr)
         pid = peerIdFromCID(peerCid)
       } catch (err) {
         // these are .thenables but not .catchables?
