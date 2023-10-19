@@ -258,13 +258,12 @@ describe('routing-v1-http-api-server', () => {
     const peerId = await createEd25519PeerId()
     const cid = CID.parse('bafkreifjjcie6lypi6ny7amxnfftagclbuxndqonfipmb64f2km2devei4')
     const record = await createIpnsRecord(peerId, cid, 0, 1000)
-    const marshalledRecord = marshalIpnsRecord(record)
 
     helia.libp2p = {
       // @ts-expect-error incomplete implementation
       contentRouting: {
         get: async function () {
-          return marshalledRecord
+          return marshalIpnsRecord(record)
         }
       }
     }
@@ -278,7 +277,7 @@ describe('routing-v1-http-api-server', () => {
 
     expect(res.status).to.equal(200)
     const arrayBuffer = await res.arrayBuffer()
-    expect(new Uint8Array(arrayBuffer)).to.equalBytes(marshalledRecord)
+    expect(new Uint8Array(arrayBuffer)).to.equalBytes(marshalIpnsRecord(record))
   })
 
   it('PUT ipns puts record', async () => {
