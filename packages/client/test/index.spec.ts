@@ -52,7 +52,7 @@ describe('routing-v1-http-api-client', () => {
     const provs = await all(client.getProviders(cid))
     expect(provs.map(prov => ({
       id: prov.ID.toString(),
-      addrs: prov.Addrs.map(ma => ma.toString())
+      addrs: prov.Addrs?.map(ma => ma.toString())
     }))).to.deep.equal(providers.map(prov => ({
       id: prov.ID,
       addrs: prov.Addrs
@@ -144,7 +144,7 @@ describe('routing-v1-http-api-client', () => {
     expect(peerRecords.map(peerRecord => ({
       ...peerRecord,
       ID: peerRecord.ID.toString(),
-      Addrs: peerRecord.Addrs.map(ma => ma.toString())
+      Addrs: peerRecord.Addrs?.map(ma => ma.toString())
     }))).to.deep.equal([
       records[2]
     ])

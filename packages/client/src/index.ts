@@ -27,8 +27,8 @@ import type { CID } from 'multiformats/cid'
 export interface PeerRecord {
   Schema: 'peer'
   ID: PeerId
-  Addrs: Multiaddr[]
-  Protocols: string[]
+  Addrs?: Multiaddr[]
+  Protocols?: string[]
 }
 
 export interface BitswapRecord {
