@@ -5,7 +5,7 @@ import { expect } from 'aegir/chai'
 import { create as createIpnsRecord, marshal as marshalIpnsRecord } from 'ipns'
 import all from 'it-all'
 import { CID } from 'multiformats/cid'
-import { createRoutingV1HttpApiClient, type RoutingV1HttpApiClient } from '../src/index.js'
+import { createDelegatedRoutingV1HttpApiClient, type DelegatedRoutingV1HttpApiClient } from '../src/index.js'
 
 if (process.env.ECHO_SERVER == null) {
   throw new Error('Echo server not configured correctly')
@@ -14,10 +14,10 @@ if (process.env.ECHO_SERVER == null) {
 const serverUrl = process.env.ECHO_SERVER
 
 describe('routing-v1-http-api-client', () => {
-  let client: RoutingV1HttpApiClient
+  let client: DelegatedRoutingV1HttpApiClient
 
   beforeEach(() => {
-    client = createRoutingV1HttpApiClient(new URL(serverUrl))
+    client = createDelegatedRoutingV1HttpApiClient(new URL(serverUrl))
   })
 
   afterEach(async () => {

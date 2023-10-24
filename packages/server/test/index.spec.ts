@@ -6,7 +6,7 @@ import { expect } from 'aegir/chai'
 import { create as createIpnsRecord, marshal as marshalIpnsRecord, peerIdToRoutingKey } from 'ipns'
 import { CID } from 'multiformats'
 import { stubInterface } from 'sinon-ts'
-import { createRoutingV1HttpApiServer } from '../src/index.js'
+import { createDelegatedRoutingV1HttpApiServer } from '../src/index.js'
 import type { Helia } from '@helia/interface'
 import type { PeerInfo } from '@libp2p/interface/peer-info'
 import type { FastifyInstance } from 'fastify'
@@ -19,7 +19,7 @@ describe('routing-v1-http-api-server', () => {
 
   beforeEach(async () => {
     helia = stubInterface<Helia>()
-    server = await createRoutingV1HttpApiServer(helia, {
+    server = await createDelegatedRoutingV1HttpApiServer(helia, {
       listen: {
         host: '127.0.0.1',
         port: 0

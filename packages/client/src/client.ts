@@ -10,7 +10,7 @@ import { ipnsValidator } from 'ipns/validator'
 import ndjson from 'iterable-ndjson'
 import defer from 'p-defer'
 import PQueue from 'p-queue'
-import type { RoutingV1HttpApiClient, RoutingV1HttpApiClientInit, Record, PeerRecord } from './index.js'
+import type { DelegatedRoutingV1HttpApiClient, DelegatedRoutingV1HttpApiClientInit, Record, PeerRecord } from './index.js'
 import type { AbortOptions } from '@libp2p/interface'
 import type { PeerId } from '@libp2p/interface/peer-id'
 import type { CID } from 'multiformats'
@@ -22,7 +22,7 @@ const defaultValues = {
   timeout: 30e3
 }
 
-export class DefaultRoutingV1HttpApiClient implements RoutingV1HttpApiClient {
+export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpApiClient {
   private started: boolean
   private readonly httpQueue: PQueue
   private readonly shutDownController: AbortController
@@ -32,7 +32,7 @@ export class DefaultRoutingV1HttpApiClient implements RoutingV1HttpApiClient {
   /**
    * Create a new DelegatedContentRouting instance
    */
-  constructor (url: string | URL, init: RoutingV1HttpApiClientInit = {}) {
+  constructor (url: string | URL, init: DelegatedRoutingV1HttpApiClientInit = {}) {
     this.started = false
     this.shutDownController = new AbortController()
     this.httpQueue = new PQueue({

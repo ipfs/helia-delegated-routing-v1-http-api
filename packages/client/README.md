@@ -4,12 +4,12 @@
   </a>
 </p>
 
-# @helia/routing-v1-http-api-client <!-- omit in toc -->
+# @helia/delegated-routing-v1-http-api-client <!-- omit in toc -->
 
 [![ipfs.tech](https://img.shields.io/badge/project-IPFS-blue.svg?style=flat-square)](https://ipfs.tech)
 [![Discuss](https://img.shields.io/discourse/https/discuss.ipfs.tech/posts.svg?style=flat-square)](https://discuss.ipfs.tech)
-[![codecov](https://img.shields.io/codecov/c/github/ipfs/helia-routing-v1-http-api.svg?style=flat-square)](https://codecov.io/gh/ipfs/helia-routing-v1-http-api)
-[![CI](https://img.shields.io/github/actions/workflow/status/ipfs/helia-routing-v1-http-api/js-test-and-release.yml?branch=main\&style=flat-square)](https://github.com/ipfs/helia-routing-v1-http-api/actions/workflows/js-test-and-release.yml?query=branch%3Amain)
+[![codecov](https://img.shields.io/codecov/c/github/ipfs/helia-delegated-routing-v1-http-api.svg?style=flat-square)](https://codecov.io/gh/ipfs/helia-delegated-routing-v1-http-api)
+[![CI](https://img.shields.io/github/actions/workflow/status/ipfs/helia-delegated-routing-v1-http-api/js-test-and-release.yml?branch=main\&style=flat-square)](https://github.com/ipfs/helia-delegated-routing-v1-http-api/actions/workflows/js-test-and-release.yml?query=branch%3Amain)
 
 > A Delegated Routing V1 HTTP API client
 
@@ -23,12 +23,12 @@
 ## Install
 
 ```console
-$ npm i @helia/routing-v1-http-api-client
+$ npm i @helia/delegated-routing-v1-http-api-client
 ```
 
 ## API Docs
 
-- <https://ipfs.github.io/helia-routing-v1-http-api/modules/_helia_routing_v1_http_api_client.html>
+- <https://ipfs.github.io/helia-delegated-routing-v1-http-api/modules/_helia_delegated_routing_v1_http_api_client.html>
 
 ## License
 
@@ -39,7 +39,7 @@ Licensed under either of
 
 ## Contribute
 
-Contributions welcome! Please check out [the issues](https://github.com/ipfs/helia-routing-v1-http-api/issues).
+Contributions welcome! Please check out [the issues](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues).
 
 Also see our [contributing document](https://github.com/ipfs/community/blob/master/CONTRIBUTING_JS.md) for more information on how we work, and about contributing in general.
 

@@ -1,14 +1,14 @@
 /* eslint-env mocha */
 
-import { createRoutingV1HttpApiClient } from '@helia/routing-v1-http-api-client'
-import { createRoutingV1HttpApiServer } from '@helia/routing-v1-http-api-server'
+import { createDelegatedRoutingV1HttpApiClient } from '@helia/delegated-routing-v1-http-api-client'
+import { createDelegatedRoutingV1HttpApiServer } from '@helia/delegated-routing-v1-http-api-server'
 import { expect } from 'aegir/chai'
 import { CID } from 'multiformats/cid'
 import * as raw from 'multiformats/codecs/raw'
 import { sha256 } from 'multiformats/hashes/sha2'
 import { createHelia } from './fixtures/create-helia.js'
 import type { Helia } from '@helia/interface'
-import type { RoutingV1HttpApiClient } from '@helia/routing-v1-http-api-client'
+import type { DelegatedRoutingV1HttpApiClient } from '@helia/delegated-routing-v1-http-api-client'
 import type { Libp2p } from '@libp2p/interface'
 import type { KadDHT } from '@libp2p/kad-dht'
 import type { FastifyInstance } from 'fastify'
@@ -16,19 +16,19 @@ import type { FastifyInstance } from 'fastify'
 describe('routing-v1-http-api interop', () => {
   let network: Array<Helia<Libp2p<{ dht: KadDHT }>>>
   let server: FastifyInstance
-  let client: RoutingV1HttpApiClient
+  let client: DelegatedRoutingV1HttpApiClient
 
   beforeEach(async () => {
     network = await Promise.all(
       new Array(10).fill(0).map(async () => createHelia())
     )
 
-    server = await createRoutingV1HttpApiServer(network[0])
+    server = await createDelegatedRoutingV1HttpApiServer(network[0])
 
     const address = server.server.address()
     const port = typeof address === 'string' ? address : address?.port
 
-    client = createRoutingV1HttpApiClient(new URL(`http://127.0.0.1:${port}`))
+    client = createDelegatedRoutingV1HttpApiClient(new URL(`http://127.0.0.1:${port}`))
 
     for (const node of network) {
       for (const remote of network) {

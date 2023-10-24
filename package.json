@@ -1,15 +1,15 @@
 {
-  "name": "helia-routing-v1-http-api",
+  "name": "helia-delegated-routing-v1-http-api",
   "version": "1.0.0",
-  "description": "The Routing V1 HTTP API powered by Helia",
+  "description": "The Delegated Routing V1 HTTP API powered by Helia",
   "license": "Apache-2.0 OR MIT",
-  "homepage": "https://github.com/ipfs/helia-routing-v1-http-api#readme",
+  "homepage": "https://github.com/ipfs/helia-delegated-routing-v1-http-api#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ipfs/helia-routing-v1-http-api.git"
+    "url": "git+https://github.com/ipfs/helia-delegated-routing-v1-http-api.git"
   },
   "bugs": {
-    "url": "https://github.com/ipfs/helia-routing-v1-http-api/issues"
+    "url": "https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues"
   },
   "keywords": [
     "ipfs"

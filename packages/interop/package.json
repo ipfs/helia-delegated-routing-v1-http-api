@@ -1,15 +1,15 @@
 {
-  "name": "@helia/routing-v1-http-api-interop",
-  "version": "1.0.0",
-  "description": "Interop tests for the Routing V1 HTTP API server powered by Helia",
+  "name": "@helia/delegated-routing-v1-http-api-interop",
+  "version": "0.0.0",
+  "description": "Interop tests for the Delegated Routing V1 HTTP API server powered by Helia",
   "license": "Apache-2.0 OR MIT",
-  "homepage": "https://github.com/ipfs/helia-routing-v1-http-api/tree/master/packages/interop#readme",
+  "homepage": "https://github.com/ipfs/helia-delegated-routing-v1-http-api/tree/master/packages/interop#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ipfs/helia-routing-v1-http-api.git"
+    "url": "git+https://github.com/ipfs/helia-delegated-routing-v1-http-api.git"
   },
   "bugs": {
-    "url": "https://github.com/ipfs/helia-routing-v1-http-api/issues"
+    "url": "https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues"
   },
   "keywords": [
     "IPFS"
@@ -44,8 +44,8 @@
     "test:node": "aegir test -t node --cov"
   },
   "dependencies": {
-    "@helia/routing-v1-http-api-client": "^1.0.0",
-    "@helia/routing-v1-http-api-server": "^1.0.0",
+    "@helia/delegated-routing-v1-http-api-client": "^0.0.0",
+    "@helia/delegated-routing-v1-http-api-server": "^0.0.0",
     "helia": "^2.0.1"
   },
   "devDependencies": {
