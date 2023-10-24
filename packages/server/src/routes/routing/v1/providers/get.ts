@@ -44,43 +44,43 @@ export default function getProvidersV1 (fastify: FastifyInstance, helia: Helia):
         const { cid: cidStr } = request.params
         cid = CID.parse(cidStr)
       } catch (err) {
-        // these are .thenables but not .catchables?
-        reply.code(422).type('text/html').send('Unprocessable Entity') // eslint-disable-line @typescript-eslint/no-floating-promises
-        return
+        fastify.log.error('could not parse CID from params', err)
+        return reply.code(422).type('text/html').send('Unprocessable Entity')
       }
 
       if (request.headers.accept?.includes('application/x-ndjson') === true) {
         const stream = new PassThrough()
 
-        try {
-          let found = 0
+        // wait until we have the first result
+        const iterable = streamingHandler(cid, helia)
+        const result = await iterable.next()
 
-          for await (const prov of streamingHandler(cid, helia)) {
-            if (found === 0) {
-              // these are .thenables but not .catchables?
-              reply.header('Content-Type', 'application/x-ndjson') // eslint-disable-line @typescript-eslint/no-floating-promises
-              reply.send(stream) // eslint-disable-line @typescript-eslint/no-floating-promises
+        // if we have a value, send the value in a stream
+        if (result.done !== true) {
+          stream.push(JSON.stringify(result.value) + '\n')
+
+          // iterate over the rest of the results
+          void Promise.resolve().then(async () => {
+            for await (const prov of iterable) {
+              stream.push(JSON.stringify(prov) + '\n')
             }
+          })
+            .catch(err => {
+              fastify.log.error('could send stream of providers', err)
+            })
+            .finally(() => {
+              stream.end()
+            })
 
-            found++
-
-            stream.push(JSON.stringify(prov) + '\n')
-          }
-
-          if (found > 0) {
-            return
-          }
-        } finally {
-          stream.end()
+          return reply
+            .header('Content-Type', 'application/x-ndjson')
+            .send(stream)
         }
       } else {
         const result = await nonStreamingHandler(cid, helia)
 
         if (result.Providers.length > 0) {
-          // this is .thenable but not .catchable?
-          reply.header('Content-Type', 'application/json') // eslint-disable-line @typescript-eslint/no-floating-promises
-
-          return reply.send(result)
+          return reply.header('Content-Type', 'application/json').send(result)
         }
       }
 

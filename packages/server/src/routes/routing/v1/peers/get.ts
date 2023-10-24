@@ -33,9 +33,8 @@ export default function getPeersV1 (fastify: FastifyInstance, helia: Helia): voi
         const peerCid = CID.parse(cidStr)
         peerId = peerIdFromCID(peerCid)
       } catch (err) {
-        // these are .thenables but not .catchables?
-        reply.code(422).type('text/html').send('Unprocessable Entity') // eslint-disable-line @typescript-eslint/no-floating-promises
-        return
+        fastify.log.error('could not parse CID from params', err)
+        return reply.code(422).type('text/html').send('Unprocessable Entity')
       }
 
       const peerInfo = await helia.libp2p.peerRouting.findPeer(peerId)
@@ -50,20 +49,20 @@ export default function getPeersV1 (fastify: FastifyInstance, helia: Helia): voi
         const stream = new PassThrough()
 
         try {
-          // these are .thenables but not .catchables?
-          reply.header('Content-Type', 'application/x-ndjson') // eslint-disable-line @typescript-eslint/no-floating-promises
-          reply.send(stream) // eslint-disable-line @typescript-eslint/no-floating-promises
           stream.push(JSON.stringify(peerRecord) + '\n')
+          // these are .thenables but not .catchables?
+          return await reply
+            .header('Content-Type', 'application/x-ndjson')
+            .send(stream)
         } finally {
           stream.end()
         }
       } else {
-        // this is .thenable but not .catchable?
-        reply.header('Content-Type', 'application/json') // eslint-disable-line @typescript-eslint/no-floating-promises
-
-        return reply.send({
-          Peers: [peerRecord]
-        })
+        return reply
+          .header('Content-Type', 'application/json')
+          .send({
+            Peers: [peerRecord]
+          })
       }
     }
   })

@@ -34,14 +34,16 @@ export default function getIpnsV1 (fastify: FastifyInstance, helia: Helia): void
         const peerCid = CID.parse(cidStr)
         peerId = peerIdFromCID(peerCid)
       } catch (err) {
-        // these are .thenables but not .catchables?
-        reply.code(422).type('text/html').send('Unprocessable Entity') // eslint-disable-line @typescript-eslint/no-floating-promises
-        return
+        fastify.log.error('could not parse CID from params', err)
+        return reply.code(422).type('text/html').send('Unprocessable Entity')
       }
 
       const rawRecord = await helia.libp2p.contentRouting.get(peerIdToRoutingKey(peerId))
-      reply.header('Content-Type', 'application/vnd.ipfs.ipns-record') // eslint-disable-line @typescript-eslint/no-floating-promises
-      return reply.send(rawRecord)
+
+      return reply
+        .header('Content-Type', 'application/vnd.ipfs.ipns-record')
+        // one cannot simply send rawRecord https://github.com/fastify/fastify/issues/5118
+        .send(Buffer.from(rawRecord, 0, rawRecord.byteLength))
     }
   })
 }

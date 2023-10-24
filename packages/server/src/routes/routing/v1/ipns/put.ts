@@ -42,9 +42,8 @@ export default function putIpnsV1 (fastify: FastifyInstance, helia: Helia): void
         const peerCid = CID.parse(cidStr)
         peerId = peerIdFromCID(peerCid)
       } catch (err) {
-        // these are .thenables but not .catchables?
-        reply.code(422).type('text/html').send('Unprocessable Entity') // eslint-disable-line @typescript-eslint/no-floating-promises
-        return
+        fastify.log.error('could not parse CID from params', err)
+        return reply.code(422).type('text/html').send('Unprocessable Entity')
       }
 
       // @ts-expect-error request.body does not have a type
