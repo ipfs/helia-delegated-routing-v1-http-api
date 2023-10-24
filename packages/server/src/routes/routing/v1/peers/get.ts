@@ -40,7 +40,6 @@ export default function getPeersV1 (fastify: FastifyInstance, helia: Helia): voi
       const peerInfo = await helia.libp2p.peerRouting.findPeer(peerId)
       const peerRecord = {
         Schema: 'peer',
-        Protocols: ['transport-bitswap'],
         ID: peerInfo.id.toString(),
         Addrs: peerInfo.multiaddrs.map(ma => ma.toString())
       }

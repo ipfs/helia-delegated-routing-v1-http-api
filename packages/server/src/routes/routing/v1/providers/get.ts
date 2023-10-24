@@ -10,7 +10,7 @@ interface Params {
 
 interface PeerRecord {
   Schema: string
-  Protocols: string[]
+  Protocols?: string[]
   ID: string
   Addrs: string[]
 }
@@ -95,7 +95,6 @@ async function * streamingHandler (cid: CID, helia: Helia, options?: AbortOption
   for await (const prov of helia.libp2p.contentRouting.findProviders(cid, options)) {
     yield {
       Schema: 'peer',
-      Protocols: ['transport-bitswap'],
       ID: prov.id.toString(),
       Addrs: prov.multiaddrs.map(ma => ma.toString())
     }
@@ -115,7 +114,6 @@ async function nonStreamingHandler (cid: CID, helia: Helia, options?: AbortOptio
     for await (const prov of helia.libp2p.contentRouting.findProviders(cid, options)) {
       providers.push({
         Schema: 'peer',
-        Protocols: ['transport-bitswap'],
         ID: prov.id.toString(),
         Addrs: prov.multiaddrs.map(ma => ma.toString())
       })

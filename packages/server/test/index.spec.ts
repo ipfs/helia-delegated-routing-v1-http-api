@@ -132,11 +132,9 @@ describe('routing-v1-http-api-server', () => {
 
     const json = await res.json()
 
-    expect(json).to.have.nested.property('Providers[0].Protocols[0]', 'transport-bitswap')
     expect(json).to.have.nested.property('Providers[0].Schema', 'peer')
     expect(json).to.have.nested.property('Providers[0].ID', provider1.id.toString())
     expect(json).to.have.deep.nested.property('Providers[0].Addrs', provider1.multiaddrs.map(ma => ma.toString()))
-    expect(json).to.have.nested.property('Providers[1].Protocols[0]', 'transport-bitswap')
     expect(json).to.have.nested.property('Providers[1].Schema', 'peer')
     expect(json).to.have.nested.property('Providers[1].ID', provider2.id.toString())
     expect(json).to.have.deep.nested.property('Providers[1].Addrs', provider2.multiaddrs.map(ma => ma.toString()))
@@ -182,11 +180,9 @@ describe('routing-v1-http-api-server', () => {
       .filter(Boolean)
       .map(str => JSON.parse(str))
 
-    expect(json).to.have.nested.property('[0].Protocols[0]', 'transport-bitswap')
     expect(json).to.have.nested.property('[0].Schema', 'peer')
     expect(json).to.have.nested.property('[0].ID', provider1.id.toString())
     expect(json).to.have.deep.nested.property('[0].Addrs', provider1.multiaddrs.map(ma => ma.toString()))
-    expect(json).to.have.nested.property('[1].Protocols[0]', 'transport-bitswap')
     expect(json).to.have.nested.property('[1].Schema', 'peer')
     expect(json).to.have.nested.property('[1].ID', provider2.id.toString())
     expect(json).to.have.deep.nested.property('[1].Addrs', provider2.multiaddrs.map(ma => ma.toString()))
@@ -232,7 +228,6 @@ describe('routing-v1-http-api-server', () => {
     expect(res.status).to.equal(200)
 
     const json = await res.json()
-    expect(json).to.have.nested.property('Peers[0].Protocols[0]', 'transport-bitswap')
     expect(json).to.have.nested.property('Peers[0].Schema', 'peer')
     expect(json).to.have.nested.property('Peers[0].ID', peer.id.toString())
     expect(json).to.have.deep.nested.property('Peers[0].Addrs', peer.multiaddrs.map(ma => ma.toString()))
