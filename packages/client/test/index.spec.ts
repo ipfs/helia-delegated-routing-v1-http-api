@@ -13,7 +13,7 @@ if (process.env.ECHO_SERVER == null) {
 
 const serverUrl = process.env.ECHO_SERVER
 
-describe('routing-v1-http-api-client', () => {
+describe('delegated-routing-v1-http-api-client', () => {
   let client: DelegatedRoutingV1HttpApiClient
 
   beforeEach(() => {

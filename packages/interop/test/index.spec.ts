@@ -13,7 +13,7 @@ import type { Libp2p } from '@libp2p/interface'
 import type { KadDHT } from '@libp2p/kad-dht'
 import type { FastifyInstance } from 'fastify'
 
-describe('routing-v1-http-api interop', () => {
+describe('delegated-routing-v1-http-api interop', () => {
   let network: Array<Helia<Libp2p<{ dht: KadDHT }>>>
   let server: FastifyInstance
   let client: DelegatedRoutingV1HttpApiClient

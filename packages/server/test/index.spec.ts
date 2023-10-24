@@ -12,7 +12,7 @@ import type { PeerInfo } from '@libp2p/interface/peer-info'
 import type { FastifyInstance } from 'fastify'
 import type { StubbedInstance } from 'sinon-ts'
 
-describe('routing-v1-http-api-server', () => {
+describe('delegated-routing-v1-http-api-server', () => {
   let helia: StubbedInstance<Helia>
   let server: FastifyInstance
   let url: URL

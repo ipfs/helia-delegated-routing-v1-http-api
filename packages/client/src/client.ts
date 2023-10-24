@@ -15,7 +15,7 @@ import type { AbortOptions } from '@libp2p/interface'
 import type { PeerId } from '@libp2p/interface/peer-id'
 import type { CID } from 'multiformats'
 
-const log = logger('routing-v1-http-api-client')
+const log = logger('delegated-routing-v1-http-api-client')
 
 const defaultValues = {
   concurrentRequests: 4,
