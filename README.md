@@ -13,6 +13,8 @@
 
 > The Delegated Routing V1 HTTP API powered by Helia
 
+This repo contains a server implementation of the IPFS [Delegated Routing V1 HTTP API](https://specs.ipfs.tech/routing/http-routing-v1/) along with a client that can be used to interact with any compliant server implementation.
+
 ## Table of contents <!-- omit in toc -->
 
 - [Structure](#structure)

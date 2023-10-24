@@ -13,6 +13,8 @@
 
 > A Delegated Routing V1 HTTP API server powered by Helia
 
+A server implementation of the IPFS [Delegated Routing V1 HTTP API](https://specs.ipfs.tech/routing/http-routing-v1/).
+
 ## Table of contents <!-- omit in toc -->
 
 - [Install](#install)
