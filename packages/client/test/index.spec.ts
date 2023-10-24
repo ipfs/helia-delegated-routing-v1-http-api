@@ -39,6 +39,9 @@ describe('routing-v1-http-api-client', () => {
       Metadata: 'gBI=',
       ID: (await createEd25519PeerId()).toString(),
       Addrs: ['/ip4/42.42.42.42/tcp/1234']
+    }, {
+      ID: (await createEd25519PeerId()).toString(),
+      Addrs: ['/ip4/43.43.43.43/tcp/1234']
     }]
 
     const cid = CID.parse('QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn')

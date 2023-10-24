@@ -31,15 +31,6 @@ export interface PeerRecord {
   Protocols?: string[]
 }
 
-export interface BitswapRecord {
-  Schema: 'bitswap'
-  Protocol: string
-  ID: PeerId
-  Addrs: Multiaddr[]
-}
-
-export type Record = PeerRecord | BitswapRecord
-
 export interface DelegatedRoutingV1HttpApiClientInit {
   /**
    * A concurrency limit to avoid request flood in web browser (default: 4)
@@ -59,7 +50,7 @@ export interface DelegatedRoutingV1HttpApiClient {
    * Returns an async generator of PeerInfos that can provide the content
    * for the passed CID
    */
-  getProviders(cid: CID, options?: AbortOptions): AsyncGenerator<Record>
+  getProviders(cid: CID, options?: AbortOptions): AsyncGenerator<PeerRecord>
 
   /**
    * Returns an async generator of PeerInfos for the provided PeerId

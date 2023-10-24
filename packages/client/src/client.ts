@@ -10,7 +10,7 @@ import { ipnsValidator } from 'ipns/validator'
 import ndjson from 'iterable-ndjson'
 import defer from 'p-defer'
 import PQueue from 'p-queue'
-import type { DelegatedRoutingV1HttpApiClient, DelegatedRoutingV1HttpApiClientInit, Record, PeerRecord } from './index.js'
+import type { DelegatedRoutingV1HttpApiClient, DelegatedRoutingV1HttpApiClientInit, PeerRecord } from './index.js'
 import type { AbortOptions } from '@libp2p/interface'
 import type { PeerId } from '@libp2p/interface/peer-id'
 import type { CID } from 'multiformats'
@@ -56,7 +56,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
     this.started = false
   }
 
-  async * getProviders (cid: CID, options: AbortOptions = {}): AsyncGenerator<Record, any, unknown> {
+  async * getProviders (cid: CID, options: AbortOptions = {}): AsyncGenerator<PeerRecord, any, unknown> {
     log('getProviders starts: %c', cid)
 
     const signal = anySignal([this.shutDownController.signal, options.signal, AbortSignal.timeout(this.timeout)])
@@ -86,14 +86,14 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
 
         for (const provider of body.Providers) {
           const record = this.#handleProviderRecords(provider)
-          if (record !== null) {
+          if (record != null) {
             yield record
           }
         }
       } else {
         for await (const provider of ndjson(toIt(res.body))) {
           const record = this.#handleProviderRecords(provider)
-          if (record !== null) {
+          if (record != null) {
             yield record
           }
         }
@@ -137,14 +137,14 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
 
         for (const peer of body.Peers) {
           const record = this.#handlePeerRecords(peerId, peer)
-          if (record !== null) {
+          if (record != null) {
             yield record
           }
         }
       } else {
         for await (const peer of ndjson(toIt(res.body))) {
           const record = this.#handlePeerRecords(peerId, peer)
-          if (record !== null) {
+          if (record != null) {
             yield record
           }
         }
@@ -223,25 +223,37 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
     }
   }
 
-  #handleProviderRecords (record: any): Record | null {
+  #handleProviderRecords (record: any): PeerRecord | undefined {
     if (record.Schema === 'peer') {
       // Peer schema can have additional, user-defined, fields.
       record.ID = peerIdFromString(record.ID)
       record.Addrs = record.Addrs.map(multiaddr)
       return record
-    } else if (record.Schema === 'bitswap') {
-      // Bitswap schema is deprecated, was incorrectly used when server had no information about actual protocols, so we convert it to peer result without protocol information.
+    }
+
+    if (record.Schema === 'bitswap') {
+      // Bitswap schema is deprecated, was incorrectly used when server had no
+      // information about actual protocols, so we convert it to peer result
+      // without protocol information
       return {
         Schema: 'peer',
         ID: peerIdFromString(record.ID),
-        Addrs: record.Addrs.map(multiaddr)
+        Addrs: record.Addrs.map(multiaddr),
+        Protocols: record.Protocol != null ? [record.Protocol] : []
       }
     }
 
-    return null
+    if (record.ID != null && Array.isArray(record.Addrs)) {
+      return {
+        Schema: 'peer',
+        ID: peerIdFromString(record.ID),
+        Addrs: record.Addrs.map(multiaddr),
+        Protocols: Array.isArray(record.Protocols) ? record.Protocols : []
+      }
+    }
   }
 
-  #handlePeerRecords (peerId: PeerId, record: any): PeerRecord | null {
+  #handlePeerRecords (peerId: PeerId, record: any): PeerRecord | undefined {
     if (record.Schema === 'peer') {
       // Peer schema can have additional, user-defined, fields.
       record.ID = peerIdFromString(record.ID)
@@ -250,7 +262,5 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
         return record
       }
     }
-
-    return null
   }
 }
