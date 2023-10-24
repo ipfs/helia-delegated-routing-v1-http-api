@@ -230,10 +230,9 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       record.Addrs = record.Addrs.map(multiaddr)
       return record
     } else if (record.Schema === 'bitswap') {
-      // Bitswap schema cannot have additional fields.
+      // Bitswap schema is deprecated, was incorrectly used when server had no information about actual protocols, so we convert it to peer result without protocol information.
       return {
-        Schema: record.Schema,
-        Protocol: record.Protocol,
+        Schema: 'peer',
         ID: peerIdFromString(record.ID),
         Addrs: record.Addrs.map(multiaddr)
       }
