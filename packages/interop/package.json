@@ -54,8 +54,8 @@
     "aegir": "^41.0.0",
     "fastify": "^4.17.0",
     "helia": "^2.0.1",
+    "ipns": "^7.0.1",
     "it-first": "^3.0.3",
-    "libp2p": "^0.46.10",
     "multiformats": "^12.1.1"
   },
   "private": true
