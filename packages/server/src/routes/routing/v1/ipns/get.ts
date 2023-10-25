@@ -27,6 +27,11 @@ export default function getIpnsV1 (fastify: FastifyInstance, helia: Helia): void
     },
     handler: async (request, reply) => {
       let peerId: PeerId
+      const controller = new AbortController()
+
+      request.raw.on('close', () => {
+        controller.abort()
+      })
 
       try {
         // PeerId must be encoded as a Libp2p-key CID.
@@ -38,7 +43,9 @@ export default function getIpnsV1 (fastify: FastifyInstance, helia: Helia): void
         return reply.code(422).type('text/html').send('Unprocessable Entity')
       }
 
-      const rawRecord = await helia.libp2p.contentRouting.get(peerIdToRoutingKey(peerId))
+      const rawRecord = await helia.libp2p.contentRouting.get(peerIdToRoutingKey(peerId), {
+        signal: controller.signal
+      })
 
       return reply
         .header('Content-Type', 'application/vnd.ipfs.ipns-record')

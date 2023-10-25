@@ -35,6 +35,11 @@ export default function putIpnsV1 (fastify: FastifyInstance, helia: Helia): void
     },
     handler: async (request, reply) => {
       let peerId: PeerId
+      const controller = new AbortController()
+
+      request.raw.on('close', () => {
+        controller.abort()
+      })
 
       try {
         // PeerId must be encoded as a Libp2p-key CID.
@@ -49,7 +54,11 @@ export default function putIpnsV1 (fastify: FastifyInstance, helia: Helia): void
       // @ts-expect-error request.body does not have a type
       const body: Uint8Array = request.body
       await ipnsValidator(peerIdToRoutingKey(peerId), body)
-      await helia.libp2p.contentRouting.put(peerIdToRoutingKey(peerId), body)
+
+      await helia.libp2p.contentRouting.put(peerIdToRoutingKey(peerId), body, {
+        signal: controller.signal
+      })
+
       return reply.send()
     }
   })

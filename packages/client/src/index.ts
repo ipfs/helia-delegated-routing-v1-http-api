@@ -63,7 +63,7 @@ export interface DelegatedRoutingV1HttpApiClient {
   getIPNS(peerId: PeerId, options?: AbortOptions): Promise<IPNSRecord>
 
   /**
-   * Publishes the given IPNSRecorded for the provided PeerId
+   * Publishes the given IPNSRecord for the provided PeerId
    */
   putIPNS(peerId: PeerId, record: IPNSRecord, options?: AbortOptions): Promise<void>
 

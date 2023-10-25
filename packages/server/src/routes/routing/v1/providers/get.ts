@@ -39,6 +39,11 @@ export default function getProvidersV1 (fastify: FastifyInstance, helia: Helia):
     },
     handler: async (request, reply) => {
       let cid: CID
+      const controller = new AbortController()
+
+      request.raw.on('close', () => {
+        controller.abort()
+      })
 
       try {
         const { cid: cidStr } = request.params
@@ -52,7 +57,9 @@ export default function getProvidersV1 (fastify: FastifyInstance, helia: Helia):
         const stream = new PassThrough()
 
         // wait until we have the first result
-        const iterable = streamingHandler(cid, helia)
+        const iterable = streamingHandler(cid, helia, {
+          signal: controller.signal
+        })
         const result = await iterable.next()
 
         // if we have a value, send the value in a stream
@@ -77,7 +84,9 @@ export default function getProvidersV1 (fastify: FastifyInstance, helia: Helia):
             .send(stream)
         }
       } else {
-        const result = await nonStreamingHandler(cid, helia)
+        const result = await nonStreamingHandler(cid, helia, {
+          signal: controller.signal
+        })
 
         if (result.Providers.length > 0) {
           return reply.header('Content-Type', 'application/json').send(result)
