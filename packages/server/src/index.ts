@@ -67,7 +67,7 @@ export interface ServerInit {
 /**
  * Create and return a Routing V1 HTTP API server
  */
-export async function createRoutingV1HttpApiServer (helia: Helia, init: ServerInit = {}): Promise<FastifyInstance> {
+export async function createDelegatedRoutingV1HttpApiServer (helia: Helia, init: ServerInit = {}): Promise<FastifyInstance> {
   const server = init.fastify ?? fastify()
   await server.register(cors, {
     origin: '*',

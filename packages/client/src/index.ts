@@ -17,12 +17,21 @@
  * ```
  */
 
-import { DefaultRoutingV1HttpApiClient } from './client.js'
+import { DefaultDelegatedRoutingV1HttpApiClient } from './client.js'
 import type { AbortOptions } from '@libp2p/interface'
-import type { PeerInfo } from '@libp2p/interface/peer-info'
+import type { PeerId } from '@libp2p/interface/peer-id'
+import type { Multiaddr } from '@multiformats/multiaddr'
+import type { IPNSRecord } from 'ipns'
 import type { CID } from 'multiformats/cid'
 
-export interface RoutingV1HttpApiClientInit {
+export interface PeerRecord {
+  Schema: 'peer'
+  ID: PeerId
+  Addrs?: Multiaddr[]
+  Protocols?: string[]
+}
+
+export interface DelegatedRoutingV1HttpApiClientInit {
   /**
    * A concurrency limit to avoid request flood in web browser (default: 4)
    *
@@ -36,12 +45,27 @@ export interface RoutingV1HttpApiClientInit {
   timeout?: number
 }
 
-export interface RoutingV1HttpApiClient {
+export interface DelegatedRoutingV1HttpApiClient {
   /**
    * Returns an async generator of PeerInfos that can provide the content
    * for the passed CID
    */
-  getProviders(cid: CID, options?: AbortOptions): AsyncGenerator<PeerInfo>
+  getProviders(cid: CID, options?: AbortOptions): AsyncGenerator<PeerRecord>
+
+  /**
+   * Returns an async generator of PeerInfos for the provided PeerId
+   */
+  getPeerInfo(peerId: PeerId, options?: AbortOptions): AsyncGenerator<PeerRecord>
+
+  /**
+   * Returns a promise of a IPNSRecord for the given PeerId
+   */
+  getIPNS(peerId: PeerId, options?: AbortOptions): Promise<IPNSRecord>
+
+  /**
+   * Publishes the given IPNSRecord for the provided PeerId
+   */
+  putIPNS(peerId: PeerId, record: IPNSRecord, options?: AbortOptions): Promise<void>
 
   /**
    * Shut down any currently running HTTP requests and clear up any resources
@@ -53,6 +77,6 @@ export interface RoutingV1HttpApiClient {
 /**
  * Create and return a client to use with a Routing V1 HTTP API server
  */
-export function createRoutingV1HttpApiClient (url: URL, init: RoutingV1HttpApiClientInit = {}): RoutingV1HttpApiClient {
-  return new DefaultRoutingV1HttpApiClient(url, init)
+export function createDelegatedRoutingV1HttpApiClient (url: URL, init: DelegatedRoutingV1HttpApiClientInit = {}): DelegatedRoutingV1HttpApiClient {
+  return new DefaultDelegatedRoutingV1HttpApiClient(url, init)
 }

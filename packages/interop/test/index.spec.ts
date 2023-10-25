@@ -1,34 +1,39 @@
 /* eslint-env mocha */
 
-import { createRoutingV1HttpApiClient } from '@helia/routing-v1-http-api-client'
-import { createRoutingV1HttpApiServer } from '@helia/routing-v1-http-api-server'
+import { createDelegatedRoutingV1HttpApiClient } from '@helia/delegated-routing-v1-http-api-client'
+import { createDelegatedRoutingV1HttpApiServer } from '@helia/delegated-routing-v1-http-api-server'
+import { ipns } from '@helia/ipns'
+import { dht } from '@helia/ipns/routing'
+import { createEd25519PeerId } from '@libp2p/peer-id-factory'
 import { expect } from 'aegir/chai'
+import { create as createIpnsRecord } from 'ipns'
+import first from 'it-first'
 import { CID } from 'multiformats/cid'
 import * as raw from 'multiformats/codecs/raw'
 import { sha256 } from 'multiformats/hashes/sha2'
 import { createHelia } from './fixtures/create-helia.js'
+import type { DelegatedRoutingV1HttpApiClient } from '@helia/delegated-routing-v1-http-api-client'
 import type { Helia } from '@helia/interface'
-import type { RoutingV1HttpApiClient } from '@helia/routing-v1-http-api-client'
 import type { Libp2p } from '@libp2p/interface'
 import type { KadDHT } from '@libp2p/kad-dht'
 import type { FastifyInstance } from 'fastify'
 
-describe('routing-v1-http-api interop', () => {
+describe('delegated-routing-v1-http-api interop', () => {
   let network: Array<Helia<Libp2p<{ dht: KadDHT }>>>
   let server: FastifyInstance
-  let client: RoutingV1HttpApiClient
+  let client: DelegatedRoutingV1HttpApiClient
 
   beforeEach(async () => {
     network = await Promise.all(
       new Array(10).fill(0).map(async () => createHelia())
     )
 
-    server = await createRoutingV1HttpApiServer(network[0])
+    server = await createDelegatedRoutingV1HttpApiServer(network[0])
 
     const address = server.server.address()
     const port = typeof address === 'string' ? address : address?.port
 
-    client = createRoutingV1HttpApiClient(new URL(`http://127.0.0.1:${port}`))
+    client = createDelegatedRoutingV1HttpApiClient(new URL(`http://127.0.0.1:${port}`))
 
     for (const node of network) {
       for (const remote of network) {
@@ -64,12 +69,52 @@ describe('routing-v1-http-api interop', () => {
 
     for await (const prov of client.getProviders(cid)) {
       // should be a node in this test network
-      if (network.map(node => node.libp2p.peerId.toString()).includes(prov.id.toString())) {
+      if (network.map(node => node.libp2p.peerId.toString()).includes(prov.ID.toString())) {
         foundProvider = true
         break
       }
     }
 
     expect(foundProvider).to.be.true()
+  })
+
+  it('should find peer info', async () => {
+    const result = await first(client.getPeerInfo(network[2].libp2p.peerId))
+
+    if (result == null) {
+      throw new Error('PeerInfo not found')
+    }
+
+    expect(result.ID.toString()).to.equal(network[2].libp2p.peerId.toString())
+  })
+
+  it('should get an IPNS record', async () => {
+    // publish a record using a remote host
+    const i = ipns(network[5], [
+      dht(network[5])
+    ])
+    const cid = CID.parse('bafybeiczsscdsbs7ffqz55asqdf3smv6klcw3gofszvwlyarci47bgf354')
+    const peerId = await createEd25519PeerId()
+    await i.publish(peerId, cid)
+
+    // use client to resolve the published record
+    const record = await client.getIPNS(peerId)
+    expect(record.value).to.equal(`/ipfs/${cid.toString()}`)
+  })
+
+  it('should put an IPNS record', async () => {
+    // publish a record using the client
+    const cid = CID.parse('bafybeiczsscdsbs7ffqz55asqdf3smv6klcw3gofszvwlyarci47bgf354')
+    const peerId = await createEd25519PeerId()
+    const record = await createIpnsRecord(peerId, cid, 0, 1000 * 60 * 60 * 24)
+
+    await client.putIPNS(peerId, record)
+
+    // resolve the record using a remote host
+    const i = ipns(network[8], [
+      dht(network[8])
+    ])
+    const result = await i.resolve(peerId)
+    expect(result.toString()).to.equal(cid.toString())
   })
 })
