@@ -44,7 +44,7 @@
     "test:node": "aegir test -t node --cov"
   },
   "devDependencies": {
-    "@helia/delegated-routing-v1-http-api-client": "~0.0.0",
+    "@helia/delegated-routing-v1-http-api-client": "^1.0.0",
     "@helia/delegated-routing-v1-http-api-server": "~0.0.0",
     "@helia/interface": "^2.0.0",
     "@helia/ipns": "^2.0.1",
