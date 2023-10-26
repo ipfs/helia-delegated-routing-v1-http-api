@@ -1,3 +1,10 @@
+## [@helia/delegated-routing-v1-http-api-client-v1.0.1](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-v1.0.0...@helia/delegated-routing-v1-http-api-client-v1.0.1) (2023-10-26)
+
+
+### Bug Fixes
+
+* PeerRecord Addrs and Protocols do not need to be optional ([#43](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues/43)) ([ec62768](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/ec62768fac9e556314219cc66432aae9624fb5f1))
+
 ## @helia/delegated-routing-v1-http-api-client-v1.0.0 (2023-10-25)
 
 
