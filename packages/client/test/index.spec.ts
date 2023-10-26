@@ -143,7 +143,7 @@ describe('delegated-routing-v1-http-api-client', () => {
       body: records.map(prov => JSON.stringify(prov)).join('\n')
     })
 
-    const peerRecords = await all(client.getPeerInfo(peerId))
+    const peerRecords = await all(client.getPeers(peerId))
     expect(peerRecords.map(peerRecord => ({
       ...peerRecord,
       ID: peerRecord.ID.toString(),

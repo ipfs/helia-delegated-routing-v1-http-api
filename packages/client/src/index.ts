@@ -47,23 +47,24 @@ export interface DelegatedRoutingV1HttpApiClientInit {
 
 export interface DelegatedRoutingV1HttpApiClient {
   /**
-   * Returns an async generator of PeerInfos that can provide the content
-   * for the passed CID
+   * Returns an async generator of {@link PeerRecord}s that can provide the
+   * content for the passed {@link CID}
    */
   getProviders(cid: CID, options?: AbortOptions): AsyncGenerator<PeerRecord>
 
   /**
-   * Returns an async generator of PeerInfos for the provided PeerId
+   * Returns an async generator of {@link PeerRecord}s for the provided
+   * {@link PeerId}
    */
-  getPeerInfo(peerId: PeerId, options?: AbortOptions): AsyncGenerator<PeerRecord>
+  getPeers(peerId: PeerId, options?: AbortOptions): AsyncGenerator<PeerRecord>
 
   /**
-   * Returns a promise of a IPNSRecord for the given PeerId
+   * Returns a promise of a {@link IPNSRecord} for the given {@link PeerId}
    */
   getIPNS(peerId: PeerId, options?: AbortOptions): Promise<IPNSRecord>
 
   /**
-   * Publishes the given IPNSRecord for the provided PeerId
+   * Publishes the given {@link IPNSRecord} for the provided {@link PeerId}
    */
   putIPNS(peerId: PeerId, record: IPNSRecord, options?: AbortOptions): Promise<void>
 
