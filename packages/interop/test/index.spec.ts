@@ -79,7 +79,7 @@ describe('delegated-routing-v1-http-api interop', () => {
   })
 
   it('should find peer info', async () => {
-    const result = await first(client.getPeerInfo(network[2].libp2p.peerId))
+    const result = await first(client.getPeers(network[2].libp2p.peerId))
 
     if (result == null) {
       throw new Error('PeerInfo not found')

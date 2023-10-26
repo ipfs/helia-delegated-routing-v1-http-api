@@ -6,8 +6,7 @@ import { anySignal } from 'any-signal'
 import toIt from 'browser-readablestream-to-it'
 import { unmarshal, type IPNSRecord, marshal, peerIdToRoutingKey } from 'ipns'
 import { ipnsValidator } from 'ipns/validator'
-// @ts-expect-error no types
-import ndjson from 'iterable-ndjson'
+import { parse as ndjson } from 'it-ndjson'
 import defer from 'p-defer'
 import PQueue from 'p-queue'
 import type { DelegatedRoutingV1HttpApiClient, DelegatedRoutingV1HttpApiClientInit, PeerRecord } from './index.js'
@@ -107,7 +106,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
     }
   }
 
-  async * getPeerInfo (peerId: PeerId, options: AbortOptions | undefined = {}): AsyncGenerator<PeerRecord, any, unknown> {
+  async * getPeers (peerId: PeerId, options: AbortOptions | undefined = {}): AsyncGenerator<PeerRecord, any, unknown> {
     log('getPeers starts: %c', peerId)
 
     const signal = anySignal([this.shutDownController.signal, options.signal, AbortSignal.timeout(this.timeout)])
@@ -228,6 +227,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       // Peer schema can have additional, user-defined, fields.
       record.ID = peerIdFromString(record.ID)
       record.Addrs = record.Addrs.map(multiaddr)
+      record.Protocols = record.Protocols ?? []
       return record
     }
 
