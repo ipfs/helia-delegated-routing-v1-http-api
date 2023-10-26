@@ -228,6 +228,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       // Peer schema can have additional, user-defined, fields.
       record.ID = peerIdFromString(record.ID)
       record.Addrs = record.Addrs.map(multiaddr)
+      record.Protocols = record.Protocols ?? []
       return record
     }
 
