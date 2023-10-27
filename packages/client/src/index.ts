@@ -6,14 +6,39 @@
  * @example
  *
  * ```typescript
- * import { createRoutingV1HttpApiClient } from '@helia/routing-v1-http-api-client'
+ * import { createDelegatedRoutingV1HttpApiClient } from '@helia/routing-v1-http-api-client'
  * import { CID } from 'multiformats/cid'
  *
- * const client = createRoutingV1HttpApiClient(new URL('https://example.org'))
+ * const client = createDelegatedRoutingV1HttpApiClient('https://example.org')
  *
  * for await (const prov of getProviders(CID.parse('QmFoo'))) {
  *   // ...
  * }
+ * ```
+ *
+ * ## How to use with libp2p
+ *
+ * The client can be configured as a libp2p service, this will enable it as both
+ * a {@link https://libp2p.github.io/js-libp2p/interfaces/_libp2p_interface.content_routing.ContentRouting.html | ContentRouting}
+ * and a {@link https://libp2p.github.io/js-libp2p/interfaces/_libp2p_interface.peer_routing.PeerRouting.html | PeerRouting}
+ * implementation
+ *
+ * @example
+ *
+ * ```typescript
+ * import { createDelegatedRoutingV1HttpApiClient } from '@helia/routing-v1-http-api-client'
+ * import { createLibp2p } from 'libp2p'
+ *
+ * const client = createDelegatedRoutingV1HttpApiClient('https://example.org')
+ * const libp2p = await createLibp2p({
+ *   // other config here
+ *   services: {
+ *     delegatedRouting: client
+ *   }
+ * })
+ *
+ * // later this will use the configured HTTP gateway
+ * await libp2p.peerRouting.findPeer(peerId, options)
  * ```
  */
 
@@ -78,6 +103,6 @@ export interface DelegatedRoutingV1HttpApiClient {
 /**
  * Create and return a client to use with a Routing V1 HTTP API server
  */
-export function createDelegatedRoutingV1HttpApiClient (url: URL, init: DelegatedRoutingV1HttpApiClientInit = {}): DelegatedRoutingV1HttpApiClient {
-  return new DefaultDelegatedRoutingV1HttpApiClient(url, init)
+export function createDelegatedRoutingV1HttpApiClient (url: URL | string, init: DelegatedRoutingV1HttpApiClientInit = {}): DelegatedRoutingV1HttpApiClient {
+  return new DefaultDelegatedRoutingV1HttpApiClient(new URL(url), init)
 }

@@ -138,10 +138,14 @@
     "browser-readablestream-to-it": "^2.0.3",
     "ipns": "^7.0.1",
     "it-all": "^3.0.2",
+    "it-drain": "^3.0.3",
+    "it-first": "^3.0.3",
+    "it-map": "^3.0.4",
     "it-ndjson": "^1.0.4",
     "multiformats": "^12.1.1",
     "p-defer": "^4.0.0",
-    "p-queue": "^7.3.4"
+    "p-queue": "^7.3.4",
+    "uint8arrays": "^4.0.6"
   },
   "devDependencies": {
     "@libp2p/peer-id-factory": "^3.0.5",
