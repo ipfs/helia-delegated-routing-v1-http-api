@@ -170,7 +170,7 @@ describe('libp2p content-routing', () => {
     expect(value).to.equalBytes(marshalIpnsRecord(record))
   })
 
-  it('should not get other records', async () => {
+  it('should not get unknown records', async () => {
     const routing = getContentRouting(client)
 
     if (routing == null) {
