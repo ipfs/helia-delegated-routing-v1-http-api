@@ -24,7 +24,7 @@ const peerIdFromRoutingKey = (key: Uint8Array): PeerId => {
 }
 
 /**
- * Wrapper class to convert events into returned values
+ * Wrapper class to convert [http-routing-v1 content events](https://specs.ipfs.tech/routing/http-routing-v1/#response-body) into returned values
  */
 export class DelegatedRoutingV1HttpApiClientContentRouting implements ContentRouting {
   private readonly client: DelegatedRoutingV1HttpApiClient
@@ -82,7 +82,7 @@ export class DelegatedRoutingV1HttpApiClientContentRouting implements ContentRou
 }
 
 /**
- * Wrapper class to convert events into returned values
+ * Wrapper class to convert [http-routing-v1](https://specs.ipfs.tech/routing/http-routing-v1/#response-body-0) events into expected libp2p values
  */
 export class DelegatedRoutingV1HttpApiClientPeerRouting implements PeerRouting {
   private readonly client: DelegatedRoutingV1HttpApiClient

@@ -13,11 +13,12 @@ import { concat as uint8ArrayConcat } from 'uint8arrays/concat'
 import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
 import { createDelegatedRoutingV1HttpApiClient, type DelegatedRoutingV1HttpApiClient } from '../src/index.js'
 
-if (process.env.ECHO_SERVER == null) {
+const serverUrl = process.env.ECHO_SERVER
+
+if (serverUrl == null) {
   throw new Error('Echo server not configured correctly')
 }
 
-const serverUrl = process.env.ECHO_SERVER
 
 describe('libp2p content-routing', () => {
   let client: DelegatedRoutingV1HttpApiClient
@@ -253,12 +254,24 @@ describe('libp2p peer-routing', () => {
   })
 })
 
-function getContentRouting (obj: any): ContentRouting | undefined {
-  return obj?.[contentRouting]
+function getContentRouting (obj: any): ContentRouting {
+  const routing = obj?.[contentRouting]
+
+  if (routing == null) {
+    throw new Error('ContentRouting not found')
+  }
+
+  return routing
 }
 
-function getPeerRouting (obj: any): PeerRouting | undefined {
-  return obj?.[peerRouting]
+function getPeerRouting (obj: any): PeerRouting {
+  const routing = obj?.[peerRouting]
+
+  if (routing == null) {
+    throw new Error('PeerRouting not found')
+  }
+
+  return routing
 }
 
 async function getServerCallCount (): Promise<number> {
