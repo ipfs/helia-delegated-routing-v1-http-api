@@ -7,7 +7,6 @@ import { createEd25519PeerId } from '@libp2p/peer-id-factory'
 import { expect } from 'aegir/chai'
 import { create as createIpnsRecord, marshal as marshalIpnsRecord } from 'ipns'
 import all from 'it-all'
-import drain from 'it-drain'
 import { CID } from 'multiformats/cid'
 import { concat as uint8ArrayConcat } from 'uint8arrays/concat'
 import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
@@ -18,7 +17,6 @@ const serverUrl = process.env.ECHO_SERVER
 if (serverUrl == null) {
   throw new Error('Echo server not configured correctly')
 }
-
 
 describe('libp2p content-routing', () => {
   let client: DelegatedRoutingV1HttpApiClient
@@ -93,7 +91,7 @@ describe('libp2p content-routing', () => {
 
     const cid = CID.parse('QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn')
 
-    await routing.provide(cid)
+    await expect(routing.provide(cid)).to.eventually.be.undefined()
   })
 
   it('should put ipns records', async () => {
@@ -249,7 +247,7 @@ describe('libp2p peer-routing', () => {
         throw new Error('PeerRouting not found')
       }
 
-      await drain(routing.getClosestPeers(Uint8Array.from([0, 1, 2, 3, 4])))
+      await expect(all(routing.getClosestPeers(Uint8Array.from([0, 1, 2, 3, 4])))).to.eventually.be.empty()
     })
   })
 })
