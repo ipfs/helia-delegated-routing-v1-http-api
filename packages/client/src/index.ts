@@ -1,7 +1,8 @@
 /**
  * @packageDocumentation
  *
- * Create a client to use with a Routing V1 HTTP API server.
+ * A client implementation of the IPFS [Delegated Routing V1 HTTP API](https://specs.ipfs.tech/routing/http-routing-v1/)
+ * that can be used to interact with any compliant server implementation.
  *
  * @example
  *

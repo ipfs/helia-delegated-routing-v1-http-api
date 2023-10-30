@@ -4,8 +4,6 @@
   </a>
 </p>
 
-# helia-delegated-routing-v1-http-api <!-- omit in toc -->
-
 [![ipfs.tech](https://img.shields.io/badge/project-IPFS-blue.svg?style=flat-square)](https://ipfs.tech)
 [![Discuss](https://img.shields.io/discourse/https/discuss.ipfs.tech/posts.svg?style=flat-square)](https://discuss.ipfs.tech)
 [![codecov](https://img.shields.io/codecov/c/github/ipfs/helia-delegated-routing-v1-http-api.svg?style=flat-square)](https://codecov.io/gh/ipfs/helia-delegated-routing-v1-http-api)
@@ -13,16 +11,11 @@
 
 > The Delegated Routing V1 HTTP API powered by Helia
 
+## About
+
 This repo contains a server implementation of the IPFS [Delegated Routing V1 HTTP API](https://specs.ipfs.tech/routing/http-routing-v1/) along with a client that can be used to interact with any compliant server implementation.
 
-## Table of contents <!-- omit in toc -->
-
-- [Structure](#structure)
-- [API Docs](#api-docs)
-- [License](#license)
-- [Contribute](#contribute)
-
-## Structure
+## Packages
 
 - [`/packages/client`](./packages/client) A Delegated Routing V1 HTTP API client
 - [`/packages/interop`](./packages/interop) Interop tests for the Delegated Routing V1 HTTP API server powered by Helia
