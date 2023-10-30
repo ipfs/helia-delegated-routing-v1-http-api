@@ -4,8 +4,6 @@
   </a>
 </p>
 
-# @helia/delegated-routing-v1-http-api-server <!-- omit in toc -->
-
 [![ipfs.tech](https://img.shields.io/badge/project-IPFS-blue.svg?style=flat-square)](https://ipfs.tech)
 [![Discuss](https://img.shields.io/discourse/https/discuss.ipfs.tech/posts.svg?style=flat-square)](https://discuss.ipfs.tech)
 [![codecov](https://img.shields.io/codecov/c/github/ipfs/helia-delegated-routing-v1-http-api.svg?style=flat-square)](https://codecov.io/gh/ipfs/helia-delegated-routing-v1-http-api)
@@ -13,14 +11,57 @@
 
 > A Delegated Routing V1 HTTP API server powered by Helia
 
-A server implementation of the IPFS [Delegated Routing V1 HTTP API](https://specs.ipfs.tech/routing/http-routing-v1/).
+## About
 
-## Table of contents <!-- omit in toc -->
+Implements HTTP routes for a Fastify server that conform to the [Routing V1 HTTP API](https://specs.ipfs.tech/routing/http-routing-v1/).
 
-- [Install](#install)
-- [API Docs](#api-docs)
-- [License](#license)
-- [Contribute](#contribute)
+### Example
+
+```typescript
+import { createHelia } from 'helia'
+import { createRoutingV1HttpApiServer } from '@helia/routing-v1-http-api-server'
+
+const helia = await createHelia()
+const server = await createRoutingV1HttpApiServer(helia, {
+  listen: {
+    // fastify listen options
+  }
+})
+
+// now make http requests
+```
+
+Alternatively if you have a Fastify instance already you can add routes to it.
+,
+
+### Example
+
+```typescript
+import fastify from 'fastify'
+import cors from '@fastify/cors'
+import { createHelia } from 'helia'
+import routes from '@helia/routing-v1-http-api-server/routes'
+
+const server = fastify({
+ // fastify options
+})
+await server.register(cors, {
+  origin: '*',
+  methods: ['GET', 'OPTIONS'],
+  strictPreflight: false
+})
+
+const helia = await createHelia()
+
+// configure Routing V1 HTTP API routes
+routes(server, helia)
+
+await server.listen({
+  // fastify listen options
+})
+
+// now make http requests
+```
 
 ## Install
 
