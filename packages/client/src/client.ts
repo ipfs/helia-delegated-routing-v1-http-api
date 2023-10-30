@@ -1,4 +1,6 @@
+import { type ContentRouting, contentRouting } from '@libp2p/interface/content-routing'
 import { CodeError } from '@libp2p/interface/errors'
+import { type PeerRouting, peerRouting } from '@libp2p/interface/peer-routing'
 import { logger } from '@libp2p/logger'
 import { peerIdFromString } from '@libp2p/peer-id'
 import { multiaddr } from '@multiformats/multiaddr'
@@ -9,6 +11,7 @@ import { ipnsValidator } from 'ipns/validator'
 import { parse as ndjson } from 'it-ndjson'
 import defer from 'p-defer'
 import PQueue from 'p-queue'
+import { DelegatedRoutingV1HttpApiClientContentRouting, DelegatedRoutingV1HttpApiClientPeerRouting } from './routings.js'
 import type { DelegatedRoutingV1HttpApiClient, DelegatedRoutingV1HttpApiClientInit, PeerRecord } from './index.js'
 import type { AbortOptions } from '@libp2p/interface'
 import type { PeerId } from '@libp2p/interface/peer-id'
@@ -27,6 +30,8 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
   private readonly shutDownController: AbortController
   private readonly clientUrl: URL
   private readonly timeout: number
+  private readonly contentRouting: ContentRouting
+  private readonly peerRouting: PeerRouting
 
   /**
    * Create a new DelegatedContentRouting instance
@@ -39,6 +44,16 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
     })
     this.clientUrl = url instanceof URL ? url : new URL(url)
     this.timeout = init.timeout ?? defaultValues.timeout
+    this.contentRouting = new DelegatedRoutingV1HttpApiClientContentRouting(this)
+    this.peerRouting = new DelegatedRoutingV1HttpApiClientPeerRouting(this)
+  }
+
+  get [contentRouting] (): ContentRouting {
+    return this.contentRouting
+  }
+
+  get [peerRouting] (): PeerRouting {
+    return this.peerRouting
   }
 
   isStarted (): boolean {
