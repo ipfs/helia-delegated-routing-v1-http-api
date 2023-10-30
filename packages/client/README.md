@@ -4,8 +4,6 @@
   </a>
 </p>
 
-# @helia/delegated-routing-v1-http-api-client <!-- omit in toc -->
-
 [![ipfs.tech](https://img.shields.io/badge/project-IPFS-blue.svg?style=flat-square)](https://ipfs.tech)
 [![Discuss](https://img.shields.io/discourse/https/discuss.ipfs.tech/posts.svg?style=flat-square)](https://discuss.ipfs.tech)
 [![codecov](https://img.shields.io/codecov/c/github/ipfs/helia-delegated-routing-v1-http-api.svg?style=flat-square)](https://codecov.io/gh/ipfs/helia-delegated-routing-v1-http-api)
@@ -13,14 +11,23 @@
 
 > A Delegated Routing V1 HTTP API client
 
-A client implementation of the IPFS [Delegated Routing V1 HTTP API](https://specs.ipfs.tech/routing/http-routing-v1/) that can be used to interact with any compliant server implementation.
+## About
 
-## Table of contents <!-- omit in toc -->
+A client implementation of the IPFS [Delegated Routing V1 HTTP API](https://specs.ipfs.tech/routing/http-routing-v1/)
+that can be used to interact with any compliant server implementation.
 
-- [Install](#install)
-- [API Docs](#api-docs)
-- [License](#license)
-- [Contribute](#contribute)
+### Example
+
+```typescript
+import { createRoutingV1HttpApiClient } from '@helia/routing-v1-http-api-client'
+import { CID } from 'multiformats/cid'
+
+const client = createRoutingV1HttpApiClient(new URL('https://example.org'))
+
+for await (const prov of getProviders(CID.parse('QmFoo'))) {
+  // ...
+}
+```
 
 ## Install
 

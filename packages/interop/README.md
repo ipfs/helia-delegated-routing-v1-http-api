@@ -4,26 +4,12 @@
   </a>
 </p>
 
-# @helia/delegated-routing-v1-http-api-interop <!-- omit in toc -->
-
 [![ipfs.tech](https://img.shields.io/badge/project-IPFS-blue.svg?style=flat-square)](https://ipfs.tech)
 [![Discuss](https://img.shields.io/discourse/https/discuss.ipfs.tech/posts.svg?style=flat-square)](https://discuss.ipfs.tech)
 [![codecov](https://img.shields.io/codecov/c/github/ipfs/helia-delegated-routing-v1-http-api.svg?style=flat-square)](https://codecov.io/gh/ipfs/helia-delegated-routing-v1-http-api)
 [![CI](https://img.shields.io/github/actions/workflow/status/ipfs/helia-delegated-routing-v1-http-api/js-test-and-release.yml?branch=main\&style=flat-square)](https://github.com/ipfs/helia-delegated-routing-v1-http-api/actions/workflows/js-test-and-release.yml?query=branch%3Amain)
 
 > Interop tests for the Delegated Routing V1 HTTP API server powered by Helia
-
-## Table of contents <!-- omit in toc -->
-
-- [Install](#install)
-- [License](#license)
-- [Contribute](#contribute)
-
-## Install
-
-```console
-$ npm i @helia/delegated-routing-v1-http-api-interop
-```
 
 ## License
 
