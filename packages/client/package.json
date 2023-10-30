@@ -137,8 +137,6 @@
     "any-signal": "^4.1.1",
     "browser-readablestream-to-it": "^2.0.3",
     "ipns": "^7.0.1",
-    "it-all": "^3.0.2",
-    "it-drain": "^3.0.3",
     "it-first": "^3.0.3",
     "it-map": "^3.0.4",
     "it-ndjson": "^1.0.4",
@@ -150,6 +148,7 @@
   "devDependencies": {
     "@libp2p/peer-id-factory": "^3.0.5",
     "aegir": "^41.0.0",
-    "body-parser": "^1.20.2"
+    "body-parser": "^1.20.2",
+    "it-all": "^3.0.2"
   }
 }

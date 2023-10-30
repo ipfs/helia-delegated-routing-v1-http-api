@@ -19,14 +19,40 @@ that can be used to interact with any compliant server implementation.
 ### Example
 
 ```typescript
-import { createRoutingV1HttpApiClient } from '@helia/routing-v1-http-api-client'
+import { createDelegatedRoutingV1HttpApiClient } from '@helia/routing-v1-http-api-client'
 import { CID } from 'multiformats/cid'
 
-const client = createRoutingV1HttpApiClient(new URL('https://example.org'))
+const client = createDelegatedRoutingV1HttpApiClient('https://example.org')
 
 for await (const prov of getProviders(CID.parse('QmFoo'))) {
   // ...
 }
+```
+
+## How to use with libp2p
+
+The client can be configured as a libp2p service, this will enable it as both
+a ContentRouting
+and a PeerRouting
+implementation
+,
+
+### Example
+
+```typescript
+import { createDelegatedRoutingV1HttpApiClient } from '@helia/routing-v1-http-api-client'
+import { createLibp2p } from 'libp2p'
+
+const client = createDelegatedRoutingV1HttpApiClient('https://example.org')
+const libp2p = await createLibp2p({
+  // other config here
+  services: {
+    delegatedRouting: client
+  }
+})
+
+// later this will use the configured HTTP gateway
+await libp2p.peerRouting.findPeer(peerId, options)
 ```
 
 ## Install
