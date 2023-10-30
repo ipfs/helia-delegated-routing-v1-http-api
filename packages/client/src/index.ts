@@ -1,8 +1,7 @@
 /**
  * @packageDocumentation
  *
- * A client implementation of the IPFS [Delegated Routing V1 HTTP API](https://specs.ipfs.tech/routing/http-routing-v1/)
- * that can be used to interact with any compliant server implementation.
+ * A client implementation of the IPFS [Delegated Routing V1 HTTP API](https://specs.ipfs.tech/routing/http-routing-v1/) that can be used to interact with any compliant server implementation.
  *
  * @example
  *
@@ -17,18 +16,16 @@
  * }
  * ```
  *
- * ## How to use with libp2p
+ * ### How to use with libp2p
  *
- * The client can be configured as a libp2p service, this will enable it as both
- * a {@link https://libp2p.github.io/js-libp2p/interfaces/_libp2p_interface.content_routing.ContentRouting.html | ContentRouting}
- * and a {@link https://libp2p.github.io/js-libp2p/interfaces/_libp2p_interface.peer_routing.PeerRouting.html | PeerRouting}
- * implementation
+ * The client can be configured as a libp2p service, this will enable it as both a {@link https://libp2p.github.io/js-libp2p/interfaces/_libp2p_interface.content_routing.ContentRouting.html | ContentRouting} and a {@link https://libp2p.github.io/js-libp2p/interfaces/_libp2p_interface.peer_routing.PeerRouting.html | PeerRouting} implementation
  *
  * @example
  *
  * ```typescript
  * import { createDelegatedRoutingV1HttpApiClient } from '@helia/routing-v1-http-api-client'
  * import { createLibp2p } from 'libp2p'
+ * import { peerIdFromString } from '@libp2p/peer-id'
  *
  * const client = createDelegatedRoutingV1HttpApiClient('https://example.org')
  * const libp2p = await createLibp2p({
@@ -39,7 +36,7 @@
  * })
  *
  * // later this will use the configured HTTP gateway
- * await libp2p.peerRouting.findPeer(peerId, options)
+ * await libp2p.peerRouting.findPeer(peerIdFromString('QmFoo'))
  * ```
  */
 

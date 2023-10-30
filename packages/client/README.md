@@ -13,8 +13,7 @@
 
 ## About
 
-A client implementation of the IPFS [Delegated Routing V1 HTTP API](https://specs.ipfs.tech/routing/http-routing-v1/)
-that can be used to interact with any compliant server implementation.
+A client implementation of the IPFS [Delegated Routing V1 HTTP API](https://specs.ipfs.tech/routing/http-routing-v1/) that can be used to interact with any compliant server implementation.
 
 ### Example
 
@@ -29,19 +28,16 @@ for await (const prov of getProviders(CID.parse('QmFoo'))) {
 }
 ```
 
-## How to use with libp2p
+### How to use with libp2p
 
-The client can be configured as a libp2p service, this will enable it as both
-a ContentRouting
-and a PeerRouting
-implementation
-,
+The client can be configured as a libp2p service, this will enable it as both a ContentRouting and a PeerRouting implementation
 
 ### Example
 
 ```typescript
 import { createDelegatedRoutingV1HttpApiClient } from '@helia/routing-v1-http-api-client'
 import { createLibp2p } from 'libp2p'
+import { peerIdFromString } from '@libp2p/peer-id'
 
 const client = createDelegatedRoutingV1HttpApiClient('https://example.org')
 const libp2p = await createLibp2p({
@@ -52,7 +48,7 @@ const libp2p = await createLibp2p({
 })
 
 // later this will use the configured HTTP gateway
-await libp2p.peerRouting.findPeer(peerId, options)
+await libp2p.peerRouting.findPeer(peerIdFromString('QmFoo'))
 ```
 
 ## Install
