@@ -11,11 +11,11 @@
 
 > A Delegated Routing V1 HTTP API client
 
-## About
+# About
 
 A client implementation of the IPFS [Delegated Routing V1 HTTP API](https://specs.ipfs.tech/routing/http-routing-v1/) that can be used to interact with any compliant server implementation.
 
-### Example
+## Example
 
 ```typescript
 import { createDelegatedRoutingV1HttpApiClient } from '@helia/routing-v1-http-api-client'
@@ -32,7 +32,7 @@ for await (const prov of getProviders(CID.parse('QmFoo'))) {
 
 The client can be configured as a libp2p service, this will enable it as both a ContentRouting and a PeerRouting implementation
 
-### Example
+## Example
 
 ```typescript
 import { createDelegatedRoutingV1HttpApiClient } from '@helia/routing-v1-http-api-client'
