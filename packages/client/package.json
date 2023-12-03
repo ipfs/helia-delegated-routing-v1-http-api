@@ -1,6 +1,6 @@
 {
   "name": "@helia/delegated-routing-v1-http-api-client",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "A Delegated Routing V1 HTTP API client",
   "license": "Apache-2.0 OR MIT",
   "homepage": "https://github.com/ipfs/helia-delegated-routing-v1-http-api/tree/master/packages/client#readme",
