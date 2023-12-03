@@ -18,7 +18,7 @@ A client implementation of the IPFS [Delegated Routing V1 HTTP API](https://spec
 ## Example
 
 ```typescript
-import { createDelegatedRoutingV1HttpApiClient } from '@helia/routing-v1-http-api-client'
+import { createDelegatedRoutingV1HttpApiClient } from '@helia/delegated-routing-v1-http-api-client'
 import { CID } from 'multiformats/cid'
 
 const client = createDelegatedRoutingV1HttpApiClient('https://example.org')
@@ -35,7 +35,7 @@ The client can be configured as a libp2p service, this will enable it as both a 
 ## Example
 
 ```typescript
-import { createDelegatedRoutingV1HttpApiClient } from '@helia/routing-v1-http-api-client'
+import { createDelegatedRoutingV1HttpApiClient } from '@helia/delegated-routing-v1-http-api-client'
 import { createLibp2p } from 'libp2p'
 import { peerIdFromString } from '@libp2p/peer-id'
 

@@ -6,7 +6,7 @@
  * @example
  *
  * ```typescript
- * import { createDelegatedRoutingV1HttpApiClient } from '@helia/routing-v1-http-api-client'
+ * import { createDelegatedRoutingV1HttpApiClient } from '@helia/delegated-routing-v1-http-api-client'
  * import { CID } from 'multiformats/cid'
  *
  * const client = createDelegatedRoutingV1HttpApiClient('https://example.org')
@@ -23,7 +23,7 @@
  * @example
  *
  * ```typescript
- * import { createDelegatedRoutingV1HttpApiClient } from '@helia/routing-v1-http-api-client'
+ * import { createDelegatedRoutingV1HttpApiClient } from '@helia/delegated-routing-v1-http-api-client'
  * import { createLibp2p } from 'libp2p'
  * import { peerIdFromString } from '@libp2p/peer-id'
  *
