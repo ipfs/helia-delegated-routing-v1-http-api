@@ -8,6 +8,7 @@ import { CID } from 'multiformats'
 import { stubInterface } from 'sinon-ts'
 import { createDelegatedRoutingV1HttpApiServer } from '../src/index.js'
 import type { Helia } from '@helia/interface'
+import type { Libp2p } from '@libp2p/interface'
 import type { PeerInfo } from '@libp2p/interface/peer-info'
 import type { FastifyInstance } from 'fastify'
 import type { StubbedInstance } from 'sinon-ts'
@@ -18,7 +19,9 @@ describe('delegated-routing-v1-http-api-server', () => {
   let url: URL
 
   beforeEach(async () => {
-    helia = stubInterface<Helia>()
+    helia = stubInterface<Helia>({
+      libp2p: stubInterface<Libp2p>()
+    })
     server = await createDelegatedRoutingV1HttpApiServer(helia, {
       listen: {
         host: '127.0.0.1',
@@ -66,12 +69,7 @@ describe('delegated-routing-v1-http-api-server', () => {
   })
 
   it('GET providers returns 404 if no providers are found', async () => {
-    helia.libp2p = {
-      // @ts-expect-error incomplete implementation
-      contentRouting: {
-        findProviders: async function * () {}
-      }
-    }
+    helia.libp2p.contentRouting.findProviders = async function * () {}
 
     const res = await fetch(`${url}routing/v1/providers/QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn`, {
       method: 'GET'
@@ -81,12 +79,7 @@ describe('delegated-routing-v1-http-api-server', () => {
   })
 
   it('GET providers returns 404 if no providers are found when streaming', async () => {
-    helia.libp2p = {
-      // @ts-expect-error incomplete implementation
-      contentRouting: {
-        findProviders: async function * () {}
-      }
-    }
+    helia.libp2p.contentRouting.findProviders = async function * () {}
 
     const res = await fetch(`${url}routing/v1/providers/QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn`, {
       method: 'GET',
@@ -114,14 +107,9 @@ describe('delegated-routing-v1-http-api-server', () => {
       protocols: []
     }
 
-    helia.libp2p = {
-      // @ts-expect-error incomplete implementation
-      contentRouting: {
-        findProviders: async function * () {
-          yield provider1
-          yield provider2
-        }
-      }
+    helia.libp2p.contentRouting.findProviders = async function * () {
+      yield provider1
+      yield provider2
     }
 
     const res = await fetch(`${url}routing/v1/providers/QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn`, {
@@ -156,14 +144,9 @@ describe('delegated-routing-v1-http-api-server', () => {
       protocols: []
     }
 
-    helia.libp2p = {
-      // @ts-expect-error incomplete implementation
-      contentRouting: {
-        findProviders: async function * () {
-          yield provider1
-          yield provider2
-        }
-      }
+    helia.libp2p.contentRouting.findProviders = async function * () {
+      yield provider1
+      yield provider2
     }
 
     const res = await fetch(`${url}routing/v1/providers/QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn`, {
@@ -213,13 +196,8 @@ describe('delegated-routing-v1-http-api-server', () => {
       protocols: ['transport-bitswap']
     }
 
-    helia.libp2p = {
-      // @ts-expect-error incomplete implementation
-      peerRouting: {
-        findPeer: async function () {
-          return peer
-        }
-      }
+    helia.libp2p.peerRouting.findPeer = async function () {
+      return peer
     }
 
     const res = await fetch(`${url}routing/v1/peers/${peer.id.toCID().toString()}`, {
@@ -254,13 +232,8 @@ describe('delegated-routing-v1-http-api-server', () => {
     const cid = CID.parse('bafkreifjjcie6lypi6ny7amxnfftagclbuxndqonfipmb64f2km2devei4')
     const record = await createIpnsRecord(peerId, cid, 0, 1000)
 
-    helia.libp2p = {
-      // @ts-expect-error incomplete implementation
-      contentRouting: {
-        get: async function () {
-          return marshalIpnsRecord(record)
-        }
-      }
+    helia.libp2p.contentRouting.get = async function () {
+      return marshalIpnsRecord(record)
     }
 
     const res = await fetch(`${url}routing/v1/ipns/${peerId.toCID().toString()}`, {
@@ -284,14 +257,9 @@ describe('delegated-routing-v1-http-api-server', () => {
     let putKey: Uint8Array = new Uint8Array()
     let putValue: Uint8Array = new Uint8Array()
 
-    helia.libp2p = {
-      // @ts-expect-error incomplete implementation
-      contentRouting: {
-        put: async function (key: Uint8Array, value: Uint8Array) {
-          putKey = key
-          putValue = value
-        }
-      }
+    helia.libp2p.contentRouting.put = async function (key: Uint8Array, value: Uint8Array) {
+      putKey = key
+      putValue = value
     }
 
     const res = await fetch(`${url}routing/v1/ipns/${peerId.toCID().toString()}`, {
