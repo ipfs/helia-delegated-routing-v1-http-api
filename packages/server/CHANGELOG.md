@@ -1,3 +1,10 @@
+## [@helia/delegated-routing-v1-http-api-server-v1.0.5](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-server-v1.0.4...@helia/delegated-routing-v1-http-api-server-v1.0.5) (2023-12-03)
+
+
+### Bug Fixes
+
+* remove @helia/interface dep ([#59](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues/59)) ([aa8ffb8](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/aa8ffb87bbfedba43f3bf201fe6c2a41221731da))
+
 ## [@helia/delegated-routing-v1-http-api-server-v1.0.4](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-server-v1.0.3...@helia/delegated-routing-v1-http-api-server-v1.0.4) (2023-12-03)
 
 
