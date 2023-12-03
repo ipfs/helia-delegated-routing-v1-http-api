@@ -1,3 +1,10 @@
+## [@helia/delegated-routing-v1-http-api-server-v1.0.4](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-server-v1.0.3...@helia/delegated-routing-v1-http-api-server-v1.0.4) (2023-12-03)
+
+
+### Documentation
+
+* update readme examples to import correct symbols ([#58](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues/58)) ([bcfc785](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/bcfc78563b8bfb549fdb070da3df36bfb601b7c7))
+
 ## [@helia/delegated-routing-v1-http-api-server-v1.0.3](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-server-v1.0.2...@helia/delegated-routing-v1-http-api-server-v1.0.3) (2023-11-06)
 
 
