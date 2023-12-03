@@ -7,10 +7,10 @@
  *
  * ```typescript
  * import { createHelia } from 'helia'
- * import { createRoutingV1HttpApiServer } from '@helia/routing-v1-http-api-server'
+ * import { createDelegatedRoutingV1HttpApiServer } from '@helia/delegated-routing-v1-http-api-server'
  *
  * const helia = await createHelia()
- * const server = await createRoutingV1HttpApiServer(helia, {
+ * const server = await createDelegatedRoutingV1HttpApiServer(helia, {
  *   listen: {
  *     // fastify listen options
  *   }
