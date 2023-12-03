@@ -1,7 +1,7 @@
 import { PassThrough } from 'node:stream'
 import { peerIdFromCID } from '@libp2p/peer-id'
 import { CID } from 'multiformats/cid'
-import type { Helia } from '@helia/interface'
+import type { Libp2p } from '@libp2p/interface'
 import type { PeerId } from '@libp2p/interface/peer-id'
 import type { FastifyInstance } from 'fastify'
 
@@ -9,7 +9,7 @@ interface Params {
   peerId: string
 }
 
-export default function getPeersV1 (fastify: FastifyInstance, helia: Helia): void {
+export default function getPeersV1 (fastify: FastifyInstance, libp2p: Libp2p): void {
   fastify.route<{ Params: Params }>({
     method: 'GET',
     url: '/routing/v1/peers/:peerId',
@@ -42,7 +42,7 @@ export default function getPeersV1 (fastify: FastifyInstance, helia: Helia): voi
         return reply.code(422).type('text/html').send('Unprocessable Entity')
       }
 
-      const peerInfo = await helia.libp2p.peerRouting.findPeer(peerId, {
+      const peerInfo = await libp2p.peerRouting.findPeer(peerId, {
         signal: controller.signal
       })
       const peerRecord = {

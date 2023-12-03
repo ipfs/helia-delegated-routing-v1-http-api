@@ -1,7 +1,6 @@
 import { PassThrough } from 'node:stream'
 import { CID } from 'multiformats/cid'
-import type { Helia } from '@helia/interface'
-import type { AbortOptions } from '@libp2p/interface'
+import type { AbortOptions, Libp2p } from '@libp2p/interface'
 import type { FastifyInstance } from 'fastify'
 
 interface Params {
@@ -21,7 +20,7 @@ interface Providers {
 
 const MAX_PROVIDERS = 100
 
-export default function getProvidersV1 (fastify: FastifyInstance, helia: Helia): void {
+export default function getProvidersV1 (fastify: FastifyInstance, libp2p: Libp2p): void {
   fastify.route<{ Params: Params }>({
     method: 'GET',
     url: '/routing/v1/providers/:cid',
@@ -57,7 +56,7 @@ export default function getProvidersV1 (fastify: FastifyInstance, helia: Helia):
         const stream = new PassThrough()
 
         // wait until we have the first result
-        const iterable = streamingHandler(cid, helia, {
+        const iterable = streamingHandler(cid, libp2p, {
           signal: controller.signal
         })
         const result = await iterable.next()
@@ -84,7 +83,7 @@ export default function getProvidersV1 (fastify: FastifyInstance, helia: Helia):
             .send(stream)
         }
       } else {
-        const result = await nonStreamingHandler(cid, helia, {
+        const result = await nonStreamingHandler(cid, libp2p, {
           signal: controller.signal
         })
 
@@ -98,10 +97,10 @@ export default function getProvidersV1 (fastify: FastifyInstance, helia: Helia):
   })
 }
 
-async function * streamingHandler (cid: CID, helia: Helia, options?: AbortOptions): AsyncGenerator<PeerRecord, void, unknown> {
+async function * streamingHandler (cid: CID, libp2p: Libp2p, options?: AbortOptions): AsyncGenerator<PeerRecord, void, unknown> {
   let provs = 0
 
-  for await (const prov of helia.libp2p.contentRouting.findProviders(cid, options)) {
+  for await (const prov of libp2p.contentRouting.findProviders(cid, options)) {
     yield {
       Schema: 'peer',
       ID: prov.id.toString(),
@@ -116,11 +115,11 @@ async function * streamingHandler (cid: CID, helia: Helia, options?: AbortOption
   }
 }
 
-async function nonStreamingHandler (cid: CID, helia: Helia, options?: AbortOptions): Promise<Providers> {
+async function nonStreamingHandler (cid: CID, libp2p: Libp2p, options?: AbortOptions): Promise<Providers> {
   const providers = []
 
   try {
-    for await (const prov of helia.libp2p.contentRouting.findProviders(cid, options)) {
+    for await (const prov of libp2p.contentRouting.findProviders(cid, options)) {
       providers.push({
         Schema: 'peer',
         ID: prov.id.toString(),

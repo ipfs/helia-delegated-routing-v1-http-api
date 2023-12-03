@@ -57,7 +57,7 @@ import fastify, {
   type FastifyInstance
 } from 'fastify'
 import routes from './routes/index.js'
-import type { Helia } from '@helia/interface'
+import type { Libp2p } from '@libp2p/interface'
 
 export interface ServerInit {
   fastify?: FastifyInstance
@@ -67,7 +67,7 @@ export interface ServerInit {
 /**
  * Create and return a Routing V1 HTTP API server
  */
-export async function createDelegatedRoutingV1HttpApiServer (helia: Helia, init: ServerInit = {}): Promise<FastifyInstance> {
+export async function createDelegatedRoutingV1HttpApiServer (helia: { libp2p: Libp2p }, init: ServerInit = {}): Promise<FastifyInstance> {
   const server = init.fastify ?? fastify()
   await server.register(cors, {
     origin: '*',
@@ -75,7 +75,7 @@ export async function createDelegatedRoutingV1HttpApiServer (helia: Helia, init:
     strictPreflight: false
   })
 
-  routes(server, helia)
+  routes(server, helia.libp2p)
 
   await server.listen(init.listen ?? {
     port: 0
