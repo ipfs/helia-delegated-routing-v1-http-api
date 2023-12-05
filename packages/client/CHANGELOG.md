@@ -1,3 +1,10 @@
+## [@helia/delegated-routing-v1-http-api-client-v1.1.2](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-v1.1.1...@helia/delegated-routing-v1-http-api-client-v1.1.2) (2023-12-05)
+
+
+### Bug Fixes
+
+* increase shutdown controller signal listeners ([#62](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues/62)) ([ab7afa7](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/ab7afa7933eaed61dec9c82d8ac056ee11911436))
+
 ## [@helia/delegated-routing-v1-http-api-client-v1.1.1](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-v1.1.0...@helia/delegated-routing-v1-http-api-client-v1.1.1) (2023-12-03)
 
 
