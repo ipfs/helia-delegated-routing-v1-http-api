@@ -1,5 +1,6 @@
 import { type ContentRouting, contentRouting } from '@libp2p/interface/content-routing'
 import { CodeError } from '@libp2p/interface/errors'
+import { setMaxListeners } from '@libp2p/interface/events'
 import { type PeerRouting, peerRouting } from '@libp2p/interface/peer-routing'
 import { logger } from '@libp2p/logger'
 import { peerIdFromString } from '@libp2p/peer-id'
@@ -39,6 +40,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
   constructor (url: string | URL, init: DelegatedRoutingV1HttpApiClientInit = {}) {
     this.started = false
     this.shutDownController = new AbortController()
+    setMaxListeners(Infinity, this.shutDownController.signal)
     this.httpQueue = new PQueue({
       concurrency: init.concurrentRequests ?? defaultValues.concurrentRequests
     })
