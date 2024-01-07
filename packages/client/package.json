@@ -140,7 +140,7 @@
     "it-first": "^3.0.3",
     "it-map": "^3.0.4",
     "it-ndjson": "^1.0.4",
-    "multiformats": "^12.1.1",
+    "multiformats": "^13.0.0",
     "p-defer": "^4.0.0",
     "p-queue": "^7.3.4",
     "uint8arrays": "^4.0.6"
