@@ -1,3 +1,22 @@
+## @helia/delegated-routing-v1-http-api-server [2.0.0](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-server-v1.0.5...@helia/delegated-routing-v1-http-api-server-2.0.0) (2024-01-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* bump multiformats from 12.1.3 to 13.0.0 (#75)
+
+### Trivial Changes
+
+* update aegir ([c7c81b5](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/c7c81b5004efae54a57dd513ed1b5d0520658238))
+* update project config ([29bf459](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/29bf459aa63e15c4a0b20c202416b3c1a22fbd7b))
+* update project config ([#100](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues/100)) ([0bc6284](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/0bc628408563039b65010f76a9ffc2f4f3c5e270))
+
+
+### Dependencies
+
+* bump multiformats from 12.1.3 to 13.0.0 ([#75](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues/75)) ([1dabe16](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/1dabe16d06944e73015ef4289fb36353f74f1768))
+* **dev:** bump aegir from 41.3.5 to 42.1.1 ([#94](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues/94)) ([e34a142](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/e34a142f4aff8a9a5899f47a31b898f21a3c4b39))
+
 ## [@helia/delegated-routing-v1-http-api-server-v1.0.5](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-server-v1.0.4...@helia/delegated-routing-v1-http-api-server-v1.0.5) (2023-12-03)
 
 
