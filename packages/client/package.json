@@ -44,7 +44,7 @@
     "test:node": "aegir test -t node --cov"
   },
   "dependencies": {
-    "@libp2p/interface": "^0.1.2",
+    "@libp2p/interface": "^1.1.1",
     "@libp2p/logger": "^3.0.2",
     "@libp2p/peer-id": "^3.0.3",
     "@multiformats/multiaddr": "^12.1.3",
