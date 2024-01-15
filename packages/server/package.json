@@ -67,7 +67,7 @@
   "dependencies": {
     "@fastify/cors": "^8.3.0",
     "@libp2p/interface": "^0.1.2",
-    "@libp2p/peer-id": "^3.0.3",
+    "@libp2p/peer-id": "^4.0.4",
     "fastify": "^4.17.0",
     "ipns": "^7.0.1",
     "multiformats": "^13.0.0",
