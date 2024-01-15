@@ -61,8 +61,7 @@
     "dep-check": "aegir dep-check -i sinon",
     "build": "aegir build --bundle false",
     "test": "aegir test -t node",
-    "test:node": "aegir test -t node --cov",
-    "release": "aegir release"
+    "test:node": "aegir test -t node --cov"
   },
   "dependencies": {
     "@fastify/cors": "^8.3.0",

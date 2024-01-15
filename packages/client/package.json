@@ -41,8 +41,7 @@
     "dep-check": "aegir dep-check",
     "build": "aegir build",
     "test": "aegir test",
-    "test:node": "aegir test -t node --cov",
-    "release": "aegir release"
+    "test:node": "aegir test -t node --cov"
   },
   "dependencies": {
     "@libp2p/interface": "^0.1.2",
