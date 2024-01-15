@@ -1,3 +1,10 @@
+## @helia/delegated-routing-v1-http-api-server [2.0.1](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-server-2.0.0...@helia/delegated-routing-v1-http-api-server-2.0.1) (2024-01-15)
+
+
+### Dependencies
+
+* bump @libp2p/interface from 0.1.6 to 1.1.1 ([#91](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues/91)) ([50e4864](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/50e4864df6584dae794b8720c4f9516ee74790ff))
+
 ## @helia/delegated-routing-v1-http-api-server [2.0.0](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-server-v1.0.5...@helia/delegated-routing-v1-http-api-server-2.0.0) (2024-01-15)
 
 
