@@ -8,8 +8,7 @@ import { CID } from 'multiformats'
 import { stubInterface } from 'sinon-ts'
 import { createDelegatedRoutingV1HttpApiServer } from '../src/index.js'
 import type { Helia } from '@helia/interface'
-import type { Libp2p } from '@libp2p/interface'
-import type { PeerInfo } from '@libp2p/interface/peer-info'
+import type { Libp2p, PeerInfo } from '@libp2p/interface'
 import type { FastifyInstance } from 'fastify'
 import type { StubbedInstance } from 'sinon-ts'
 
@@ -96,15 +95,13 @@ describe('delegated-routing-v1-http-api-server', () => {
       id: await createEd25519PeerId(),
       multiaddrs: [
         multiaddr('/ip4/123.123.123.123/tcp/123')
-      ],
-      protocols: []
+      ]
     }
     const provider2: PeerInfo = {
       id: await createEd25519PeerId(),
       multiaddrs: [
         multiaddr('/ip4/123.123.123.123/tcp/123')
-      ],
-      protocols: []
+      ]
     }
 
     helia.libp2p.contentRouting.findProviders = async function * () {
@@ -133,15 +130,13 @@ describe('delegated-routing-v1-http-api-server', () => {
       id: await createEd25519PeerId(),
       multiaddrs: [
         multiaddr('/ip4/123.123.123.123/tcp/123')
-      ],
-      protocols: []
+      ]
     }
     const provider2: PeerInfo = {
       id: await createEd25519PeerId(),
       multiaddrs: [
         multiaddr('/ip4/123.123.123.123/tcp/123')
-      ],
-      protocols: []
+      ]
     }
 
     helia.libp2p.contentRouting.findProviders = async function * () {
@@ -192,8 +187,7 @@ describe('delegated-routing-v1-http-api-server', () => {
       id: await createEd25519PeerId(),
       multiaddrs: [
         multiaddr('/ip4/123.123.123.123/tcp/123')
-      ],
-      protocols: ['transport-bitswap']
+      ]
     }
 
     helia.libp2p.peerRouting.findPeer = async function () {

@@ -1,8 +1,7 @@
 /* eslint-disable max-nested-callbacks */
 /* eslint-env mocha */
 
-import { contentRouting, type ContentRouting } from '@libp2p/interface/content-routing'
-import { type PeerRouting, peerRouting } from '@libp2p/interface/peer-routing'
+import { contentRoutingSymbol, peerRoutingSymbol } from '@libp2p/interface'
 import { createEd25519PeerId } from '@libp2p/peer-id-factory'
 import { expect } from 'aegir/chai'
 import { create as createIpnsRecord, marshal as marshalIpnsRecord } from 'ipns'
@@ -11,6 +10,7 @@ import { CID } from 'multiformats/cid'
 import { concat as uint8ArrayConcat } from 'uint8arrays/concat'
 import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
 import { createDelegatedRoutingV1HttpApiClient, type DelegatedRoutingV1HttpApiClient } from '../src/index.js'
+import type { PeerRouting, ContentRouting } from '@libp2p/interface'
 
 const serverUrl = process.env.ECHO_SERVER
 
@@ -54,7 +54,7 @@ describe('libp2p content-routing', () => {
       ID: (await createEd25519PeerId()).toString(),
       Addrs: ['/ip4/41.41.41.41/tcp/1234']
     }, {
-      Protocols: ['transport-bitswap'],
+      Protocol: 'transport-bitswap',
       Schema: 'peer',
       Metadata: 'gBI=',
       ID: (await createEd25519PeerId()).toString(),
@@ -221,7 +221,7 @@ describe('libp2p peer-routing', () => {
       const peerId = await createEd25519PeerId()
 
       const records = [{
-        Protocols: ['transport-bitswap'],
+        Protocol: 'transport-bitswap',
         Schema: 'peer',
         Metadata: 'gBI=',
         ID: peerId.toString(),
@@ -253,7 +253,7 @@ describe('libp2p peer-routing', () => {
 })
 
 function getContentRouting (obj: any): ContentRouting {
-  const routing = obj?.[contentRouting]
+  const routing = obj?.[contentRoutingSymbol]
 
   if (routing == null) {
     throw new Error('ContentRouting not found')
@@ -263,7 +263,7 @@ function getContentRouting (obj: any): ContentRouting {
 }
 
 function getPeerRouting (obj: any): PeerRouting {
-  const routing = obj?.[peerRouting]
+  const routing = obj?.[peerRoutingSymbol]
 
   if (routing == null) {
     throw new Error('PeerRouting not found')

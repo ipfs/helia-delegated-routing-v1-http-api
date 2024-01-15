@@ -45,12 +45,12 @@
   },
   "dependencies": {
     "@libp2p/interface": "^1.1.1",
-    "@libp2p/logger": "^3.0.2",
-    "@libp2p/peer-id": "^3.0.3",
+    "@libp2p/logger": "^4.0.4",
+    "@libp2p/peer-id": "^4.0.4",
     "@multiformats/multiaddr": "^12.1.3",
     "any-signal": "^4.1.1",
     "browser-readablestream-to-it": "^2.0.3",
-    "ipns": "^7.0.1",
+    "ipns": "^8.0.1",
     "it-first": "^3.0.3",
     "it-map": "^3.0.4",
     "it-ndjson": "^1.0.4",
@@ -60,7 +60,7 @@
     "uint8arrays": "^5.0.1"
   },
   "devDependencies": {
-    "@libp2p/peer-id-factory": "^3.0.5",
+    "@libp2p/peer-id-factory": "^4.0.4",
     "aegir": "^42.2.0",
     "body-parser": "^1.20.2",
     "it-all": "^3.0.2"

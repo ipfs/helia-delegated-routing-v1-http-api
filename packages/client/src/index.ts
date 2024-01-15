@@ -41,8 +41,7 @@
  */
 
 import { DefaultDelegatedRoutingV1HttpApiClient } from './client.js'
-import type { AbortOptions } from '@libp2p/interface'
-import type { PeerId } from '@libp2p/interface/peer-id'
+import type { AbortOptions, PeerId } from '@libp2p/interface'
 import type { Multiaddr } from '@multiformats/multiaddr'
 import type { IPNSRecord } from 'ipns'
 import type { CID } from 'multiformats/cid'
@@ -50,8 +49,9 @@ import type { CID } from 'multiformats/cid'
 export interface PeerRecord {
   Schema: 'peer'
   ID: PeerId
-  Addrs: Multiaddr[]
-  Protocols: string[]
+  Addrs?: Multiaddr[]
+  Protocol: string
+  Metadata?: string
 }
 
 export interface DelegatedRoutingV1HttpApiClientInit {

@@ -1,8 +1,7 @@
 import { peerIdFromCID } from '@libp2p/peer-id'
 import { peerIdToRoutingKey } from 'ipns'
 import { CID } from 'multiformats/cid'
-import type { Libp2p } from '@libp2p/interface'
-import type { PeerId } from '@libp2p/interface/peer-id'
+import type { Libp2p, PeerId } from '@libp2p/interface'
 import type { FastifyInstance } from 'fastify'
 
 interface Params {
@@ -43,14 +42,22 @@ export default function getIpnsV1 (fastify: FastifyInstance, libp2p: Libp2p): vo
         return reply.code(422).type('text/html').send('Unprocessable Entity')
       }
 
-      const rawRecord = await libp2p.contentRouting.get(peerIdToRoutingKey(peerId), {
-        signal: controller.signal
-      })
+      try {
+        const rawRecord = await libp2p.contentRouting.get(peerIdToRoutingKey(peerId), {
+          signal: controller.signal
+        })
 
-      return reply
-        .header('Content-Type', 'application/vnd.ipfs.ipns-record')
-        // one cannot simply send rawRecord https://github.com/fastify/fastify/issues/5118
-        .send(Buffer.from(rawRecord, 0, rawRecord.byteLength))
+        return await reply
+          .header('Content-Type', 'application/vnd.ipfs.ipns-record')
+          // one cannot simply send rawRecord https://github.com/fastify/fastify/issues/5118
+          .send(Buffer.from(rawRecord, 0, rawRecord.byteLength))
+      } catch (err: any) {
+        if (err.code === 'ERR_NOT_FOUND' || err.errors?.[0].code === 'ERR_NOT_FOUND') {
+          return reply.code(404).send('Record not found')
+        }
+
+        throw err
+      }
     }
   })
 }

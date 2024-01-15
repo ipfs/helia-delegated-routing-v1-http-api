@@ -1,8 +1,7 @@
 import { PassThrough } from 'node:stream'
 import { peerIdFromCID } from '@libp2p/peer-id'
 import { CID } from 'multiformats/cid'
-import type { Libp2p } from '@libp2p/interface'
-import type { PeerId } from '@libp2p/interface/peer-id'
+import type { Libp2p, PeerId } from '@libp2p/interface'
 import type { FastifyInstance } from 'fastify'
 
 interface Params {

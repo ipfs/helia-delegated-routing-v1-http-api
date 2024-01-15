@@ -9,9 +9,10 @@ interface Params {
 
 interface PeerRecord {
   Schema: string
-  Protocols?: string[]
+  Protocol?: string[]
   ID: string
-  Addrs: string[]
+  Addrs?: string[]
+  Metadata?: string
 }
 
 interface Providers {

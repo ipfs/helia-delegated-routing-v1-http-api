@@ -3,8 +3,7 @@ import { peerIdToRoutingKey } from 'ipns'
 import { ipnsValidator } from 'ipns/validator'
 import { CID } from 'multiformats/cid'
 import getRawBody from 'raw-body'
-import type { Libp2p } from '@libp2p/interface'
-import type { PeerId } from '@libp2p/interface/peer-id'
+import type { Libp2p, PeerId } from '@libp2p/interface'
 import type { FastifyInstance } from 'fastify'
 
 interface Params {
