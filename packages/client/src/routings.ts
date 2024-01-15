@@ -1,6 +1,5 @@
-import { type ContentRouting } from '@libp2p/interface/content-routing'
-import { CodeError } from '@libp2p/interface/errors'
-import { type PeerRouting } from '@libp2p/interface/peer-routing'
+import { type ContentRouting, type PeerRouting, type AbortOptions, type PeerId, type PeerInfo } from '@libp2p/interface'
+import { CodeError } from '@libp2p/interface'
 import { peerIdFromBytes } from '@libp2p/peer-id'
 import { marshal, unmarshal } from 'ipns'
 import first from 'it-first'
@@ -8,9 +7,6 @@ import map from 'it-map'
 import { equals as uint8ArrayEquals } from 'uint8arrays/equals'
 import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
 import type { DelegatedRoutingV1HttpApiClient } from './index.js'
-import type { AbortOptions } from '@libp2p/interface'
-import type { PeerId } from '@libp2p/interface/peer-id'
-import type { PeerInfo } from '@libp2p/interface/peer-info'
 import type { CID } from 'multiformats/cid'
 
 const IPNS_PREFIX = uint8ArrayFromString('/ipns/')
@@ -37,8 +33,7 @@ export class DelegatedRoutingV1HttpApiClientContentRouting implements ContentRou
     yield * map(this.client.getProviders(cid, options), (record) => {
       return {
         id: record.ID,
-        multiaddrs: record.Addrs ?? [],
-        protocols: []
+        multiaddrs: record.Addrs ?? []
       }
     })
   }
@@ -97,8 +92,7 @@ export class DelegatedRoutingV1HttpApiClientPeerRouting implements PeerRouting {
     if (peer != null) {
       return {
         id: peer.ID,
-        multiaddrs: peer.Addrs,
-        protocols: []
+        multiaddrs: peer.Addrs ?? []
       }
     }
 

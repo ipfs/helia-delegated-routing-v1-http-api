@@ -1,7 +1,4 @@
-import { type ContentRouting, contentRouting } from '@libp2p/interface/content-routing'
-import { CodeError } from '@libp2p/interface/errors'
-import { setMaxListeners } from '@libp2p/interface/events'
-import { type PeerRouting, peerRouting } from '@libp2p/interface/peer-routing'
+import { contentRoutingSymbol, peerRoutingSymbol, CodeError, setMaxListeners } from '@libp2p/interface'
 import { logger } from '@libp2p/logger'
 import { peerIdFromString } from '@libp2p/peer-id'
 import { multiaddr } from '@multiformats/multiaddr'
@@ -14,8 +11,7 @@ import defer from 'p-defer'
 import PQueue from 'p-queue'
 import { DelegatedRoutingV1HttpApiClientContentRouting, DelegatedRoutingV1HttpApiClientPeerRouting } from './routings.js'
 import type { DelegatedRoutingV1HttpApiClient, DelegatedRoutingV1HttpApiClientInit, PeerRecord } from './index.js'
-import type { AbortOptions } from '@libp2p/interface'
-import type { PeerId } from '@libp2p/interface/peer-id'
+import type { ContentRouting, PeerRouting, AbortOptions, PeerId } from '@libp2p/interface'
 import type { CID } from 'multiformats'
 
 const log = logger('delegated-routing-v1-http-api-client')
@@ -50,11 +46,11 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
     this.peerRouting = new DelegatedRoutingV1HttpApiClientPeerRouting(this)
   }
 
-  get [contentRouting] (): ContentRouting {
+  get [contentRoutingSymbol] (): ContentRouting {
     return this.contentRouting
   }
 
-  get [peerRouting] (): PeerRouting {
+  get [peerRoutingSymbol] (): PeerRouting {
     return this.peerRouting
   }
 
@@ -91,6 +87,18 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       const resource = `${this.clientUrl}routing/v1/providers/${cid.toString()}`
       const getOptions = { headers: { Accept: 'application/x-ndjson' }, signal }
       const res = await fetch(resource, getOptions)
+
+      if (res.status === 404) {
+        // https://specs.ipfs.tech/routing/http-routing-v1/#response-status-codes
+        // 404 (Not Found): must be returned if no matching records are found.
+        throw new CodeError('No matching records found.', 'ERR_NOT_FOUND')
+      }
+
+      if (res.status === 422) {
+        // https://specs.ipfs.tech/routing/http-routing-v1/#response-status-codes
+        // 422 (Unprocessable Entity): request does not conform to schema or semantic constraints.
+        throw new CodeError('Request does not conform to schema or semantic constraints.', 'ERR_INVALID_REQUEST')
+      }
 
       if (res.body == null) {
         throw new CodeError('Routing response had no body', 'ERR_BAD_RESPONSE')
@@ -143,6 +151,18 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       const getOptions = { headers: { Accept: 'application/x-ndjson' }, signal }
       const res = await fetch(resource, getOptions)
 
+      if (res.status === 404) {
+        // https://specs.ipfs.tech/routing/http-routing-v1/#response-status-codes
+        // 404 (Not Found): must be returned if no matching records are found.
+        throw new CodeError('No matching records found.', 'ERR_NOT_FOUND')
+      }
+
+      if (res.status === 422) {
+        // https://specs.ipfs.tech/routing/http-routing-v1/#response-status-codes
+        // 422 (Unprocessable Entity): request does not conform to schema or semantic constraints.
+        throw new CodeError('Request does not conform to schema or semantic constraints.', 'ERR_INVALID_REQUEST')
+      }
+
       if (res.body == null) {
         throw new CodeError('Routing response had no body', 'ERR_BAD_RESPONSE')
       }
@@ -194,11 +214,24 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       const getOptions = { headers: { Accept: 'application/vnd.ipfs.ipns-record' }, signal }
       const res = await fetch(resource, getOptions)
 
+      if (res.status === 404) {
+        // https://specs.ipfs.tech/routing/http-routing-v1/#response-status-codes
+        // 404 (Not Found): must be returned if no matching records are found.
+        throw new CodeError('No matching records found.', 'ERR_NOT_FOUND')
+      }
+
+      if (res.status === 422) {
+        // https://specs.ipfs.tech/routing/http-routing-v1/#response-status-codes
+        // 422 (Unprocessable Entity): request does not conform to schema or semantic constraints.
+        throw new CodeError('Request does not conform to schema or semantic constraints.', 'ERR_INVALID_REQUEST')
+      }
+
       if (res.body == null) {
         throw new CodeError('GET ipns response had no body', 'ERR_BAD_RESPONSE')
       }
 
       const body = new Uint8Array(await res.arrayBuffer())
+
       await ipnsValidator(peerIdToRoutingKey(peerId), body)
       return unmarshal(body)
     } finally {
@@ -243,8 +276,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
     if (record.Schema === 'peer') {
       // Peer schema can have additional, user-defined, fields.
       record.ID = peerIdFromString(record.ID)
-      record.Addrs = record.Addrs.map(multiaddr)
-      record.Protocols = record.Protocols ?? []
+      record.Addrs = record.Addrs?.map(multiaddr) ?? []
       return record
     }
 
@@ -255,8 +287,8 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       return {
         Schema: 'peer',
         ID: peerIdFromString(record.ID),
-        Addrs: record.Addrs.map(multiaddr),
-        Protocols: record.Protocol != null ? [record.Protocol] : []
+        Addrs: record.Addrs?.map(multiaddr) ?? [],
+        Protocol: record.Protocol
       }
     }
 
@@ -264,8 +296,8 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       return {
         Schema: 'peer',
         ID: peerIdFromString(record.ID),
-        Addrs: record.Addrs.map(multiaddr),
-        Protocols: Array.isArray(record.Protocols) ? record.Protocols : []
+        Addrs: record.Addrs?.map(multiaddr) ?? [],
+        Protocol: record.Protocol
       }
     }
   }
@@ -274,7 +306,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
     if (record.Schema === 'peer') {
       // Peer schema can have additional, user-defined, fields.
       record.ID = peerIdFromString(record.ID)
-      record.Addrs = record.Addrs.map(multiaddr)
+      record.Addrs = record.Addrs?.map(multiaddr) ?? []
       if (peerId.equals(record.ID)) {
         return record
       }

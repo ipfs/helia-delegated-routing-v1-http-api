@@ -3,7 +3,7 @@
 import { createDelegatedRoutingV1HttpApiClient } from '@helia/delegated-routing-v1-http-api-client'
 import { createDelegatedRoutingV1HttpApiServer } from '@helia/delegated-routing-v1-http-api-server'
 import { ipns } from '@helia/ipns'
-import { dht } from '@helia/ipns/routing'
+import { libp2p } from '@helia/ipns/routing'
 import { createEd25519PeerId } from '@libp2p/peer-id-factory'
 import { expect } from 'aegir/chai'
 import { create as createIpnsRecord } from 'ipns'
@@ -90,9 +90,11 @@ describe('delegated-routing-v1-http-api interop', () => {
 
   it('should get an IPNS record', async () => {
     // publish a record using a remote host
-    const i = ipns(network[5], [
-      dht(network[5])
-    ])
+    const i = ipns(network[5], {
+      routers: [
+        libp2p(network[5])
+      ]
+    })
     const cid = CID.parse('bafybeiczsscdsbs7ffqz55asqdf3smv6klcw3gofszvwlyarci47bgf354')
     const peerId = await createEd25519PeerId()
     await i.publish(peerId, cid)
@@ -111,9 +113,11 @@ describe('delegated-routing-v1-http-api interop', () => {
     await client.putIPNS(peerId, record)
 
     // resolve the record using a remote host
-    const i = ipns(network[8], [
-      dht(network[8])
-    ])
+    const i = ipns(network[8], {
+      routers: [
+        libp2p(network[8])
+      ]
+    })
     const result = await i.resolve(peerId)
     expect(result.toString()).to.equal(cid.toString())
   })

@@ -34,7 +34,7 @@ describe('delegated-routing-v1-http-api-client', () => {
       ID: (await createEd25519PeerId()).toString(),
       Addrs: ['/ip4/41.41.41.41/tcp/1234']
     }, {
-      Protocols: ['transport-bitswap'],
+      Protocol: 'transport-bitswap',
       Schema: 'peer',
       Metadata: 'gBI=',
       ID: (await createEd25519PeerId()).toString(),
@@ -124,13 +124,13 @@ describe('delegated-routing-v1-http-api-client', () => {
       ID: peerId.toString(),
       Addrs: ['/ip4/41.41.41.41/tcp/1234']
     }, {
-      Protocols: ['transport-bitswap'],
+      Protocol: 'transport-bitswap',
       Schema: 'peer',
       Metadata: 'gBI=',
       ID: peerId.toString(),
       Addrs: ['/ip4/42.42.42.42/tcp/1234']
     }, {
-      Protocols: ['transport-bitswap'],
+      Protocol: 'transport-bitswap',
       Schema: 'peer',
       Metadata: 'gBI=',
       ID: (await createEd25519PeerId()).toString(),
