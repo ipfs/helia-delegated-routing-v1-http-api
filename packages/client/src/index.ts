@@ -46,12 +46,22 @@ import type { Multiaddr } from '@multiformats/multiaddr'
 import type { IPNSRecord } from 'ipns'
 import type { CID } from 'multiformats/cid'
 
+/**
+ * A peer that conforms to the [Peer Schema](https://specs.ipfs.tech/routing/http-routing-v1/#peer-schema).
+ *
+ * Note that legacy schemas may be reformatted internally by this module.
+ *
+ * If `Addrs` is empty, a caller may wish to perform a `findPeer` operation to
+ * ascertain the peer's multiaddrs.
+ *
+ * If `Protocols` is empty, a caller may wish to dial the peer and peform a
+ * libp2p identify operation to ascertain the peer's supported protocols.
+ */
 export interface PeerRecord {
   Schema: 'peer'
   ID: PeerId
-  Addrs?: Multiaddr[]
-  Protocol: string
-  Metadata?: string
+  Addrs: Multiaddr[]
+  Protocols: string[]
 }
 
 export interface DelegatedRoutingV1HttpApiClientInit {

@@ -1,6 +1,8 @@
 /* eslint-env mocha */
 
+import { peerIdFromString } from '@libp2p/peer-id'
 import { createEd25519PeerId } from '@libp2p/peer-id-factory'
+import { multiaddr } from '@multiformats/multiaddr'
 import { expect } from 'aegir/chai'
 import { create as createIpnsRecord, marshal as marshalIpnsRecord } from 'ipns'
 import all from 'it-all'
@@ -108,7 +110,7 @@ describe('delegated-routing-v1-http-api-client', () => {
     expect(provs).to.be.empty()
   })
 
-  it('should find peers and only accepts correct peer records', async () => {
+  it('should conform records to peer schema', async () => {
     const peerId = await createEd25519PeerId()
 
     const records = [{
@@ -124,7 +126,7 @@ describe('delegated-routing-v1-http-api-client', () => {
       ID: peerId.toString(),
       Addrs: ['/ip4/41.41.41.41/tcp/1234']
     }, {
-      Protocol: 'transport-bitswap',
+      Protocols: ['transport-bitswap'],
       Schema: 'peer',
       Metadata: 'gBI=',
       ID: peerId.toString(),
@@ -135,6 +137,40 @@ describe('delegated-routing-v1-http-api-client', () => {
       Metadata: 'gBI=',
       ID: (await createEd25519PeerId()).toString(),
       Addrs: ['/ip4/42.42.42.42/tcp/1234']
+    }, {
+      Schema: 'peer',
+      ID: (await createEd25519PeerId()).toString()
+    }]
+
+    const peers = [{
+      Protocols: ['transport-bitswap'],
+      Schema: 'peer',
+      Metadata: 'gBI=',
+      ID: peerIdFromString(records[0].ID),
+      Addrs: [multiaddr('/ip4/41.41.41.41/tcp/1234')]
+    }, {
+      Protocols: ['transport-saddle'],
+      Schema: 'peer',
+      Metadata: 'gBI=',
+      ID: peerIdFromString(records[1].ID),
+      Addrs: [multiaddr('/ip4/41.41.41.41/tcp/1234')]
+    }, {
+      Protocols: ['transport-bitswap'],
+      Schema: 'peer',
+      Metadata: 'gBI=',
+      ID: peerIdFromString(records[2].ID),
+      Addrs: [multiaddr('/ip4/42.42.42.42/tcp/1234')]
+    }, {
+      Protocols: ['transport-bitswap'],
+      Schema: 'peer',
+      Metadata: 'gBI=',
+      ID: peerIdFromString(records[3].ID),
+      Addrs: [multiaddr('/ip4/42.42.42.42/tcp/1234')]
+    }, {
+      Protocols: [],
+      Schema: 'peer',
+      ID: peerIdFromString(records[4].ID),
+      Addrs: []
     }]
 
     // load peer for the router to fetch
@@ -147,10 +183,12 @@ describe('delegated-routing-v1-http-api-client', () => {
     expect(peerRecords.map(peerRecord => ({
       ...peerRecord,
       ID: peerRecord.ID.toString(),
+      Addrs: peerRecord.Addrs?.map(ma => ma.toString()) ?? []
+    }))).to.deep.equal(peers.map(peerRecord => ({
+      ...peerRecord,
+      ID: peerRecord.ID.toString(),
       Addrs: peerRecord.Addrs?.map(ma => ma.toString())
-    }))).to.deep.equal([
-      records[2]
-    ])
+    })))
   })
 
   it('should get ipns record', async () => {

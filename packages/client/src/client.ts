@@ -12,6 +12,7 @@ import PQueue from 'p-queue'
 import { DelegatedRoutingV1HttpApiClientContentRouting, DelegatedRoutingV1HttpApiClientPeerRouting } from './routings.js'
 import type { DelegatedRoutingV1HttpApiClient, DelegatedRoutingV1HttpApiClientInit, PeerRecord } from './index.js'
 import type { ContentRouting, PeerRouting, AbortOptions, PeerId } from '@libp2p/interface'
+import type { Multiaddr } from '@multiformats/multiaddr'
 import type { CID } from 'multiformats'
 
 const log = logger('delegated-routing-v1-http-api-client')
@@ -68,7 +69,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
     this.started = false
   }
 
-  async * getProviders (cid: CID, options: AbortOptions = {}): AsyncGenerator<PeerRecord, any, unknown> {
+  async * getProviders (cid: CID, options: AbortOptions = {}): AsyncGenerator<PeerRecord> {
     log('getProviders starts: %c', cid)
 
     const signal = anySignal([this.shutDownController.signal, options.signal, AbortSignal.timeout(this.timeout)])
@@ -109,14 +110,14 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
         const body = await res.json()
 
         for (const provider of body.Providers) {
-          const record = this.#handleProviderRecords(provider)
+          const record = this.#conformToPeerSchema(provider)
           if (record != null) {
             yield record
           }
         }
       } else {
         for await (const provider of ndjson(toIt(res.body))) {
-          const record = this.#handleProviderRecords(provider)
+          const record = this.#conformToPeerSchema(provider)
           if (record != null) {
             yield record
           }
@@ -131,7 +132,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
     }
   }
 
-  async * getPeers (peerId: PeerId, options: AbortOptions | undefined = {}): AsyncGenerator<PeerRecord, any, unknown> {
+  async * getPeers (peerId: PeerId, options: AbortOptions | undefined = {}): AsyncGenerator<PeerRecord> {
     log('getPeers starts: %c', peerId)
 
     const signal = anySignal([this.shutDownController.signal, options.signal, AbortSignal.timeout(this.timeout)])
@@ -172,14 +173,14 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
         const body = await res.json()
 
         for (const peer of body.Peers) {
-          const record = this.#handlePeerRecords(peerId, peer)
+          const record = this.#conformToPeerSchema(peer)
           if (record != null) {
             yield record
           }
         }
       } else {
         for await (const peer of ndjson(toIt(res.body))) {
-          const record = this.#handlePeerRecords(peerId, peer)
+          const record = this.#conformToPeerSchema(peer)
           if (record != null) {
             yield record
           }
@@ -272,44 +273,25 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
     }
   }
 
-  #handleProviderRecords (record: any): PeerRecord | undefined {
-    if (record.Schema === 'peer') {
-      // Peer schema can have additional, user-defined, fields.
-      record.ID = peerIdFromString(record.ID)
-      record.Addrs = record.Addrs?.map(multiaddr) ?? []
-      return record
+  #conformToPeerSchema (record: any): PeerRecord | undefined {
+    const protocols: string[] = []
+    const multiaddrs: Multiaddr[] = record.Addrs?.map(multiaddr) ?? []
+
+    if (record.Protocols != null) {
+      protocols.push(...record.Protocols)
     }
 
-    if (record.Schema === 'bitswap') {
-      // Bitswap schema is deprecated, was incorrectly used when server had no
-      // information about actual protocols, so we convert it to peer result
-      // without protocol information
-      return {
-        Schema: 'peer',
-        ID: peerIdFromString(record.ID),
-        Addrs: record.Addrs?.map(multiaddr) ?? [],
-        Protocol: record.Protocol
-      }
+    if (record.Protocol != null) {
+      protocols.push(record.Protocol)
+      delete record.Protocol
     }
 
-    if (record.ID != null && Array.isArray(record.Addrs)) {
-      return {
-        Schema: 'peer',
-        ID: peerIdFromString(record.ID),
-        Addrs: record.Addrs?.map(multiaddr) ?? [],
-        Protocol: record.Protocol
-      }
-    }
-  }
-
-  #handlePeerRecords (peerId: PeerId, record: any): PeerRecord | undefined {
-    if (record.Schema === 'peer') {
-      // Peer schema can have additional, user-defined, fields.
-      record.ID = peerIdFromString(record.ID)
-      record.Addrs = record.Addrs?.map(multiaddr) ?? []
-      if (peerId.equals(record.ID)) {
-        return record
-      }
+    return {
+      ...record,
+      Schema: 'peer',
+      ID: peerIdFromString(record.ID),
+      Addrs: multiaddrs,
+      Protocols: protocols
     }
   }
 }
