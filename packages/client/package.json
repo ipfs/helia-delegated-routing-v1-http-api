@@ -64,5 +64,6 @@
     "aegir": "^42.2.0",
     "body-parser": "^1.20.2",
     "it-all": "^3.0.2"
-  }
+  },
+  "sideEffects": false
 }
