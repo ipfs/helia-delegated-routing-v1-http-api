@@ -1,3 +1,10 @@
+## @helia/delegated-routing-v1-http-api-client [2.1.0](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-2.0.3...@helia/delegated-routing-v1-http-api-client-2.1.0) (2024-01-18)
+
+
+### Features
+
+* allow skipping IPNS record validation ([#101](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues/101)) ([ec0ba89](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/ec0ba898cbe6e839eda7ffc03c672cbaf7fcc4f6))
+
 ## @helia/delegated-routing-v1-http-api-client [2.0.3](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-2.0.2...@helia/delegated-routing-v1-http-api-client-2.0.3) (2024-01-16)
 
 
