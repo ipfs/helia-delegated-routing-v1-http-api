@@ -10,7 +10,7 @@ import { parse as ndjson } from 'it-ndjson'
 import defer from 'p-defer'
 import PQueue from 'p-queue'
 import { DelegatedRoutingV1HttpApiClientContentRouting, DelegatedRoutingV1HttpApiClientPeerRouting } from './routings.js'
-import type { DelegatedRoutingV1HttpApiClient, DelegatedRoutingV1HttpApiClientInit, PeerRecord } from './index.js'
+import type { DelegatedRoutingV1HttpApiClient, DelegatedRoutingV1HttpApiClientInit, GetIPNSOptions, PeerRecord } from './index.js'
 import type { ContentRouting, PeerRouting, AbortOptions, PeerId } from '@libp2p/interface'
 import type { Multiaddr } from '@multiformats/multiaddr'
 import type { CID } from 'multiformats'
@@ -195,7 +195,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
     }
   }
 
-  async getIPNS (peerId: PeerId, options: AbortOptions = {}): Promise<IPNSRecord> {
+  async getIPNS (peerId: PeerId, options: GetIPNSOptions = {}): Promise<IPNSRecord> {
     log('getIPNS starts: %c', peerId)
 
     const signal = anySignal([this.shutDownController.signal, options.signal, AbortSignal.timeout(this.timeout)])
@@ -207,13 +207,16 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       return onFinish.promise
     })
 
+    // https://specs.ipfs.tech/routing/http-routing-v1/
+    const resource = `${this.clientUrl}routing/v1/ipns/${peerId.toCID().toString()}`
+
     try {
       await onStart.promise
 
-      // https://specs.ipfs.tech/routing/http-routing-v1/
-      const resource = `${this.clientUrl}routing/v1/ipns/${peerId.toCID().toString()}`
       const getOptions = { headers: { Accept: 'application/vnd.ipfs.ipns-record' }, signal }
       const res = await fetch(resource, getOptions)
+
+      log('getIPNS GET %s %d', resource, res.status)
 
       if (res.status === 404) {
         // https://specs.ipfs.tech/routing/http-routing-v1/#response-status-codes
@@ -231,10 +234,18 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
         throw new CodeError('GET ipns response had no body', 'ERR_BAD_RESPONSE')
       }
 
-      const body = new Uint8Array(await res.arrayBuffer())
+      const buf = await res.arrayBuffer()
+      const body = new Uint8Array(buf, 0, buf.byteLength)
 
-      await ipnsValidator(peerIdToRoutingKey(peerId), body)
+      if (options.validate !== false) {
+        await ipnsValidator(peerIdToRoutingKey(peerId), body)
+      }
+
       return unmarshal(body)
+    } catch (err: any) {
+      log.error('getIPNS GET %s error:', resource, err)
+
+      throw err
     } finally {
       signal.clear()
       onFinish.resolve()
@@ -243,7 +254,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
   }
 
   async putIPNS (peerId: PeerId, record: IPNSRecord, options: AbortOptions = {}): Promise<void> {
-    log('getIPNS starts: %c', peerId)
+    log('putIPNS starts: %c', peerId)
 
     const signal = anySignal([this.shutDownController.signal, options.signal, AbortSignal.timeout(this.timeout)])
     const onStart = defer()
@@ -254,22 +265,30 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       return onFinish.promise
     })
 
+    // https://specs.ipfs.tech/routing/http-routing-v1/
+    const resource = `${this.clientUrl}routing/v1/ipns/${peerId.toCID().toString()}`
+
     try {
       await onStart.promise
 
       const body = marshal(record)
 
-      // https://specs.ipfs.tech/routing/http-routing-v1/
-      const resource = `${this.clientUrl}routing/v1/ipns/${peerId.toCID().toString()}`
       const getOptions = { method: 'PUT', headers: { 'Content-Type': 'application/vnd.ipfs.ipns-record' }, body, signal }
       const res = await fetch(resource, getOptions)
+
+      log('putIPNS PUT %s %d', resource, res.status)
+
       if (res.status !== 200) {
         throw new CodeError('PUT ipns response had status other than 200', 'ERR_BAD_RESPONSE')
       }
+    } catch (err: any) {
+      log.error('putIPNS PUT %s error:', resource, err.stack)
+
+      throw err
     } finally {
       signal.clear()
       onFinish.resolve()
-      log('getIPNS finished: %c', peerId)
+      log('putIPNS finished: %c', peerId)
     }
   }
 
