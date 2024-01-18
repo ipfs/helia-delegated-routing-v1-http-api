@@ -78,6 +78,16 @@ export interface DelegatedRoutingV1HttpApiClientInit {
   timeout?: number
 }
 
+export interface GetIPNSOptions extends AbortOptions {
+  /**
+   * By default incoming IPNS records are validated, pass false here to skip
+   * validation and just return the record.
+   *
+   * @default true
+   */
+  validate?: boolean
+}
+
 export interface DelegatedRoutingV1HttpApiClient {
   /**
    * Returns an async generator of {@link PeerRecord}s that can provide the
@@ -94,7 +104,7 @@ export interface DelegatedRoutingV1HttpApiClient {
   /**
    * Returns a promise of a {@link IPNSRecord} for the given {@link PeerId}
    */
-  getIPNS(peerId: PeerId, options?: AbortOptions): Promise<IPNSRecord>
+  getIPNS(peerId: PeerId, options?: GetIPNSOptions): Promise<IPNSRecord>
 
   /**
    * Publishes the given {@link IPNSRecord} for the provided {@link PeerId}
