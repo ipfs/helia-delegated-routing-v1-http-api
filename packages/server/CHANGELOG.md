@@ -1,3 +1,14 @@
+## @helia/delegated-routing-v1-http-api-server [3.0.0](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-server-2.0.1...@helia/delegated-routing-v1-http-api-server-3.0.0) (2024-01-18)
+
+
+### ⚠ BREAKING CHANGES
+
+* returns IPNS objects are from ipns@9.x.x
+
+### Dependencies
+
+* update ipns to v9 ([#102](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues/102)) ([1097cb6](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/1097cb6bd90741bf55d46f9c3e07bfa9f01f362b))
+
 ## @helia/delegated-routing-v1-http-api-server [2.0.1](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-server-2.0.0...@helia/delegated-routing-v1-http-api-server-2.0.1) (2024-01-15)
 
 
