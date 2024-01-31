@@ -1,14 +1,15 @@
 import { peerIdFromCID } from '@libp2p/peer-id'
 import { peerIdToRoutingKey } from 'ipns'
 import { CID } from 'multiformats/cid'
-import type { Libp2p, PeerId } from '@libp2p/interface'
+import type { Helia } from '@helia/interface'
+import type { PeerId } from '@libp2p/interface'
 import type { FastifyInstance } from 'fastify'
 
 interface Params {
   name: string
 }
 
-export default function getIpnsV1 (fastify: FastifyInstance, libp2p: Libp2p): void {
+export default function getIpnsV1 (fastify: FastifyInstance, helia: Helia): void {
   fastify.route<{ Params: Params }>({
     method: 'GET',
     url: '/routing/v1/ipns/:name',
@@ -43,7 +44,7 @@ export default function getIpnsV1 (fastify: FastifyInstance, libp2p: Libp2p): vo
       }
 
       try {
-        const rawRecord = await libp2p.contentRouting.get(peerIdToRoutingKey(peerId), {
+        const rawRecord = await helia.routing.get(peerIdToRoutingKey(peerId), {
           signal: controller.signal
         })
 

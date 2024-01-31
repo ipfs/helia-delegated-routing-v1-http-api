@@ -38,17 +38,16 @@
     "test:node": "aegir test -t node --cov"
   },
   "devDependencies": {
-    "@helia/delegated-routing-v1-http-api-client": "^2.0.0",
-    "@helia/delegated-routing-v1-http-api-server": "^2.0.0",
-    "@helia/interface": "^3.0.1",
-    "@helia/ipns": "^4.0.0",
+    "@helia/delegated-routing-v1-http-api-client": "^3.0.0",
+    "@helia/delegated-routing-v1-http-api-server": "^3.0.0",
+    "@helia/ipns": "^5.0.0",
     "@libp2p/identify": "^1.0.10",
     "@libp2p/interface": "^1.1.1",
     "@libp2p/kad-dht": "^12.0.3",
     "@libp2p/peer-id-factory": "^4.0.4",
     "aegir": "^42.2.0",
     "fastify": "^4.17.0",
-    "helia": "^3.0.1",
+    "helia": "^4.0.0",
     "ipns": "^9.0.0",
     "it-first": "^3.0.3",
     "multiformats": "^13.0.0"

@@ -3,7 +3,6 @@
 import { createDelegatedRoutingV1HttpApiClient } from '@helia/delegated-routing-v1-http-api-client'
 import { createDelegatedRoutingV1HttpApiServer } from '@helia/delegated-routing-v1-http-api-server'
 import { ipns } from '@helia/ipns'
-import { libp2p } from '@helia/ipns/routing'
 import { createEd25519PeerId } from '@libp2p/peer-id-factory'
 import { expect } from 'aegir/chai'
 import { create as createIpnsRecord } from 'ipns'
@@ -13,13 +12,13 @@ import * as raw from 'multiformats/codecs/raw'
 import { sha256 } from 'multiformats/hashes/sha2'
 import { createHelia } from './fixtures/create-helia.js'
 import type { DelegatedRoutingV1HttpApiClient } from '@helia/delegated-routing-v1-http-api-client'
-import type { Helia } from '@helia/interface'
 import type { Libp2p } from '@libp2p/interface'
 import type { KadDHT } from '@libp2p/kad-dht'
 import type { FastifyInstance } from 'fastify'
+import type { HeliaLibp2p } from 'helia'
 
 describe('delegated-routing-v1-http-api interop', () => {
-  let network: Array<Helia<Libp2p<{ dht: KadDHT }>>>
+  let network: Array<HeliaLibp2p<Libp2p<{ dht: KadDHT }>>>
   let server: FastifyInstance
   let client: DelegatedRoutingV1HttpApiClient
 
@@ -90,11 +89,7 @@ describe('delegated-routing-v1-http-api interop', () => {
 
   it('should get an IPNS record', async () => {
     // publish a record using a remote host
-    const i = ipns(network[5], {
-      routers: [
-        libp2p(network[5])
-      ]
-    })
+    const i = ipns(network[5])
     const cid = CID.parse('bafybeiczsscdsbs7ffqz55asqdf3smv6klcw3gofszvwlyarci47bgf354')
     const peerId = await createEd25519PeerId()
     await i.publish(peerId, cid)
@@ -113,11 +108,7 @@ describe('delegated-routing-v1-http-api interop', () => {
     await client.putIPNS(peerId, record)
 
     // resolve the record using a remote host
-    const i = ipns(network[8], {
-      routers: [
-        libp2p(network[8])
-      ]
-    })
+    const i = ipns(network[8])
     const result = await i.resolve(peerId)
     expect(result.toString()).to.equal(cid.toString())
   })
