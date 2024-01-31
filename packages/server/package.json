@@ -65,6 +65,7 @@
   },
   "dependencies": {
     "@fastify/cors": "^8.3.0",
+    "@helia/interface": "^4.0.0",
     "@libp2p/interface": "^1.1.1",
     "@libp2p/peer-id": "^4.0.4",
     "fastify": "^4.17.0",
@@ -73,7 +74,6 @@
     "raw-body": "^2.5.2"
   },
   "devDependencies": {
-    "@helia/interface": "^3.0.1",
     "@libp2p/peer-id-factory": "^4.0.4",
     "@multiformats/multiaddr": "^12.1.3",
     "@types/sinon": "^17.0.0",

@@ -3,14 +3,15 @@ import { peerIdToRoutingKey } from 'ipns'
 import { ipnsValidator } from 'ipns/validator'
 import { CID } from 'multiformats/cid'
 import getRawBody from 'raw-body'
-import type { Libp2p, PeerId } from '@libp2p/interface'
+import type { Helia } from '@helia/interface'
+import type { PeerId } from '@libp2p/interface'
 import type { FastifyInstance } from 'fastify'
 
 interface Params {
   name: string
 }
 
-export default function putIpnsV1 (fastify: FastifyInstance, libp2p: Libp2p): void {
+export default function putIpnsV1 (fastify: FastifyInstance, helia: Helia): void {
   fastify.addContentTypeParser('application/vnd.ipfs.ipns-record', function (request, payload, done) {
     getRawBody(payload)
       .then(buff => { done(null, buff) })
@@ -54,7 +55,7 @@ export default function putIpnsV1 (fastify: FastifyInstance, libp2p: Libp2p): vo
       const body: Uint8Array = request.body
       await ipnsValidator(peerIdToRoutingKey(peerId), body)
 
-      await libp2p.contentRouting.put(peerIdToRoutingKey(peerId), body, {
+      await helia.routing.put(peerIdToRoutingKey(peerId), body, {
         signal: controller.signal
       })
 
