@@ -110,6 +110,6 @@ describe('delegated-routing-v1-http-api interop', () => {
     // resolve the record using a remote host
     const i = ipns(network[8])
     const result = await i.resolve(peerId)
-    expect(result.toString()).to.equal(cid.toString())
+    expect(result.cid.toString()).to.equal(cid.toString())
   })
 })
