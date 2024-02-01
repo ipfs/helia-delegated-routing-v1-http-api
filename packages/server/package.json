@@ -64,7 +64,7 @@
     "test:node": "aegir test -t node --cov"
   },
   "dependencies": {
-    "@fastify/cors": "^8.3.0",
+    "@fastify/cors": "^9.0.1",
     "@helia/interface": "^4.0.0",
     "@libp2p/interface": "^1.1.1",
     "@libp2p/peer-id": "^4.0.4",
