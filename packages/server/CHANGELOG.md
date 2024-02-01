@@ -1,3 +1,10 @@
+## @helia/delegated-routing-v1-http-api-server [3.0.2](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-server-3.0.1...@helia/delegated-routing-v1-http-api-server-3.0.2) (2024-02-01)
+
+
+### Dependencies
+
+* bump @fastify/cors from 8.5.0 to 9.0.1 ([#108](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues/108)) ([851b40f](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/851b40f29e17804a86969773bde3d8997c8628e5))
+
 ## @helia/delegated-routing-v1-http-api-server [3.0.1](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-server-3.0.0...@helia/delegated-routing-v1-http-api-server-3.0.1) (2024-01-31)
 
 
