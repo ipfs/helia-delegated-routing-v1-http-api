@@ -1,3 +1,10 @@
+## @helia/delegated-routing-v1-http-api-client [3.0.1](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-3.0.0...@helia/delegated-routing-v1-http-api-client-3.0.1) (2024-04-13)
+
+
+### Bug Fixes
+
+* increase listeners to silence node warnings ([#112](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues/112)) ([13f4084](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/13f408422422e132f8c00f02108f87cf9ea01bb1))
+
 ## @helia/delegated-routing-v1-http-api-client [3.0.0](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-2.1.0...@helia/delegated-routing-v1-http-api-client-3.0.0) (2024-01-18)
 
 
