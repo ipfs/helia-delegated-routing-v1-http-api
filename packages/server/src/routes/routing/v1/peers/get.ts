@@ -1,4 +1,5 @@
 import { PassThrough } from 'node:stream'
+import { setMaxListeners } from '@libp2p/interface'
 import { peerIdFromCID } from '@libp2p/peer-id'
 import { CID } from 'multiformats/cid'
 import type { Helia } from '@helia/interface'
@@ -28,6 +29,7 @@ export default function getPeersV1 (fastify: FastifyInstance, helia: Helia): voi
     handler: async (request, reply) => {
       let peerId: PeerId
       const controller = new AbortController()
+      setMaxListeners(Infinity, controller.signal)
 
       request.raw.on('close', () => {
         controller.abort()

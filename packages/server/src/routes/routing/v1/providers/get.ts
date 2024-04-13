@@ -1,4 +1,5 @@
 import { PassThrough } from 'node:stream'
+import { setMaxListeners } from '@libp2p/interface'
 import { CID } from 'multiformats/cid'
 import type { Helia } from '@helia/interface'
 import type { AbortOptions } from '@libp2p/interface'
@@ -41,6 +42,7 @@ export default function getProvidersV1 (fastify: FastifyInstance, helia: Helia):
     handler: async (request, reply) => {
       let cid: CID
       const controller = new AbortController()
+      setMaxListeners(Infinity, controller.signal)
 
       request.raw.on('close', () => {
         controller.abort()

@@ -72,7 +72,9 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
   async * getProviders (cid: CID, options: AbortOptions = {}): AsyncGenerator<PeerRecord> {
     log('getProviders starts: %c', cid)
 
-    const signal = anySignal([this.shutDownController.signal, options.signal, AbortSignal.timeout(this.timeout)])
+    const timeoutSignal = AbortSignal.timeout(this.timeout)
+    const signal = anySignal([this.shutDownController.signal, timeoutSignal, options.signal])
+    setMaxListeners(Infinity, timeoutSignal, signal)
     const onStart = defer()
     const onFinish = defer()
 
@@ -135,7 +137,9 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
   async * getPeers (peerId: PeerId, options: AbortOptions | undefined = {}): AsyncGenerator<PeerRecord> {
     log('getPeers starts: %c', peerId)
 
-    const signal = anySignal([this.shutDownController.signal, options.signal, AbortSignal.timeout(this.timeout)])
+    const timeoutSignal = AbortSignal.timeout(this.timeout)
+    const signal = anySignal([this.shutDownController.signal, timeoutSignal, options.signal])
+    setMaxListeners(Infinity, timeoutSignal, signal)
     const onStart = defer()
     const onFinish = defer()
 
@@ -198,7 +202,9 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
   async getIPNS (peerId: PeerId, options: GetIPNSOptions = {}): Promise<IPNSRecord> {
     log('getIPNS starts: %c', peerId)
 
-    const signal = anySignal([this.shutDownController.signal, options.signal, AbortSignal.timeout(this.timeout)])
+    const timeoutSignal = AbortSignal.timeout(this.timeout)
+    const signal = anySignal([this.shutDownController.signal, timeoutSignal, options.signal])
+    setMaxListeners(Infinity, timeoutSignal, signal)
     const onStart = defer()
     const onFinish = defer()
 
@@ -256,7 +262,9 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
   async putIPNS (peerId: PeerId, record: IPNSRecord, options: AbortOptions = {}): Promise<void> {
     log('putIPNS starts: %c', peerId)
 
-    const signal = anySignal([this.shutDownController.signal, options.signal, AbortSignal.timeout(this.timeout)])
+    const timeoutSignal = AbortSignal.timeout(this.timeout)
+    const signal = anySignal([this.shutDownController.signal, timeoutSignal, options.signal])
+    setMaxListeners(Infinity, timeoutSignal, signal)
     const onStart = defer()
     const onFinish = defer()
 

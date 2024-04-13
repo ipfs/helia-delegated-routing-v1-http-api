@@ -1,3 +1,4 @@
+import { setMaxListeners } from '@libp2p/interface'
 import { peerIdFromCID } from '@libp2p/peer-id'
 import { peerIdToRoutingKey } from 'ipns'
 import { CID } from 'multiformats/cid'
@@ -28,6 +29,7 @@ export default function getIpnsV1 (fastify: FastifyInstance, helia: Helia): void
     handler: async (request, reply) => {
       let peerId: PeerId
       const controller = new AbortController()
+      setMaxListeners(Infinity, controller.signal)
 
       request.raw.on('close', () => {
         controller.abort()
