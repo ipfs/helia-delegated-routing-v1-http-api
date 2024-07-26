@@ -71,7 +71,7 @@
     "fastify": "^4.17.0",
     "ipns": "^9.0.0",
     "multiformats": "^13.0.0",
-    "raw-body": "^2.5.2"
+    "raw-body": "^3.0.0"
   },
   "devDependencies": {
     "@libp2p/peer-id-factory": "^4.0.4",
