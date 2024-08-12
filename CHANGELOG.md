@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/v1.0.0...v1.0.1) (2024-08-12)
+
+### Dependencies
+
+* bump raw-body from 2.5.2 to 3.0.0 ([#123](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues/123)) ([2e7b7da](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/2e7b7da9375e2a1f28ffa83d9c005a7556122489))
+* **dev:** bump aegir from 43.0.3 to 44.1.1 ([#125](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues/125)) ([d01f77b](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/d01f77b4c751e076fec0a1d99d2614a6427ff140))
+
 ## 1.0.0 (2024-06-20)
 
 
