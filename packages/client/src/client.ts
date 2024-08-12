@@ -301,24 +301,28 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
   }
 
   #conformToPeerSchema (record: any): PeerRecord | undefined {
-    const protocols: string[] = []
-    const multiaddrs: Multiaddr[] = record.Addrs?.map(multiaddr) ?? []
+    try {
+      const protocols: string[] = []
+      const multiaddrs: Multiaddr[] = record.Addrs?.map(multiaddr) ?? []
 
-    if (record.Protocols != null) {
-      protocols.push(...record.Protocols)
-    }
+      if (record.Protocols != null) {
+        protocols.push(...record.Protocols)
+      }
 
-    if (record.Protocol != null) {
-      protocols.push(record.Protocol)
-      delete record.Protocol
-    }
+      if (record.Protocol != null) {
+        protocols.push(record.Protocol)
+        delete record.Protocol
+      }
 
-    return {
-      ...record,
-      Schema: 'peer',
-      ID: peerIdFromString(record.ID),
-      Addrs: multiaddrs,
-      Protocols: protocols
+      return {
+        ...record,
+        Schema: 'peer',
+        ID: peerIdFromString(record.ID),
+        Addrs: multiaddrs,
+        Protocols: protocols
+      }
+    } catch (err) {
+      log.error('could not conform record to peer schema', err)
     }
   }
 }

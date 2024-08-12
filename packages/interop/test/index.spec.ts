@@ -63,6 +63,7 @@ describe('delegated-routing-v1-http-api interop', () => {
     const cid = CID.createV1(raw.code, digest)
 
     await network[1].blockstore.put(cid, input)
+    await network[1].routing.provide(cid)
 
     let foundProvider = false
 
