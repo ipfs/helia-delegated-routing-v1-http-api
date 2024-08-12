@@ -1,3 +1,9 @@
+## [1.0.2](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/v1.0.1...v1.0.2) (2024-08-12)
+
+### Dependencies
+
+* **dev:** bump sinon from 17.0.2 to 18.0.0 ([#114](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues/114)) ([e306161](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/e3061613fb7dbe8773a9ac8eecea8013e9f6341e))
+
 ## [1.0.1](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/v1.0.0...v1.0.1) (2024-08-12)
 
 ### Dependencies
