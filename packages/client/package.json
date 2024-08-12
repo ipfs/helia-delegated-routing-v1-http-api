@@ -61,7 +61,7 @@
   },
   "devDependencies": {
     "@libp2p/peer-id-factory": "^4.0.4",
-    "aegir": "^43.0.1",
+    "aegir": "^44.1.1",
     "body-parser": "^1.20.2",
     "it-all": "^3.0.2"
   },
