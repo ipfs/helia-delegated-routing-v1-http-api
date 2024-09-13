@@ -43,7 +43,7 @@
     "@helia/ipns": "^7.1.0",
     "@libp2p/identify": "^2.1.0",
     "@libp2p/interface": "^1.1.1",
-    "@libp2p/kad-dht": "^12.0.3",
+    "@libp2p/kad-dht": "^13.0.1",
     "@libp2p/peer-id-factory": "^4.0.4",
     "aegir": "^44.1.1",
     "fastify": "^4.17.0",
