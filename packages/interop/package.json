@@ -113,8 +113,7 @@
     "dep-check": "aegir dep-check",
     "build": "aegir build --bundle false",
     "test": "aegir test -t node",
-    "test:node": "aegir test -t node --cov",
-    "release": "aegir release"
+    "test:node": "aegir test -t node --cov"
   },
   "devDependencies": {
     "@helia/delegated-routing-v1-http-api-client": "^3.0.0",
