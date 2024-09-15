@@ -1,3 +1,13 @@
+## [@helia/delegated-routing-v1-http-api-server-v4.0.0](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-server-3.0.4...@helia/delegated-routing-v1-http-api-server-4.0.0) (2024-09-15)
+
+### ⚠ BREAKING CHANGES
+
+* upgrade to Helia 5.x.x and libp2p 2.x.x
+
+### Dependencies
+
+* upgrade to Helia 5.x.x and libp2p 2.x.x ([27101f3](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/27101f309a66244d1790c926be4c54225534e361))
+
 ## @helia/delegated-routing-v1-http-api-server [3.0.3](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-server-3.0.2...@helia/delegated-routing-v1-http-api-server-3.0.3) (2024-04-13)
 
 
