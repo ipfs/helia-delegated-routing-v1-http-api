@@ -1,9 +1,9 @@
+import { hasCode } from '@helia/utils'
 import { setMaxListeners } from '@libp2p/interface'
-import { peerIdFromCID } from '@libp2p/peer-id'
-import { peerIdToRoutingKey } from 'ipns'
+import { multihashToIPNSRoutingKey } from 'ipns'
 import { CID } from 'multiformats/cid'
+import { LIBP2P_KEY_CODEC } from '../../../../constants.js'
 import type { Helia } from '@helia/interface'
-import type { PeerId } from '@libp2p/interface'
 import type { FastifyInstance } from 'fastify'
 
 interface Params {
@@ -27,7 +27,7 @@ export default function getIpnsV1 (fastify: FastifyInstance, helia: Helia): void
       }
     },
     handler: async (request, reply) => {
-      let peerId: PeerId
+      let cid: CID
       const controller = new AbortController()
       setMaxListeners(Infinity, controller.signal)
 
@@ -38,15 +38,24 @@ export default function getIpnsV1 (fastify: FastifyInstance, helia: Helia): void
       try {
         // PeerId must be encoded as a Libp2p-key CID.
         const { name: cidStr } = request.params
-        const peerCid = CID.parse(cidStr)
-        peerId = peerIdFromCID(peerCid)
+        cid = CID.parse(cidStr)
       } catch (err) {
         fastify.log.error('could not parse CID from params', err)
         return reply.code(422).type('text/html').send('Unprocessable Entity')
       }
 
       try {
-        const rawRecord = await helia.routing.get(peerIdToRoutingKey(peerId), {
+        if (!hasCode(cid.multihash, 0x00) && !hasCode(cid.multihash, 0x12)) {
+          fastify.log.error('CID multihash had incorrect code %d', cid.multihash.code)
+          return reply.code(422).type('text/html').send('Unprocessable Entity')
+        }
+
+        if (cid.code !== LIBP2P_KEY_CODEC) {
+          fastify.log.error('CID had incorrect code %d', cid.code)
+          return reply.code(422).type('text/html').send('Unprocessable Entity')
+        }
+
+        const rawRecord = await helia.routing.get(multihashToIPNSRoutingKey(cid.multihash), {
           signal: controller.signal
         })
 

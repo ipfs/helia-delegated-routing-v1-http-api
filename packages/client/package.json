@@ -3,13 +3,17 @@
   "version": "3.0.1",
   "description": "A Delegated Routing V1 HTTP API client",
   "license": "Apache-2.0 OR MIT",
-  "homepage": "https://github.com/ipfs/helia-delegated-routing-v1-http-api/tree/master/packages/client#readme",
+  "homepage": "https://github.com/ipfs/helia-delegated-routing-v1-http-api/tree/main/packages/client#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ipfs/helia-delegated-routing-v1-http-api.git"
   },
   "bugs": {
     "url": "https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
   },
   "keywords": [
     "IPFS"
@@ -35,6 +39,91 @@
       "sourceType": "module"
     }
   },
+  "release": {
+    "branches": [
+      "main"
+    ],
+    "plugins": [
+      [
+        "@semantic-release/commit-analyzer",
+        {
+          "preset": "conventionalcommits",
+          "releaseRules": [
+            {
+              "breaking": true,
+              "release": "major"
+            },
+            {
+              "revert": true,
+              "release": "patch"
+            },
+            {
+              "type": "feat",
+              "release": "minor"
+            },
+            {
+              "type": "fix",
+              "release": "patch"
+            },
+            {
+              "type": "docs",
+              "release": "patch"
+            },
+            {
+              "type": "test",
+              "release": "patch"
+            },
+            {
+              "type": "deps",
+              "release": "patch"
+            },
+            {
+              "scope": "no-release",
+              "release": false
+            }
+          ]
+        }
+      ],
+      [
+        "@semantic-release/release-notes-generator",
+        {
+          "preset": "conventionalcommits",
+          "presetConfig": {
+            "types": [
+              {
+                "type": "feat",
+                "section": "Features"
+              },
+              {
+                "type": "fix",
+                "section": "Bug Fixes"
+              },
+              {
+                "type": "chore",
+                "section": "Trivial Changes"
+              },
+              {
+                "type": "docs",
+                "section": "Documentation"
+              },
+              {
+                "type": "deps",
+                "section": "Dependencies"
+              },
+              {
+                "type": "test",
+                "section": "Tests"
+              }
+            ]
+          }
+        }
+      ],
+      "@semantic-release/changelog",
+      "@semantic-release/npm",
+      "@semantic-release/github",
+      "@semantic-release/git"
+    ]
+  },
   "scripts": {
     "clean": "aegir clean",
     "lint": "aegir lint",
@@ -45,26 +134,25 @@
     "release": "aegir release"
   },
   "dependencies": {
-    "@libp2p/interface": "^1.1.1",
-    "@libp2p/logger": "^5.0.0",
-    "@libp2p/peer-id": "^4.0.4",
-    "@multiformats/multiaddr": "^12.1.3",
+    "@libp2p/interface": "^2.0.1",
+    "@libp2p/logger": "^5.0.1",
+    "@libp2p/peer-id": "^5.0.1",
+    "@multiformats/multiaddr": "^12.3.1",
     "any-signal": "^4.1.1",
-    "browser-readablestream-to-it": "^2.0.3",
-    "ipns": "^9.0.0",
-    "it-first": "^3.0.3",
-    "it-map": "^3.0.4",
-    "it-ndjson": "^1.0.4",
-    "multiformats": "^13.0.0",
-    "p-defer": "^4.0.0",
+    "browser-readablestream-to-it": "^2.0.7",
+    "ipns": "^10.0.0",
+    "it-first": "^3.0.6",
+    "it-map": "^3.1.1",
+    "it-ndjson": "^1.0.7",
+    "multiformats": "^13.2.3",
+    "p-defer": "^4.0.1",
     "p-queue": "^8.0.1",
-    "uint8arrays": "^5.0.1"
+    "uint8arrays": "^5.1.0"
   },
   "devDependencies": {
-    "@libp2p/peer-id-factory": "^4.0.4",
     "aegir": "^44.1.1",
-    "body-parser": "^1.20.2",
-    "it-all": "^3.0.2"
+    "body-parser": "^1.20.3",
+    "it-all": "^3.0.6"
   },
   "sideEffects": false
 }

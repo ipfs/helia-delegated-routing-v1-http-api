@@ -2,7 +2,5 @@
   "entryPoints": [
     "./src/index.ts",
     "./src/routes/index.ts"
-  ],
-  "readme": "none",
-  "includeVersion": true
+  ]
 }

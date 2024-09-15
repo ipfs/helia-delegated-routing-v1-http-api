@@ -1,10 +1,11 @@
 /* eslint-disable max-nested-callbacks */
 /* eslint-env mocha */
 
+import { generateKeyPair } from '@libp2p/crypto/keys'
 import { contentRoutingSymbol, peerRoutingSymbol } from '@libp2p/interface'
-import { createEd25519PeerId } from '@libp2p/peer-id-factory'
+import { peerIdFromPrivateKey } from '@libp2p/peer-id'
 import { expect } from 'aegir/chai'
-import { create as createIpnsRecord, marshal as marshalIpnsRecord } from 'ipns'
+import { createIPNSRecord, marshalIPNSRecord, multihashToIPNSRoutingKey } from 'ipns'
 import all from 'it-all'
 import { CID } from 'multiformats/cid'
 import { concat as uint8ArrayConcat } from 'uint8arrays/concat'
@@ -51,16 +52,16 @@ describe('libp2p content-routing', () => {
       Protocol: 'transport-bitswap',
       Schema: 'bitswap',
       Metadata: 'gBI=',
-      ID: (await createEd25519PeerId()).toString(),
+      ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
       Addrs: ['/ip4/41.41.41.41/tcp/1234']
     }, {
       Protocol: 'transport-bitswap',
       Schema: 'peer',
       Metadata: 'gBI=',
-      ID: (await createEd25519PeerId()).toString(),
+      ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
       Addrs: ['/ip4/42.42.42.42/tcp/1234']
     }, {
-      ID: (await createEd25519PeerId()).toString(),
+      ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
       Addrs: ['/ip4/43.43.43.43/tcp/1234']
     }]
 
@@ -102,17 +103,14 @@ describe('libp2p content-routing', () => {
     }
 
     const cid = CID.parse('QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn')
-    const peerId = await createEd25519PeerId()
-    const record = await createIpnsRecord(peerId, cid, 0, 1000)
-    const key = uint8ArrayConcat([
-      uint8ArrayFromString('/ipns/'),
-      peerId.toBytes()
-    ])
+    const privateKey = await generateKeyPair('Ed25519')
+    const record = await createIPNSRecord(privateKey, cid, 0, 1000)
+    const key = multihashToIPNSRoutingKey(privateKey.publicKey.toMultihash())
 
-    await routing.put(key, marshalIpnsRecord(record))
+    await routing.put(key, marshalIPNSRecord(record))
 
     // load record that our client just PUT to remote server
-    const res = await fetch(`${process.env.ECHO_SERVER}/get-ipns/${peerId.toCID().toString()}`, {
+    const res = await fetch(`${process.env.ECHO_SERVER}/get-ipns/${privateKey.publicKey.toCID()}`, {
       method: 'GET',
       headers: {
         Accept: 'application/vnd.ipfs.ipns-record'
@@ -120,7 +118,7 @@ describe('libp2p content-routing', () => {
     })
 
     const receivedRecord = new Uint8Array(await res.arrayBuffer())
-    expect(marshalIpnsRecord(record)).to.equalBytes(receivedRecord)
+    expect(marshalIPNSRecord(record)).to.equalBytes(receivedRecord)
   })
 
   it('should not put other records', async () => {
@@ -130,10 +128,10 @@ describe('libp2p content-routing', () => {
       throw new Error('ContentRouting not found')
     }
 
-    const peerId = await createEd25519PeerId()
+    const privateKey = await generateKeyPair('Ed25519')
     const key = uint8ArrayConcat([
       uint8ArrayFromString('/an-unknown-key/'),
-      peerId.toBytes()
+      privateKey.publicKey.toMultihash().bytes
     ])
 
     await routing.put(key, Uint8Array.from([0, 1, 2, 3, 4]))
@@ -149,25 +147,25 @@ describe('libp2p content-routing', () => {
     }
 
     const cid = CID.parse('QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn')
-    const peerId = await createEd25519PeerId()
-    const record = await createIpnsRecord(peerId, cid, 0, 1000)
+    const privateKey = await generateKeyPair('Ed25519')
+    const record = await createIPNSRecord(privateKey, cid, 0, 1000)
 
     // load record for the router to fetch
-    await fetch(`${process.env.ECHO_SERVER}/add-ipns/${peerId.toCID().toString()}`, {
+    await fetch(`${process.env.ECHO_SERVER}/add-ipns/${privateKey.publicKey.toCID()}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/vnd.ipfs.ipns-record'
       },
-      body: marshalIpnsRecord(record)
+      body: marshalIPNSRecord(record)
     })
 
     const key = uint8ArrayConcat([
       uint8ArrayFromString('/ipns/'),
-      peerId.toBytes()
+      privateKey.publicKey.toMultihash().bytes
     ])
 
     const value = await routing.get(key)
-    expect(value).to.equalBytes(marshalIpnsRecord(record))
+    expect(value).to.equalBytes(marshalIPNSRecord(record))
   })
 
   it('should not get unknown records', async () => {
@@ -177,15 +175,15 @@ describe('libp2p content-routing', () => {
       throw new Error('ContentRouting not found')
     }
 
-    const peerId = await createEd25519PeerId()
+    const privateKey = await generateKeyPair('Ed25519')
 
     const key = uint8ArrayConcat([
       uint8ArrayFromString('/am-unknown-key/'),
-      peerId.toBytes()
+      privateKey.publicKey.toMultihash().bytes
     ])
 
     await expect(routing.get(key)).to.eventually.be.rejected
-      .with.property('code', 'ERR_NOT_FOUND')
+      .with.property('name', 'NotFoundError')
 
     await expect(getServerCallCount()).to.eventually.equal(0)
   })
@@ -218,7 +216,8 @@ describe('libp2p peer-routing', () => {
         throw new Error('PeerRouting not found')
       }
 
-      const peerId = await createEd25519PeerId()
+      const privateKey = await generateKeyPair('Ed25519')
+      const peerId = peerIdFromPrivateKey(privateKey)
 
       const records = [{
         Protocol: 'transport-bitswap',

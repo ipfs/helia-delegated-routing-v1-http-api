@@ -4,6 +4,8 @@
   </a>
 </p>
 
+# @helia/delegated-routing-v1-http-api-server
+
 [![ipfs.tech](https://img.shields.io/badge/project-IPFS-blue.svg?style=flat-square)](https://ipfs.tech)
 [![Discuss](https://img.shields.io/discourse/https/discuss.ipfs.tech/posts.svg?style=flat-square)](https://discuss.ipfs.tech)
 [![codecov](https://img.shields.io/codecov/c/github/ipfs/helia-delegated-routing-v1-http-api.svg?style=flat-square)](https://codecov.io/gh/ipfs/helia-delegated-routing-v1-http-api)
@@ -63,24 +65,24 @@ await server.listen({
 // now make http requests
 ```
 
-## Install
+# Install
 
 ```console
 $ npm i @helia/delegated-routing-v1-http-api-server
 ```
 
-## API Docs
+# API Docs
 
 - <https://ipfs.github.io/helia-delegated-routing-v1-http-api/modules/_helia_delegated_routing_v1_http_api_server.html>
 
-## License
+# License
 
 Licensed under either of
 
-- Apache 2.0, ([LICENSE-APACHE](LICENSE-APACHE) / <http://www.apache.org/licenses/LICENSE-2.0>)
-- MIT ([LICENSE-MIT](LICENSE-MIT) / <http://opensource.org/licenses/MIT>)
+- Apache 2.0, ([LICENSE-APACHE](https://github.com/ipfs/helia-delegated-routing-v1-http-api/blob/main/packages/server/LICENSE-APACHE) / <http://www.apache.org/licenses/LICENSE-2.0>)
+- MIT ([LICENSE-MIT](https://github.com/ipfs/helia-delegated-routing-v1-http-api/blob/main/packages/server/LICENSE-MIT) / <http://opensource.org/licenses/MIT>)
 
-## Contribute
+# Contribute
 
 Contributions welcome! Please check out [the issues](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues).
 

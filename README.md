@@ -4,6 +4,8 @@
   </a>
 </p>
 
+# helia-delegated-routing-v1-http-api
+
 [![ipfs.tech](https://img.shields.io/badge/project-IPFS-blue.svg?style=flat-square)](https://ipfs.tech)
 [![Discuss](https://img.shields.io/discourse/https/discuss.ipfs.tech/posts.svg?style=flat-square)](https://discuss.ipfs.tech)
 [![codecov](https://img.shields.io/codecov/c/github/ipfs/helia-delegated-routing-v1-http-api.svg?style=flat-square)](https://codecov.io/gh/ipfs/helia-delegated-routing-v1-http-api)
@@ -15,24 +17,24 @@
 
 This repo contains a server implementation of the IPFS [Delegated Routing V1 HTTP API](https://specs.ipfs.tech/routing/http-routing-v1/) along with a client that can be used to interact with any compliant server implementation.
 
-## Packages
+# Packages
 
-- [`/packages/client`](./packages/client) A Delegated Routing V1 HTTP API client
-- [`/packages/interop`](./packages/interop) Interop tests for the Delegated Routing V1 HTTP API server powered by Helia
-- [`/packages/server`](./packages/server) A Delegated Routing V1 HTTP API server powered by Helia
+- [`packages/client`](https://github.com/ipfs/helia-delegated-routing-v1-http-api/tree/main/packages/client) A Delegated Routing V1 HTTP API client
+- [`packages/interop`](https://github.com/ipfs/helia-delegated-routing-v1-http-api/tree/main/packages/interop) Interop tests for the Delegated Routing V1 HTTP API server powered by Helia
+- [`packages/server`](https://github.com/ipfs/helia-delegated-routing-v1-http-api/tree/main/packages/server) A Delegated Routing V1 HTTP API server powered by Helia
 
-## API Docs
+# API Docs
 
 - <https://ipfs.github.io/helia-delegated-routing-v1-http-api>
 
-## License
+# License
 
 Licensed under either of
 
-- Apache 2.0, ([LICENSE-APACHE](LICENSE-APACHE) / <http://www.apache.org/licenses/LICENSE-2.0>)
-- MIT ([LICENSE-MIT](LICENSE-MIT) / <http://opensource.org/licenses/MIT>)
+- Apache 2.0, ([LICENSE-APACHE](https://github.com/ipfs/helia-delegated-routing-v1-http-api/blob/main/LICENSE-APACHE) / <http://www.apache.org/licenses/LICENSE-2.0>)
+- MIT ([LICENSE-MIT](https://github.com/ipfs/helia-delegated-routing-v1-http-api/blob/main/LICENSE-MIT) / <http://opensource.org/licenses/MIT>)
 
-## Contribute
+# Contribute
 
 Contributions welcome! Please check out [the issues](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues).
 
