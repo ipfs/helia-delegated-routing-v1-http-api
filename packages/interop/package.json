@@ -119,13 +119,14 @@
   "devDependencies": {
     "@helia/delegated-routing-v1-http-api-client": "^3.0.0",
     "@helia/delegated-routing-v1-http-api-server": "^3.0.0",
-    "@helia/ipns": "^7.2.3-ec8bf66",
+    "@helia/ipns": "next",
+    "@libp2p/crypto": "^5.0.1",
     "@libp2p/identify": "^3.0.1",
     "@libp2p/interface": "^2.0.1",
     "@libp2p/kad-dht": "^13.0.1",
     "aegir": "^44.1.1",
     "fastify": "^4.28.1",
-    "helia": "^4.2.6-ec8bf66",
+    "helia": "next",
     "ipns": "^10.0.0",
     "it-first": "^3.0.6",
     "multiformats": "^13.2.3"

@@ -47,12 +47,12 @@ export default function getIpnsV1 (fastify: FastifyInstance, helia: Helia): void
       try {
         if (!hasCode(cid.multihash, 0x00) && !hasCode(cid.multihash, 0x12)) {
           fastify.log.error('CID multihash had incorrect code %d', cid.multihash.code)
-          return reply.code(422).type('text/html').send('Unprocessable Entity')
+          return await reply.code(422).type('text/html').send('Unprocessable Entity')
         }
 
         if (cid.code !== LIBP2P_KEY_CODEC) {
           fastify.log.error('CID had incorrect code %d', cid.code)
-          return reply.code(422).type('text/html').send('Unprocessable Entity')
+          return await reply.code(422).type('text/html').send('Unprocessable Entity')
         }
 
         const rawRecord = await helia.routing.get(multihashToIPNSRoutingKey(cid.multihash), {
@@ -64,7 +64,9 @@ export default function getIpnsV1 (fastify: FastifyInstance, helia: Helia): void
           // one cannot simply send rawRecord https://github.com/fastify/fastify/issues/5118
           .send(Buffer.from(rawRecord, 0, rawRecord.byteLength))
       } catch (err: any) {
-        if (err.code === 'ERR_NOT_FOUND' || err.errors?.[0].code === 'ERR_NOT_FOUND') {
+        if (err.code === 'ERR_NOT_FOUND' || err.errors?.[0].code === 'ERR_NOT_FOUND' ||
+            err.name === 'NotFoundError' || err.errors?.[0].name === 'NotFoundError'
+        ) {
           return reply.code(404).send('Record not found')
         }
 

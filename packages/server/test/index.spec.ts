@@ -1,5 +1,7 @@
 /* eslint-env mocha */
 
+import { generateKeyPair } from '@libp2p/crypto/keys'
+import { peerIdFromPrivateKey } from '@libp2p/peer-id'
 import { multiaddr } from '@multiformats/multiaddr'
 import { expect } from 'aegir/chai'
 import { createIPNSRecord, marshalIPNSRecord, multihashToIPNSRoutingKey } from 'ipns'
@@ -10,8 +12,6 @@ import type { Helia } from '@helia/interface'
 import type { PeerInfo } from '@libp2p/interface'
 import type { FastifyInstance } from 'fastify'
 import type { StubbedInstance } from 'sinon-ts'
-import { peerIdFromPrivateKey } from '@libp2p/peer-id'
-import { generateKeyPair } from '@libp2p/crypto/keys'
 
 describe('delegated-routing-v1-http-api-server', () => {
   let helia: StubbedInstance<Helia>
