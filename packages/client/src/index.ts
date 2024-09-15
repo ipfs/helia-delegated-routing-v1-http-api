@@ -102,14 +102,14 @@ export interface DelegatedRoutingV1HttpApiClient {
   getPeers(peerId: PeerId, options?: AbortOptions): AsyncGenerator<PeerRecord>
 
   /**
-   * Returns a promise of a {@link IPNSRecord} for the given {@link PeerId}
+   * Returns a promise of a {@link IPNSRecord} for the given {@link MultihashDigest}
    */
-  getIPNS(peerId: PeerId, options?: GetIPNSOptions): Promise<IPNSRecord>
+  getIPNS(libp2pKey: CID<unknown, 0x72, 0x00 | 0x12, 1>, options?: GetIPNSOptions): Promise<IPNSRecord>
 
   /**
-   * Publishes the given {@link IPNSRecord} for the provided {@link PeerId}
+   * Publishes the given {@link IPNSRecord} for the provided {@link MultihashDigest}
    */
-  putIPNS(peerId: PeerId, record: IPNSRecord, options?: AbortOptions): Promise<void>
+  putIPNS(libp2pKey: CID<unknown, 0x72, 0x00 | 0x12, 1>, record: IPNSRecord, options?: AbortOptions): Promise<void>
 
   /**
    * Shut down any currently running HTTP requests and clear up any resources

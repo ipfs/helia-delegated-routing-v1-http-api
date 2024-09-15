@@ -4,6 +4,8 @@
   </a>
 </p>
 
+# @helia/delegated-routing-v1-http-api-server
+
 [![ipfs.tech](https://img.shields.io/badge/project-IPFS-blue.svg?style=flat-square)](https://ipfs.tech)
 [![Discuss](https://img.shields.io/discourse/https/discuss.ipfs.tech/posts.svg?style=flat-square)](https://discuss.ipfs.tech)
 [![codecov](https://img.shields.io/codecov/c/github/ipfs/helia-delegated-routing-v1-http-api.svg?style=flat-square)](https://codecov.io/gh/ipfs/helia-delegated-routing-v1-http-api)
@@ -11,18 +13,33 @@
 
 > A Delegated Routing V1 HTTP API server powered by Helia
 
-## About
+# About
+
+<!--
+
+!IMPORTANT!
+
+Everything in this README between "# About" and "# Install" is automatically
+generated and will be overwritten the next time the doc generator is run.
+
+To make changes to this section, please update the @packageDocumentation section
+of src/index.js or src/index.ts
+
+To experiment with formatting, please run "npm run docs" from the root of this
+repo and examine the changes made.
+
+-->
 
 Implements HTTP routes for a Fastify server that conform to the [Routing V1 HTTP API](https://specs.ipfs.tech/routing/http-routing-v1/).
 
-### Example
+## Example
 
 ```typescript
 import { createHelia } from 'helia'
-import { createRoutingV1HttpApiServer } from '@helia/routing-v1-http-api-server'
+import { createDelegatedRoutingV1HttpApiServer } from '@helia/delegated-routing-v1-http-api-server'
 
 const helia = await createHelia()
-const server = await createRoutingV1HttpApiServer(helia, {
+const server = await createDelegatedRoutingV1HttpApiServer(helia, {
   listen: {
     // fastify listen options
   }
@@ -32,9 +49,8 @@ const server = await createRoutingV1HttpApiServer(helia, {
 ```
 
 Alternatively if you have a Fastify instance already you can add routes to it.
-,
 
-### Example
+## Example
 
 ```typescript
 import fastify from 'fastify'
@@ -63,24 +79,24 @@ await server.listen({
 // now make http requests
 ```
 
-## Install
+# Install
 
 ```console
 $ npm i @helia/delegated-routing-v1-http-api-server
 ```
 
-## API Docs
+# API Docs
 
 - <https://ipfs.github.io/helia-delegated-routing-v1-http-api/modules/_helia_delegated_routing_v1_http_api_server.html>
 
-## License
+# License
 
 Licensed under either of
 
-- Apache 2.0, ([LICENSE-APACHE](LICENSE-APACHE) / <http://www.apache.org/licenses/LICENSE-2.0>)
-- MIT ([LICENSE-MIT](LICENSE-MIT) / <http://opensource.org/licenses/MIT>)
+- Apache 2.0, ([LICENSE-APACHE](https://github.com/ipfs/helia-delegated-routing-v1-http-api/blob/main/packages/server/LICENSE-APACHE) / <http://www.apache.org/licenses/LICENSE-2.0>)
+- MIT ([LICENSE-MIT](https://github.com/ipfs/helia-delegated-routing-v1-http-api/blob/main/packages/server/LICENSE-MIT) / <http://opensource.org/licenses/MIT>)
 
-## Contribute
+# Contribute
 
 Contributions welcome! Please check out [the issues](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues).
 

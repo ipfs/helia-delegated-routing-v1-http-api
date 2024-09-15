@@ -1,9 +1,10 @@
 /* eslint-env mocha */
 
-import { createEd25519PeerId } from '@libp2p/peer-id-factory'
+import { generateKeyPair } from '@libp2p/crypto/keys'
+import { peerIdFromPrivateKey } from '@libp2p/peer-id'
 import { multiaddr } from '@multiformats/multiaddr'
 import { expect } from 'aegir/chai'
-import { create as createIpnsRecord, marshal as marshalIpnsRecord, peerIdToRoutingKey } from 'ipns'
+import { createIPNSRecord, marshalIPNSRecord, multihashToIPNSRoutingKey } from 'ipns'
 import { CID } from 'multiformats'
 import { stubInterface } from 'sinon-ts'
 import { createDelegatedRoutingV1HttpApiServer } from '../src/index.js'
@@ -90,13 +91,13 @@ describe('delegated-routing-v1-http-api-server', () => {
 
   it('GET providers returns providers', async () => {
     const provider1: PeerInfo = {
-      id: await createEd25519PeerId(),
+      id: peerIdFromPrivateKey(await generateKeyPair('Ed25519')),
       multiaddrs: [
         multiaddr('/ip4/123.123.123.123/tcp/123')
       ]
     }
     const provider2: PeerInfo = {
-      id: await createEd25519PeerId(),
+      id: peerIdFromPrivateKey(await generateKeyPair('Ed25519')),
       multiaddrs: [
         multiaddr('/ip4/123.123.123.123/tcp/123')
       ]
@@ -125,13 +126,13 @@ describe('delegated-routing-v1-http-api-server', () => {
 
   it('GET providers returns provider stream', async () => {
     const provider1: PeerInfo = {
-      id: await createEd25519PeerId(),
+      id: peerIdFromPrivateKey(await generateKeyPair('Ed25519')),
       multiaddrs: [
         multiaddr('/ip4/123.123.123.123/tcp/123')
       ]
     }
     const provider2: PeerInfo = {
-      id: await createEd25519PeerId(),
+      id: peerIdFromPrivateKey(await generateKeyPair('Ed25519')),
       multiaddrs: [
         multiaddr('/ip4/123.123.123.123/tcp/123')
       ]
@@ -165,7 +166,7 @@ describe('delegated-routing-v1-http-api-server', () => {
   })
 
   it('GET peers returns 422 if peer id is not cid', async () => {
-    const res = await fetch(`${url}routing/v1/peers/${(await createEd25519PeerId()).toString()}`, {
+    const res = await fetch(`${url}routing/v1/peers/${peerIdFromPrivateKey(await generateKeyPair('Ed25519')).toString()}`, {
       method: 'GET'
     })
 
@@ -182,7 +183,7 @@ describe('delegated-routing-v1-http-api-server', () => {
 
   it('GET peers returns peer records for get peers', async () => {
     const peer: PeerInfo = {
-      id: await createEd25519PeerId(),
+      id: peerIdFromPrivateKey(await generateKeyPair('Ed25519')),
       multiaddrs: [
         multiaddr('/ip4/123.123.123.123/tcp/123')
       ]
@@ -204,7 +205,7 @@ describe('delegated-routing-v1-http-api-server', () => {
   })
 
   it('GET ipns returns 422 if peer id is not cid', async () => {
-    const res = await fetch(`${url}routing/v1/ipns/${(await createEd25519PeerId()).toString()}`, {
+    const res = await fetch(`${url}routing/v1/ipns/${peerIdFromPrivateKey(await generateKeyPair('Ed25519')).toString()}`, {
       method: 'GET'
     })
 
@@ -220,12 +221,13 @@ describe('delegated-routing-v1-http-api-server', () => {
   })
 
   it('GET ipns returns record', async () => {
-    const peerId = await createEd25519PeerId()
+    const privateKey = await generateKeyPair('Ed25519')
+    const peerId = peerIdFromPrivateKey(privateKey)
     const cid = CID.parse('bafkreifjjcie6lypi6ny7amxnfftagclbuxndqonfipmb64f2km2devei4')
-    const record = await createIpnsRecord(peerId, cid, 0, 1000)
+    const record = await createIPNSRecord(privateKey, cid, 0, 1000)
 
     helia.routing.get = async function () {
-      return marshalIpnsRecord(record)
+      return marshalIPNSRecord(record)
     }
 
     const res = await fetch(`${url}routing/v1/ipns/${peerId.toCID().toString()}`, {
@@ -237,14 +239,15 @@ describe('delegated-routing-v1-http-api-server', () => {
 
     expect(res.status).to.equal(200)
     const arrayBuffer = await res.arrayBuffer()
-    expect(new Uint8Array(arrayBuffer)).to.equalBytes(marshalIpnsRecord(record))
+    expect(new Uint8Array(arrayBuffer)).to.equalBytes(marshalIPNSRecord(record))
   })
 
   it('PUT ipns puts record', async () => {
-    const peerId = await createEd25519PeerId()
+    const privateKey = await generateKeyPair('Ed25519')
+    const peerId = peerIdFromPrivateKey(privateKey)
     const cid = CID.parse('bafkreifjjcie6lypi6ny7amxnfftagclbuxndqonfipmb64f2km2devei4')
-    const record = await createIpnsRecord(peerId, cid, 0, 1000)
-    const marshalledRecord = marshalIpnsRecord(record)
+    const record = await createIPNSRecord(privateKey, cid, 0, 1000)
+    const marshalledRecord = marshalIPNSRecord(record)
 
     let putKey: Uint8Array = new Uint8Array()
     let putValue: Uint8Array = new Uint8Array()
@@ -263,7 +266,7 @@ describe('delegated-routing-v1-http-api-server', () => {
     })
 
     expect(res.status).to.equal(200)
-    expect(putKey).to.equalBytes(peerIdToRoutingKey(peerId))
+    expect(putKey).to.equalBytes(multihashToIPNSRoutingKey(privateKey.publicKey.toMultihash()))
     expect(putValue).to.equalBytes(marshalledRecord)
   })
 })

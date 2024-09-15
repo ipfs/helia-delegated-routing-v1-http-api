@@ -1,22 +1,16 @@
-import { type ContentRouting, type PeerRouting, type AbortOptions, type PeerId, type PeerInfo } from '@libp2p/interface'
-import { CodeError } from '@libp2p/interface'
-import { peerIdFromBytes } from '@libp2p/peer-id'
-import { marshal, unmarshal } from 'ipns'
+import { type ContentRouting, type PeerRouting, type AbortOptions, type PeerId, type PeerInfo, NotFoundError } from '@libp2p/interface'
+import { marshalIPNSRecord, multihashFromIPNSRoutingKey, unmarshalIPNSRecord } from 'ipns'
 import first from 'it-first'
 import map from 'it-map'
+import { CID } from 'multiformats/cid'
 import { equals as uint8ArrayEquals } from 'uint8arrays/equals'
 import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
 import type { DelegatedRoutingV1HttpApiClient } from './index.js'
-import type { CID } from 'multiformats/cid'
 
 const IPNS_PREFIX = uint8ArrayFromString('/ipns/')
 
 function isIPNSKey (key: Uint8Array): boolean {
   return uint8ArrayEquals(key.subarray(0, IPNS_PREFIX.byteLength), IPNS_PREFIX)
-}
-
-const peerIdFromRoutingKey = (key: Uint8Array): PeerId => {
-  return peerIdFromBytes(key.slice(IPNS_PREFIX.length))
 }
 
 /**
@@ -47,28 +41,30 @@ export class DelegatedRoutingV1HttpApiClientContentRouting implements ContentRou
       return
     }
 
-    const peerId = peerIdFromRoutingKey(key)
-    const record = unmarshal(value)
+    const digest = multihashFromIPNSRoutingKey(key)
+    const cid = CID.createV1(0x72, digest)
+    const record = unmarshalIPNSRecord(value)
 
-    await this.client.putIPNS(peerId, record, options)
+    await this.client.putIPNS(cid, record, options)
   }
 
   async get (key: Uint8Array, options?: AbortOptions): Promise<Uint8Array> {
     if (!isIPNSKey(key)) {
-      throw new CodeError('Not found', 'ERR_NOT_FOUND')
+      throw new NotFoundError('Not found')
     }
 
-    const peerId = peerIdFromRoutingKey(key)
+    const digest = multihashFromIPNSRoutingKey(key)
+    const cid = CID.createV1(0x72, digest)
 
     try {
-      const record = await this.client.getIPNS(peerId, options)
+      const record = await this.client.getIPNS(cid, options)
 
-      return marshal(record)
+      return marshalIPNSRecord(record)
     } catch (err: any) {
-      // ERR_BAD_RESPONSE is thrown when the response had no body, which means
+      // BadResponseError is thrown when the response had no body, which means
       // the record couldn't be found
-      if (err.code === 'ERR_BAD_RESPONSE') {
-        throw new CodeError('Not found', 'ERR_NOT_FOUND')
+      if (err.name === 'BadResponseError') {
+        throw new NotFoundError('Not found')
       }
 
       throw err
@@ -96,7 +92,7 @@ export class DelegatedRoutingV1HttpApiClientPeerRouting implements PeerRouting {
       }
     }
 
-    throw new CodeError('Not found', 'ERR_NOT_FOUND')
+    throw new NotFoundError('Not found')
   }
 
   async * getClosestPeers (key: Uint8Array, options: AbortOptions = {}): AsyncIterable<PeerInfo> {
