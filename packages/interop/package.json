@@ -116,8 +116,8 @@
     "test:node": "aegir test -t node --cov"
   },
   "devDependencies": {
-    "@helia/delegated-routing-v1-http-api-client": "^3.0.0",
-    "@helia/delegated-routing-v1-http-api-server": "^3.0.0",
+    "@helia/delegated-routing-v1-http-api-client": "^4.0.0",
+    "@helia/delegated-routing-v1-http-api-server": "^4.0.0",
     "@helia/ipns": "next",
     "@libp2p/crypto": "^5.0.1",
     "@libp2p/identify": "^3.0.1",
@@ -128,7 +128,7 @@
     "helia": "next",
     "ipns": "^10.0.0",
     "it-first": "^3.0.6",
-    "multiformats": "^13.2.3"
+    "multiformats": "^13.3.0"
   },
   "private": true
 }
