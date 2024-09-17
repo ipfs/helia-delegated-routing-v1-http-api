@@ -1,3 +1,9 @@
+## [@helia/delegated-routing-v1-http-api-server-v4.0.1](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-server-4.0.0...@helia/delegated-routing-v1-http-api-server-4.0.1) (2024-09-17)
+
+### Bug Fixes
+
+* update import to use multiformats ([8f92779](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/8f927793e0eb0b6d24d506a01f67e5cd4943321c))
+
 ## [@helia/delegated-routing-v1-http-api-server-v4.0.0](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-server-3.0.4...@helia/delegated-routing-v1-http-api-server-4.0.0) (2024-09-15)
 
 ### ⚠ BREAKING CHANGES
