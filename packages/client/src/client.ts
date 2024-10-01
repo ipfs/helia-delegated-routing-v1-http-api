@@ -93,19 +93,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
 
       // https://specs.ipfs.tech/routing/http-routing-v1/
       const url = new URL(`${this.clientUrl}routing/v1/providers/${cid.toString()}`)
-      // IPIP-484 filtering. options takes precedence over global filter
-      if (options.filterAddrs != null || this.filterAddrs != null) {
-        const filterAddrs = options.filterAddrs?.join(',') ?? this.filterAddrs?.join(',') ?? ''
-        if (filterAddrs !== '') {
-          url.searchParams.set('filter-addrs', filterAddrs)
-        }
-      }
-      if (options.filterProtocols != null || this.filterProtocols != null) {
-        const filterProtocols = options.filterProtocols?.join(',') ?? this.filterProtocols?.join(',') ?? ''
-        if (filterProtocols !== '') {
-          url.searchParams.set('filter-protocols', filterProtocols)
-        }
-      }
+      this.#addFilterParams(url, options.filterAddrs, options.filterProtocols)
       const getOptions = { headers: { Accept: 'application/x-ndjson' }, signal }
       const res = await fetch(url, getOptions)
 
@@ -171,20 +159,8 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
 
       // https://specs.ipfs.tech/routing/http-routing-v1/
       const url = new URL(`${this.clientUrl}routing/v1/peers/${peerId.toCID().toString()}`)
+      this.#addFilterParams(url, options.filterAddrs, options.filterProtocols)
 
-      // IPIP-484 filtering. local options filter precedence over global filter
-      if (options.filterAddrs != null || this.filterAddrs != null) {
-        const filterAddrs = options.filterAddrs?.join(',') ?? this.filterAddrs?.join(',') ?? ''
-        if (filterAddrs !== '') {
-          url.searchParams.set('filter-addrs', filterAddrs)
-        }
-      }
-      if (options.filterProtocols != null || this.filterProtocols != null) {
-        const filterProtocols = options.filterProtocols?.join(',') ?? this.filterProtocols?.join(',') ?? ''
-        if (filterProtocols !== '') {
-          url.searchParams.set('filter-protocols', filterProtocols)
-        }
-      }
       const getOptions = { headers: { Accept: 'application/x-ndjson' }, signal }
       const res = await fetch(url, getOptions)
 
@@ -355,6 +331,22 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       }
     } catch (err) {
       log.error('could not conform record to peer schema', err)
+    }
+  }
+
+  #addFilterParams (url: URL, filterAddrs?: string[], filterProtocols?: string[]): void {
+    // IPIP-484 filtering. local options filter precedence over global filter
+    if (filterAddrs != null || this.filterAddrs != null) {
+      const adressFilter = filterAddrs?.join(',') ?? this.filterAddrs?.join(',') ?? ''
+      if (adressFilter !== '') {
+        url.searchParams.set('filter-addrs', adressFilter)
+      }
+    }
+    if (filterProtocols != null || this.filterProtocols != null) {
+      const protocolFilter = filterProtocols?.join(',') ?? this.filterProtocols?.join(',') ?? ''
+      if (protocolFilter !== '') {
+        url.searchParams.set('filter-protocols', protocolFilter)
+      }
     }
   }
 }
