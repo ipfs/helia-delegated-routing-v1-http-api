@@ -31,8 +31,8 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
   private readonly timeout: number
   private readonly contentRouting: ContentRouting
   private readonly peerRouting: PeerRouting
-  private readonly filterAddrs: string[] | undefined
-  private readonly filterProtocols: string[] | undefined
+  private readonly filterAddrs?: string[]
+  private readonly filterProtocols?: string[]
 
   /**
    * Create a new DelegatedContentRouting instance
