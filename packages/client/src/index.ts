@@ -64,7 +64,26 @@ export interface PeerRecord {
   Protocols: string[]
 }
 
-export interface DelegatedRoutingV1HttpApiClientInit {
+export interface FilterOptions {
+  /**
+   * List of protocols to filter in the PeerRecords as defined in IPIP-484
+   * If undefined, PeerRecords are not filtered by protocol
+   *
+   * @see https://github.com/ipfs/specs/pull/484
+   * @default undefined
+   */
+  filterProtocols?: string[]
+
+  /**
+   * Array of address filters to filter PeerRecords's addresses as defined in IPIP-484
+   * If undefined, PeerRecords are not filtered by address
+   *
+   * @see https://github.com/ipfs/specs/pull/484
+   * @default undefined
+   */
+  filterAddrs?: string[]
+}
+export interface DelegatedRoutingV1HttpApiClientInit extends FilterOptions {
   /**
    * A concurrency limit to avoid request flood in web browser (default: 4)
    *
@@ -88,18 +107,21 @@ export interface GetIPNSOptions extends AbortOptions {
   validate?: boolean
 }
 
+export type GetProvidersOptions = FilterOptions & AbortOptions
+export type GetPeersOptions = FilterOptions & AbortOptions
+
 export interface DelegatedRoutingV1HttpApiClient {
   /**
    * Returns an async generator of {@link PeerRecord}s that can provide the
    * content for the passed {@link CID}
    */
-  getProviders(cid: CID, options?: AbortOptions): AsyncGenerator<PeerRecord>
+  getProviders(cid: CID, options?: GetProvidersOptions): AsyncGenerator<PeerRecord>
 
   /**
    * Returns an async generator of {@link PeerRecord}s for the provided
    * {@link PeerId}
    */
-  getPeers(peerId: PeerId, options?: AbortOptions): AsyncGenerator<PeerRecord>
+  getPeers(peerId: PeerId, options?: GetPeersOptions): AsyncGenerator<PeerRecord>
 
   /**
    * Returns a promise of a {@link IPNSRecord} for the given {@link MultihashDigest}

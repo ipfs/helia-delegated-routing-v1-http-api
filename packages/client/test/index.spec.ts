@@ -64,6 +64,63 @@ describe('delegated-routing-v1-http-api-client', () => {
     })))
   })
 
+  it('should add filter parameters the query of the request url', async () => {
+    const providers = [{
+      Protocol: 'transport-bitswap',
+      Schema: 'bitswap',
+      Metadata: 'gBI=',
+      ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
+      Addrs: []
+    }, {
+      Protocol: 'transport-bitswap',
+      Schema: 'peer',
+      Metadata: 'gBI=',
+      ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
+      Addrs: ['/ip4/42.42.42.42/tcp/1234']
+    }, {
+      ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
+      Addrs: []
+    }]
+
+    const cid = CID.parse('QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn')
+
+    // load providers for the router to fetch
+    await fetch(`${process.env.ECHO_SERVER}/add-providers/${cid.toString()}`, {
+      method: 'POST',
+      body: providers.map(prov => JSON.stringify(prov)).join('\n')
+    })
+
+    await all(client.getProviders(cid, { filterProtocols: ['transport-bitswap', 'unknown'], filterAddrs: ['webtransport', '!p2p-circuit'] }))
+
+    // Check if the correct URL was called with filter parameters
+    const lastCalledUrl = await fetch(`${process.env.ECHO_SERVER}/last-called-url`)
+    const lastCalledUrlText = await lastCalledUrl.text()
+
+    const searchParams = new URLSearchParams(lastCalledUrlText.split('?')[1])
+
+    expect(searchParams.get('filter-protocols')).to.equal('transport-bitswap,unknown')
+    expect(searchParams.get('filter-addrs')).to.equal('webtransport,!p2p-circuit')
+  })
+
+  it('should add filter parameters the query of the request url based on global filter', async () => {
+    const client = createDelegatedRoutingV1HttpApiClient(new URL(serverUrl), {
+      filterProtocols: ['transport-bitswap', 'unknown'],
+      filterAddrs: ['tcp', '!p2p-circuit']
+    })
+    const cid = CID.parse('QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn')
+
+    await all(client.getProviders(cid))
+
+    // Check if the correct URL was called with filter parameters
+    const lastCalledUrl = await fetch(`${process.env.ECHO_SERVER}/last-called-url`)
+    const lastCalledUrlText = await lastCalledUrl.text()
+
+    const searchParams = new URLSearchParams(lastCalledUrlText.split('?')[1])
+
+    expect(searchParams.get('filter-protocols')).to.equal('transport-bitswap,unknown')
+    expect(searchParams.get('filter-addrs')).to.equal('tcp,!p2p-circuit')
+  })
+
   it('should handle non-json input', async () => {
     const cid = CID.parse('QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn')
 

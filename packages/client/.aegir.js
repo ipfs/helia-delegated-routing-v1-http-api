@@ -6,6 +6,7 @@ const options = {
   test: {
     before: async () => {
       let callCount = 0
+      let lastCalledUrl = ''
       const providers = new Map()
       const peers = new Map()
       const ipnsGet = new Map()
@@ -13,6 +14,10 @@ const options = {
       const echo = new EchoServer()
       echo.polka.use(body.raw({ type: 'application/vnd.ipfs.ipns-record'}))
       echo.polka.use(body.text())
+      echo.polka.use((req, res, next) => {
+        next()
+        lastCalledUrl = req.url
+      })
       echo.polka.post('/add-providers/:cid', (req, res) => {
         callCount++
         providers.set(req.params.cid, req.body)
@@ -22,7 +27,6 @@ const options = {
         callCount++
         const records = providers.get(req.params.cid) ?? '[]'
         providers.delete(req.params.cid)
-
         res.end(records)
       })
       echo.polka.post('/add-peers/:peerId', (req, res) => {
@@ -67,6 +71,9 @@ const options = {
       echo.polka.get('/reset-call-count', (req, res) => {
         callCount = 0
         res.end()
+      })
+      echo.polka.get('/last-called-url', (req, res) => {
+        res.end(lastCalledUrl)
       })
 
       await echo.start()

@@ -11,7 +11,7 @@ import defer from 'p-defer'
 import PQueue from 'p-queue'
 import { BadResponseError, InvalidRequestError } from './errors.js'
 import { DelegatedRoutingV1HttpApiClientContentRouting, DelegatedRoutingV1HttpApiClientPeerRouting } from './routings.js'
-import type { DelegatedRoutingV1HttpApiClient, DelegatedRoutingV1HttpApiClientInit, GetIPNSOptions, PeerRecord } from './index.js'
+import type { DelegatedRoutingV1HttpApiClient, DelegatedRoutingV1HttpApiClientInit, GetProvidersOptions, GetPeersOptions, GetIPNSOptions, PeerRecord } from './index.js'
 import type { ContentRouting, PeerRouting, AbortOptions, PeerId } from '@libp2p/interface'
 import type { Multiaddr } from '@multiformats/multiaddr'
 import type { CID } from 'multiformats'
@@ -31,6 +31,8 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
   private readonly timeout: number
   private readonly contentRouting: ContentRouting
   private readonly peerRouting: PeerRouting
+  private readonly filterAddrs?: string[]
+  private readonly filterProtocols?: string[]
 
   /**
    * Create a new DelegatedContentRouting instance
@@ -44,6 +46,8 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
     })
     this.clientUrl = url instanceof URL ? url : new URL(url)
     this.timeout = init.timeout ?? defaultValues.timeout
+    this.filterAddrs = init.filterAddrs
+    this.filterProtocols = init.filterProtocols
     this.contentRouting = new DelegatedRoutingV1HttpApiClientContentRouting(this)
     this.peerRouting = new DelegatedRoutingV1HttpApiClientPeerRouting(this)
   }
@@ -70,7 +74,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
     this.started = false
   }
 
-  async * getProviders (cid: CID, options: AbortOptions = {}): AsyncGenerator<PeerRecord> {
+  async * getProviders (cid: CID, options: GetProvidersOptions = {}): AsyncGenerator<PeerRecord> {
     log('getProviders starts: %c', cid)
 
     const timeoutSignal = AbortSignal.timeout(this.timeout)
@@ -88,9 +92,10 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       await onStart.promise
 
       // https://specs.ipfs.tech/routing/http-routing-v1/
-      const resource = `${this.clientUrl}routing/v1/providers/${cid.toString()}`
+      const url = new URL(`${this.clientUrl}routing/v1/providers/${cid.toString()}`)
+      this.#addFilterParams(url, options.filterAddrs, options.filterProtocols)
       const getOptions = { headers: { Accept: 'application/x-ndjson' }, signal }
-      const res = await fetch(resource, getOptions)
+      const res = await fetch(url, getOptions)
 
       if (res.status === 404) {
         // https://specs.ipfs.tech/routing/http-routing-v1/#response-status-codes
@@ -135,7 +140,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
     }
   }
 
-  async * getPeers (peerId: PeerId, options: AbortOptions | undefined = {}): AsyncGenerator<PeerRecord> {
+  async * getPeers (peerId: PeerId, options: GetPeersOptions = {}): AsyncGenerator<PeerRecord> {
     log('getPeers starts: %c', peerId)
 
     const timeoutSignal = AbortSignal.timeout(this.timeout)
@@ -153,9 +158,11 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       await onStart.promise
 
       // https://specs.ipfs.tech/routing/http-routing-v1/
-      const resource = `${this.clientUrl}routing/v1/peers/${peerId.toCID().toString()}`
+      const url = new URL(`${this.clientUrl}routing/v1/peers/${peerId.toCID().toString()}`)
+      this.#addFilterParams(url, options.filterAddrs, options.filterProtocols)
+
       const getOptions = { headers: { Accept: 'application/x-ndjson' }, signal }
-      const res = await fetch(resource, getOptions)
+      const res = await fetch(url, getOptions)
 
       if (res.status === 404) {
         // https://specs.ipfs.tech/routing/http-routing-v1/#response-status-codes
@@ -324,6 +331,22 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       }
     } catch (err) {
       log.error('could not conform record to peer schema', err)
+    }
+  }
+
+  #addFilterParams (url: URL, filterAddrs?: string[], filterProtocols?: string[]): void {
+    // IPIP-484 filtering. local options filter precedence over global filter
+    if (filterAddrs != null || this.filterAddrs != null) {
+      const adressFilter = filterAddrs?.join(',') ?? this.filterAddrs?.join(',') ?? ''
+      if (adressFilter !== '') {
+        url.searchParams.set('filter-addrs', adressFilter)
+      }
+    }
+    if (filterProtocols != null || this.filterProtocols != null) {
+      const protocolFilter = filterProtocols?.join(',') ?? this.filterProtocols?.join(',') ?? ''
+      if (protocolFilter !== '') {
+        url.searchParams.set('filter-protocols', protocolFilter)
+      }
     }
   }
 }
