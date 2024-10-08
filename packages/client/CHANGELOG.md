@@ -1,3 +1,9 @@
+## [@helia/delegated-routing-v1-http-api-client-v4.1.0](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-4.0.1...@helia/delegated-routing-v1-http-api-client-4.1.0) (2024-10-08)
+
+### Features
+
+* add addr and protocol filtering to client ([#144](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues/144)) ([3e919e1](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/3e919e128c54bae79ce3c8af2a81076de248eb4b))
+
 ## [@helia/delegated-routing-v1-http-api-client-v4.0.1](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-4.0.0...@helia/delegated-routing-v1-http-api-client-4.0.1) (2024-09-17)
 
 ### Bug Fixes
