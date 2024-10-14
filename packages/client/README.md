@@ -87,7 +87,7 @@ const client = createDelegatedRoutingV1HttpApiClient('https://delegated-ipfs.dev
 })
 
 // per-request filter options
-for await (const peer of client.getPeers(peerIdFromString('QmFoo'), {
+for await (const prov of getProviders(CID.parse('bafy'), {
   filterProtocols: ['transport-ipfs-gateway-http'],
   filterAddrs: ['!p2p-circuit']
 })) {
