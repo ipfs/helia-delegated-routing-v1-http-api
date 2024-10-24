@@ -38,6 +38,35 @@
  * // later this will use the configured HTTP gateway
  * await libp2p.peerRouting.findPeer(peerIdFromString('QmFoo'))
  * ```
+ *
+ * ### Filtering with IPIP-484
+ *
+ * The client can be configured to pass filter options to the delegated routing server as defined in IPIP-484.
+ * The filter options be set globally, by passing them to the client constructor, or on a per-request basis.
+ *
+ * @see https://github.com/ipfs/specs/pull/484
+ *
+ * @example
+ *
+ * ```typescript
+ * import { createDelegatedRoutingV1HttpApiClient } from '@helia/delegated-routing-v1-http-api-client'
+ * import { createLibp2p } from 'libp2p'
+ * import { peerIdFromString } from '@libp2p/peer-id'
+ *
+ * // globally set filter options
+ * const client = createDelegatedRoutingV1HttpApiClient('https://delegated-ipfs.dev', {
+ *   filterProtocols: ['transport-bitswap', 'unknown', 'transport-ipfs-gateway-http'],
+ *   filterAddrs: ['webtransport', 'webrtc-direct', 'wss']
+ * })
+ *
+ * // per-request filter options
+ * for await (const prov of getProviders(CID.parse('bafy'), {
+ *   filterProtocols: ['transport-ipfs-gateway-http'],
+ *   filterAddrs: ['!p2p-circuit']
+ * })) {
+ *   // ...
+ * }
+ * ```
  */
 
 import { DefaultDelegatedRoutingV1HttpApiClient } from './client.js'
