@@ -1,3 +1,9 @@
+## [@helia/delegated-routing-v1-http-api-client-v4.1.1](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-4.1.0...@helia/delegated-routing-v1-http-api-client-4.1.1) (2024-10-24)
+
+### Documentation
+
+* add example showing ipip-484 client filtering ([#147](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues/147)) ([b54f84f](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/b54f84f7023b51e9db035d5e76fcaa8c7961fc41))
+
 ## [@helia/delegated-routing-v1-http-api-client-v4.1.0](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-4.0.1...@helia/delegated-routing-v1-http-api-client-4.1.0) (2024-10-08)
 
 ### Features
