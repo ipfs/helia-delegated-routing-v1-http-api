@@ -1,3 +1,13 @@
+## [@helia/delegated-routing-v1-http-api-client-v4.1.2](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-4.1.1...@helia/delegated-routing-v1-http-api-client-4.1.2) (2024-11-01)
+
+### Bug Fixes
+
+* add cancelReprovide as a noop, bump @libp2p/interface ([#150](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues/150)) ([997b27d](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/997b27d782cddd7b38d859c55a0ef0587022a1d1))
+
+### Dependencies
+
+* **dev:** bump aegir from 44.1.4 to 45.0.1 ([#149](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues/149)) ([31cf591](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/31cf5919579b5cad960448e85146935a965139c7))
+
 ## [@helia/delegated-routing-v1-http-api-client-v4.1.1](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-4.1.0...@helia/delegated-routing-v1-http-api-client-4.1.1) (2024-10-24)
 
 ### Documentation
