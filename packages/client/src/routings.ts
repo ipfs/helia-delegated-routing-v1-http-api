@@ -36,6 +36,10 @@ export class DelegatedRoutingV1HttpApiClientContentRouting implements ContentRou
     // noop
   }
 
+  async cancelReprovide (): Promise<void> {
+    // noop
+  }
+
   async put (key: Uint8Array, value: Uint8Array, options?: AbortOptions): Promise<void> {
     if (!isIPNSKey(key)) {
       return
