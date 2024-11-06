@@ -302,4 +302,52 @@ describe('delegated-routing-v1-http-api-client', () => {
     const receivedRecord = new Uint8Array(await res.arrayBuffer())
     expect(marshalIPNSRecord(record)).to.equalBytes(receivedRecord)
   })
+
+  it('should deduplicate concurrent requests to the same URL', async () => {
+    const cid = CID.parse('QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn')
+    const providers = [{
+      Protocol: 'transport-bitswap',
+      Schema: 'bitswap',
+      Metadata: 'gBI=',
+      ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
+      Addrs: ['/ip4/41.41.41.41/tcp/1234']
+    }]
+
+    // load providers for the router to fetch
+    await fetch(`${process.env.ECHO_SERVER}/add-providers/${cid.toString()}`, {
+      method: 'POST',
+      body: providers.map(prov => JSON.stringify(prov)).join('\n')
+    })
+
+    // Reset call count before our test
+    await fetch(`${process.env.ECHO_SERVER}/reset-call-count`)
+
+    // Make multiple concurrent requests
+    const results = await Promise.all([
+      all(client.getProviders(cid)),
+      all(client.getProviders(cid)),
+      all(client.getProviders(cid)),
+      all(client.getProviders(cid))
+    ])
+
+    // Get the number of times the server was called
+    const callCountRes = await fetch(`${process.env.ECHO_SERVER}/get-call-count`)
+    const callCount = parseInt(await callCountRes.text(), 10)
+
+    // Verify server was only called once
+    expect(callCount).to.equal(1)
+
+    // Verify all results are the same
+    console.log('-------', results)
+    results.forEach(resultProviders => {
+      expect(resultProviders.map(prov => ({
+        id: prov.ID.toString(),
+        // eslint-disable-next-line max-nested-callbacks
+        addrs: prov.Addrs?.map(ma => ma.toString())
+      }))).to.deep.equal(providers.map(prov => ({
+        id: prov.ID,
+        addrs: prov.Addrs
+      })))
+    })
+  })
 })

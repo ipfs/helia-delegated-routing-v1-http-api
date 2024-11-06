@@ -352,14 +352,16 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
     }
   }
 
-  // Ensures that only one concurrent request is made for the same URL with the same method
+  // Ensures that only one concurrent request is made for the same url-method tuple
   async #makeRequest (url: string, options: RequestInit): Promise<Response> {
     const key = `${options.method ?? 'GET'}-${url}`
 
-    // Check if there's already an in-flight request for this URL
+    // Check if there's already an in-flight request for this url-method tuple
     const existingRequest = this.inFlightRequests.get(key)
     if (existingRequest != null) {
-      return existingRequest
+      const response = await existingRequest
+      // Clone the response since it can only be consumed once
+      return response.clone()
     }
 
     // Create new request and track it
@@ -369,6 +371,8 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
     })
 
     this.inFlightRequests.set(key, requestPromise)
-    return requestPromise
+    const response = await requestPromise
+    // Return a clone for the first caller too, so all callers get a fresh response
+    return response.clone()
   }
 }
