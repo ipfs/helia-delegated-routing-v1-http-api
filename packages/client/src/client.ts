@@ -33,6 +33,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
   private readonly peerRouting: PeerRouting
   private readonly filterAddrs?: string[]
   private readonly filterProtocols?: string[]
+  private readonly inFlightRequests: Map<string, Promise<Response>>
 
   /**
    * Create a new DelegatedContentRouting instance
@@ -44,6 +45,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
     this.httpQueue = new PQueue({
       concurrency: init.concurrentRequests ?? defaultValues.concurrentRequests
     })
+    this.inFlightRequests = new Map() // Tracks in-flight requests to avoid duplicate requests
     this.clientUrl = url instanceof URL ? url : new URL(url)
     this.timeout = init.timeout ?? defaultValues.timeout
     this.filterAddrs = init.filterAddrs
@@ -95,7 +97,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       const url = new URL(`${this.clientUrl}routing/v1/providers/${cid.toString()}`)
       this.#addFilterParams(url, options.filterAddrs, options.filterProtocols)
       const getOptions = { headers: { Accept: 'application/x-ndjson' }, signal }
-      const res = await fetch(url, getOptions)
+      const res = await this.#makeRequest(url.toString(), getOptions)
 
       if (res.status === 404) {
         // https://specs.ipfs.tech/routing/http-routing-v1/#response-status-codes
@@ -162,7 +164,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       this.#addFilterParams(url, options.filterAddrs, options.filterProtocols)
 
       const getOptions = { headers: { Accept: 'application/x-ndjson' }, signal }
-      const res = await fetch(url, getOptions)
+      const res = await this.#makeRequest(url.toString(), getOptions)
 
       if (res.status === 404) {
         // https://specs.ipfs.tech/routing/http-routing-v1/#response-status-codes
@@ -228,7 +230,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       await onStart.promise
 
       const getOptions = { headers: { Accept: 'application/vnd.ipfs.ipns-record' }, signal }
-      const res = await fetch(resource, getOptions)
+      const res = await this.#makeRequest(resource, getOptions)
 
       log('getIPNS GET %s %d', resource, res.status)
 
@@ -290,7 +292,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       const body = marshalIPNSRecord(record)
 
       const getOptions = { method: 'PUT', headers: { 'Content-Type': 'application/vnd.ipfs.ipns-record' }, body, signal }
-      const res = await fetch(resource, getOptions)
+      const res = await this.#makeRequest(resource, getOptions)
 
       log('putIPNS PUT %s %d', resource, res.status)
 
@@ -348,5 +350,25 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
         url.searchParams.set('filter-protocols', protocolFilter)
       }
     }
+  }
+
+  // Ensures that only one concurrent request is made for the same URL with the same method
+  async #makeRequest (url: string, options: RequestInit): Promise<Response> {
+    const key = `${options.method ?? 'GET'}-${url}`
+
+    // Check if there's already an in-flight request for this URL
+    const existingRequest = this.inFlightRequests.get(key)
+    if (existingRequest != null) {
+      return existingRequest
+    }
+
+    // Create new request and track it
+    const requestPromise = fetch(url, options).finally(() => {
+      // Clean up the tracked request when it completes
+      this.inFlightRequests.delete(key)
+    })
+
+    this.inFlightRequests.set(key, requestPromise)
+    return requestPromise
   }
 }
