@@ -356,7 +356,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
   async #makeRequest (url: string, options: RequestInit): Promise<Response> {
     const key = `${options.method ?? 'GET'}-${url}`
 
-    // Check if there's already an in-flight request for this url-method tuple
+    // Check if there's already an in-flight request for this ur-method tuple
     const existingRequest = this.inFlightRequests.get(key)
     if (existingRequest != null) {
       const response = await existingRequest

@@ -338,7 +338,6 @@ describe('delegated-routing-v1-http-api-client', () => {
     expect(callCount).to.equal(1)
 
     // Verify all results are the same
-    console.log('-------', results)
     results.forEach(resultProviders => {
       expect(resultProviders.map(prov => ({
         id: prov.ID.toString(),
