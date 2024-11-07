@@ -39,6 +39,20 @@
  * await libp2p.peerRouting.findPeer(peerIdFromString('QmFoo'))
  * ```
  *
+ * ### Caching
+ *
+ * By default, the client caches responses in browser environments for a duration of 5 minutes.
+ *
+ * If caching is enabled, the client will cache responses for the duration of `cacheTTL` milliseconds.
+ * If `cacheTTL` is 0, caching is disabled:
+ *
+ * @example
+ *
+ * ```typescript
+ * // disable caching
+ * const client = createDelegatedRoutingV1HttpApiClient('https://example.org', { cacheTTL: 0 })
+ * ```
+ *
  * ### Filtering with IPIP-484
  *
  * The client can be configured to pass filter options to the delegated routing server as defined in IPIP-484.
