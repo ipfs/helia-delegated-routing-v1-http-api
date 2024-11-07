@@ -55,16 +55,17 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
     this.contentRouting = new DelegatedRoutingV1HttpApiClientContentRouting(this)
     this.peerRouting = new DelegatedRoutingV1HttpApiClientPeerRouting(this)
 
-    const cacheEnabled = typeof globalThis.caches !== 'undefined'
+    this.cacheTTL = init.cacheTTL ?? defaultValues.cacheTTL
+    const cacheEnabled = (typeof globalThis.caches !== 'undefined') && (this.cacheTTL > 0)
+
     if (cacheEnabled) {
-      log('cache enabled')
+      log('cache enabled with ttl %d', this.cacheTTL)
       globalThis.caches.open('delegated-routing-v1-cache').then(cache => {
         this.cache = cache
       }).catch(() => {
         this.cache = undefined
       })
     }
-    this.cacheTTL = init.cacheTTL ?? defaultValues.cacheTTL
   }
 
   get [contentRoutingSymbol] (): ContentRouting {

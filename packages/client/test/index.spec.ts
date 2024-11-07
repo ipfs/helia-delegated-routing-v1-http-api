@@ -21,7 +21,7 @@ describe('delegated-routing-v1-http-api-client', () => {
   let client: DelegatedRoutingV1HttpApiClient
 
   beforeEach(() => {
-    client = createDelegatedRoutingV1HttpApiClient(new URL(serverUrl))
+    client = createDelegatedRoutingV1HttpApiClient(new URL(serverUrl), { cacheTTL: 0 })
   })
 
   afterEach(async () => {

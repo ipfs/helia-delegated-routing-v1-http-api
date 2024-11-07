@@ -127,6 +127,7 @@ export interface DelegatedRoutingV1HttpApiClientInit extends FilterOptions {
 
   /**
    * How long to cache responses for in ms (default: 5 minutes)
+   * If 0, caching is disabled
    */
   cacheTTL?: number
 }
