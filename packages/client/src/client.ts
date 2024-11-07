@@ -409,10 +409,16 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
     const requestPromise = fetch(url, options).then(async response => {
       // Only cache successful GET requests
       if (this.cache != null && response.ok && requestMethod === 'GET') {
-        // Create a new response with expiration header
-        const cachedResponse = response.clone()
         const expires = Date.now() + this.cacheTTL
-        cachedResponse.headers.set('x-cache-expires', expires.toString())
+        const headers = new Headers(response.headers)
+        headers.set('x-cache-expires', expires.toString())
+
+        // Create a new response with expiration header
+        const cachedResponse = new Response(response.clone().body, {
+          status: response.status,
+          statusText: response.statusText,
+          headers
+        })
 
         await this.cache.put(url, cachedResponse)
       }
