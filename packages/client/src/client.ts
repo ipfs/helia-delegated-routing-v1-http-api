@@ -20,7 +20,8 @@ const log = logger('delegated-routing-v1-http-api-client')
 
 const defaultValues = {
   concurrentRequests: 4,
-  timeout: 30e3
+  timeout: 30e3,
+  cacheTTL: 5 * 60 * 1000 // 5 minutes default as per https://specs.ipfs.tech/routing/http-routing-v1/#response-headers
 }
 
 export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpApiClient {
@@ -34,7 +35,8 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
   private readonly filterAddrs?: string[]
   private readonly filterProtocols?: string[]
   private readonly inFlightRequests: Map<string, Promise<Response>>
-
+  private cache?: Cache
+  private readonly cacheTTL: number
   /**
    * Create a new DelegatedContentRouting instance
    */
@@ -52,6 +54,17 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
     this.filterProtocols = init.filterProtocols
     this.contentRouting = new DelegatedRoutingV1HttpApiClientContentRouting(this)
     this.peerRouting = new DelegatedRoutingV1HttpApiClientPeerRouting(this)
+
+    const cacheEnabled = typeof globalThis.caches !== 'undefined'
+    if (cacheEnabled) {
+      log('cache enabled')
+      globalThis.caches.open('delegated-routing-v1-cache').then(cache => {
+        this.cache = cache
+      }).catch(() => {
+        this.cache = undefined
+      })
+    }
+    this.cacheTTL = init.cacheTTL ?? defaultValues.cacheTTL
   }
 
   get [contentRoutingSymbol] (): ContentRouting {
@@ -74,6 +87,11 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
     this.httpQueue.clear()
     this.shutDownController.abort()
     this.started = false
+
+    // Clear the cache when stopping
+    if (this.cache != null) {
+      void this.cache.delete('delegated-routing-v1-cache')
+    }
   }
 
   async * getProviders (cid: CID, options: GetProvidersOptions = {}): AsyncGenerator<PeerRecord> {
@@ -352,27 +370,60 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
     }
   }
 
-  // Ensures that only one concurrent request is made for the same url-method tuple
+  //
+  // and caches GET requests
+  /**
+   * makeRequest has two features:
+   * - Ensures only one concurrent request is made for the same URL
+   * - Caches GET requests if the Cache API is available
+   */
   async #makeRequest (url: string, options: RequestInit): Promise<Response> {
-    const key = `${options.method ?? 'GET'}-${url}`
+    const requestMethod = options.method ?? 'GET'
+    const key = `${requestMethod}-${url}`
 
-    // Check if there's already an in-flight request for this ur-method tuple
+    // Only try to use cache for GET requests
+    if (requestMethod === 'GET') {
+      const cachedResponse = await this.cache?.match(url)
+      if (cachedResponse != null) {
+        // Check if the cached response has expired
+        const expires = parseInt(cachedResponse.headers.get('x-cache-expires') ?? '0', 10)
+        if (expires > Date.now()) {
+          log('returning cached response for %s', key)
+          return cachedResponse
+        } else {
+          // Remove expired response from cache
+          await this.cache?.delete(url)
+        }
+      }
+    }
+
+    // Check if there's already an in-flight request for this URL
     const existingRequest = this.inFlightRequests.get(key)
     if (existingRequest != null) {
       const response = await existingRequest
-      // Clone the response since it can only be consumed once
+      log('deduplicating outgoing request for %s', key)
       return response.clone()
     }
 
     // Create new request and track it
-    const requestPromise = fetch(url, options).finally(() => {
+    const requestPromise = fetch(url, options).then(async response => {
+      // Only cache successful GET requests
+      if (this.cache != null && response.ok && requestMethod === 'GET') {
+        // Create a new response with expiration header
+        const cachedResponse = response.clone()
+        const expires = Date.now() + this.cacheTTL
+        cachedResponse.headers.set('x-cache-expires', expires.toString())
+
+        await this.cache.put(url, cachedResponse)
+      }
+      return response
+    }).finally(() => {
       // Clean up the tracked request when it completes
       this.inFlightRequests.delete(key)
     })
 
     this.inFlightRequests.set(key, requestPromise)
     const response = await requestPromise
-    // Return a clone for the first caller too, so all callers get a fresh response
     return response.clone()
   }
 }

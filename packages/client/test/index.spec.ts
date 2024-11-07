@@ -7,6 +7,7 @@ import { expect } from 'aegir/chai'
 import { createIPNSRecord, marshalIPNSRecord } from 'ipns'
 import all from 'it-all'
 import { CID } from 'multiformats/cid'
+import { isBrowser } from 'wherearewe'
 import { createDelegatedRoutingV1HttpApiClient, type DelegatedRoutingV1HttpApiClient } from '../src/index.js'
 
 if (process.env.ECHO_SERVER == null) {
@@ -14,6 +15,7 @@ if (process.env.ECHO_SERVER == null) {
 }
 
 const serverUrl = process.env.ECHO_SERVER
+const itBrowser = (isBrowser ? it : it.skip)
 
 describe('delegated-routing-v1-http-api-client', () => {
   let client: DelegatedRoutingV1HttpApiClient
@@ -348,5 +350,50 @@ describe('delegated-routing-v1-http-api-client', () => {
         addrs: prov.Addrs
       })))
     })
+  })
+
+  itBrowser('should respect cache TTL', async () => {
+    const shortTTL = 100 // 100ms TTL for testing
+    const clientWithShortTTL = createDelegatedRoutingV1HttpApiClient(new URL(serverUrl), {
+      cacheTTL: shortTTL
+    })
+
+    const cid = CID.parse('QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn')
+    const providers = [{
+      Protocol: 'transport-bitswap',
+      Schema: 'bitswap',
+      Metadata: 'gBI=',
+      ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
+      Addrs: ['/ip4/41.41.41.41/tcp/1234']
+    }]
+
+    // load providers for the router to fetch
+    await fetch(`${process.env.ECHO_SERVER}/add-providers/${cid.toString()}`, {
+      method: 'POST',
+      body: providers.map(prov => JSON.stringify(prov)).join('\n')
+    })
+
+    // Reset call count
+    await fetch(`${process.env.ECHO_SERVER}/reset-call-count`)
+
+    // First request should hit the server
+    await all(clientWithShortTTL.getProviders(cid))
+
+    // Second request should use cache
+    await all(clientWithShortTTL.getProviders(cid))
+
+    let callCount = parseInt(await (await fetch(`${process.env.ECHO_SERVER}/get-call-count`)).text(), 10)
+    expect(callCount).to.equal(1) // Only one server call so far
+
+    // Wait for cache to expire
+    await new Promise(resolve => setTimeout(resolve, shortTTL + 50))
+
+    // This request should hit the server again because cache expired
+    await all(clientWithShortTTL.getProviders(cid))
+
+    callCount = parseInt(await (await fetch(`${process.env.ECHO_SERVER}/get-call-count`)).text(), 10)
+    expect(callCount).to.equal(2) // Second server call after cache expired
+
+    clientWithShortTTL.stop()
   })
 })

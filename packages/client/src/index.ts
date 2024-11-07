@@ -124,6 +124,11 @@ export interface DelegatedRoutingV1HttpApiClientInit extends FilterOptions {
    * How long a request is allowed to take in ms (default: 30 seconds)
    */
   timeout?: number
+
+  /**
+   * How long to cache responses for in ms (default: 5 minutes)
+   */
+  cacheTTL?: number
 }
 
 export interface GetIPNSOptions extends AbortOptions {
