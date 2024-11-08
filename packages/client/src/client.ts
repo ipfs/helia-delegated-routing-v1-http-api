@@ -371,8 +371,6 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
     }
   }
 
-  //
-  // and caches GET requests
   /**
    * makeRequest has two features:
    * - Ensures only one concurrent request is made for the same URL
