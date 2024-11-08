@@ -429,6 +429,6 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
 
     this.inFlightRequests.set(key, requestPromise)
     const response = await requestPromise
-    return response.clone()
+    return response
   }
 }

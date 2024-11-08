@@ -379,7 +379,8 @@ describe('delegated-routing-v1-http-api-client', () => {
     // First request should hit the server
     await all(clientWithShortTTL.getProviders(cid))
 
-    // Second request should use cache
+    // Second and third request should use cache
+    await all(clientWithShortTTL.getProviders(cid))
     await all(clientWithShortTTL.getProviders(cid))
 
     let callCount = parseInt(await (await fetch(`${process.env.ECHO_SERVER}/get-call-count`)).text(), 10)
