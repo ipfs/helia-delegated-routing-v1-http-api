@@ -1,3 +1,9 @@
+## [@helia/delegated-routing-v1-http-api-client-v4.2.0](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-4.1.2...@helia/delegated-routing-v1-http-api-client-4.2.0) (2024-11-11)
+
+### Features
+
+* request deduplication and caching in client ([#151](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues/151)) ([98105ae](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/98105ae6de1f4a771a6d7bb0d1cb51862b264710)), closes [#148](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues/148)
+
 ## [@helia/delegated-routing-v1-http-api-client-v4.1.2](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-4.1.1...@helia/delegated-routing-v1-http-api-client-4.1.2) (2024-11-01)
 
 ### Bug Fixes
