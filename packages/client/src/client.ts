@@ -20,7 +20,8 @@ const log = logger('delegated-routing-v1-http-api-client')
 
 const defaultValues = {
   concurrentRequests: 4,
-  timeout: 30e3
+  timeout: 30e3,
+  cacheTTL: 5 * 60 * 1000 // 5 minutes default as per https://specs.ipfs.tech/routing/http-routing-v1/#response-headers
 }
 
 export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpApiClient {
@@ -33,7 +34,9 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
   private readonly peerRouting: PeerRouting
   private readonly filterAddrs?: string[]
   private readonly filterProtocols?: string[]
-
+  private readonly inFlightRequests: Map<string, Promise<Response>>
+  private cache?: Cache
+  private readonly cacheTTL: number
   /**
    * Create a new DelegatedContentRouting instance
    */
@@ -44,12 +47,25 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
     this.httpQueue = new PQueue({
       concurrency: init.concurrentRequests ?? defaultValues.concurrentRequests
     })
+    this.inFlightRequests = new Map() // Tracks in-flight requests to avoid duplicate requests
     this.clientUrl = url instanceof URL ? url : new URL(url)
     this.timeout = init.timeout ?? defaultValues.timeout
     this.filterAddrs = init.filterAddrs
     this.filterProtocols = init.filterProtocols
     this.contentRouting = new DelegatedRoutingV1HttpApiClientContentRouting(this)
     this.peerRouting = new DelegatedRoutingV1HttpApiClientPeerRouting(this)
+
+    this.cacheTTL = init.cacheTTL ?? defaultValues.cacheTTL
+    const cacheEnabled = (typeof globalThis.caches !== 'undefined') && (this.cacheTTL > 0)
+
+    if (cacheEnabled) {
+      log('cache enabled with ttl %d', this.cacheTTL)
+      globalThis.caches.open('delegated-routing-v1-cache').then(cache => {
+        this.cache = cache
+      }).catch(() => {
+        this.cache = undefined
+      })
+    }
   }
 
   get [contentRoutingSymbol] (): ContentRouting {
@@ -72,6 +88,11 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
     this.httpQueue.clear()
     this.shutDownController.abort()
     this.started = false
+
+    // Clear the cache when stopping
+    if (this.cache != null) {
+      void this.cache.delete('delegated-routing-v1-cache')
+    }
   }
 
   async * getProviders (cid: CID, options: GetProvidersOptions = {}): AsyncGenerator<PeerRecord> {
@@ -95,7 +116,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       const url = new URL(`${this.clientUrl}routing/v1/providers/${cid.toString()}`)
       this.#addFilterParams(url, options.filterAddrs, options.filterProtocols)
       const getOptions = { headers: { Accept: 'application/x-ndjson' }, signal }
-      const res = await fetch(url, getOptions)
+      const res = await this.#makeRequest(url.toString(), getOptions)
 
       if (res.status === 404) {
         // https://specs.ipfs.tech/routing/http-routing-v1/#response-status-codes
@@ -162,7 +183,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       this.#addFilterParams(url, options.filterAddrs, options.filterProtocols)
 
       const getOptions = { headers: { Accept: 'application/x-ndjson' }, signal }
-      const res = await fetch(url, getOptions)
+      const res = await this.#makeRequest(url.toString(), getOptions)
 
       if (res.status === 404) {
         // https://specs.ipfs.tech/routing/http-routing-v1/#response-status-codes
@@ -228,7 +249,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       await onStart.promise
 
       const getOptions = { headers: { Accept: 'application/vnd.ipfs.ipns-record' }, signal }
-      const res = await fetch(resource, getOptions)
+      const res = await this.#makeRequest(resource, getOptions)
 
       log('getIPNS GET %s %d', resource, res.status)
 
@@ -290,7 +311,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       const body = marshalIPNSRecord(record)
 
       const getOptions = { method: 'PUT', headers: { 'Content-Type': 'application/vnd.ipfs.ipns-record' }, body, signal }
-      const res = await fetch(resource, getOptions)
+      const res = await this.#makeRequest(resource, getOptions)
 
       log('putIPNS PUT %s %d', resource, res.status)
 
@@ -348,5 +369,66 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
         url.searchParams.set('filter-protocols', protocolFilter)
       }
     }
+  }
+
+  /**
+   * makeRequest has two features:
+   * - Ensures only one concurrent request is made for the same URL
+   * - Caches GET requests if the Cache API is available
+   */
+  async #makeRequest (url: string, options: RequestInit): Promise<Response> {
+    const requestMethod = options.method ?? 'GET'
+    const key = `${requestMethod}-${url}`
+
+    // Only try to use cache for GET requests
+    if (requestMethod === 'GET') {
+      const cachedResponse = await this.cache?.match(url)
+      if (cachedResponse != null) {
+        // Check if the cached response has expired
+        const expires = parseInt(cachedResponse.headers.get('x-cache-expires') ?? '0', 10)
+        if (expires > Date.now()) {
+          log('returning cached response for %s', key)
+          return cachedResponse
+        } else {
+          // Remove expired response from cache
+          await this.cache?.delete(url)
+        }
+      }
+    }
+
+    // Check if there's already an in-flight request for this URL
+    const existingRequest = this.inFlightRequests.get(key)
+    if (existingRequest != null) {
+      const response = await existingRequest
+      log('deduplicating outgoing request for %s', key)
+      return response.clone()
+    }
+
+    // Create new request and track it
+    const requestPromise = fetch(url, options).then(async response => {
+      // Only cache successful GET requests
+      if (this.cache != null && response.ok && requestMethod === 'GET') {
+        const expires = Date.now() + this.cacheTTL
+        const headers = new Headers(response.headers)
+        headers.set('x-cache-expires', expires.toString())
+
+        // Create a new response with expiration header
+        const cachedResponse = new Response(response.clone().body, {
+          status: response.status,
+          statusText: response.statusText,
+          headers
+        })
+
+        await this.cache.put(url, cachedResponse)
+      }
+      return response
+    }).finally(() => {
+      // Clean up the tracked request when it completes
+      this.inFlightRequests.delete(key)
+    })
+
+    this.inFlightRequests.set(key, requestPromise)
+    const response = await requestPromise
+    return response
   }
 }

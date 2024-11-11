@@ -23,7 +23,7 @@ describe('libp2p content-routing', () => {
   let client: DelegatedRoutingV1HttpApiClient
 
   beforeEach(() => {
-    client = createDelegatedRoutingV1HttpApiClient(new URL(serverUrl))
+    client = createDelegatedRoutingV1HttpApiClient(new URL(serverUrl), { cacheTTL: 0 })
   })
 
   afterEach(async () => {
