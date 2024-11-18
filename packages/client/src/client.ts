@@ -9,7 +9,6 @@ import { ipnsValidator } from 'ipns/validator'
 import { parse as ndjson } from 'it-ndjson'
 import defer from 'p-defer'
 import PQueue from 'p-queue'
-import { CACHE_NAME } from './constants.js'
 import { BadResponseError, InvalidRequestError } from './errors.js'
 import { DelegatedRoutingV1HttpApiClientContentRouting, DelegatedRoutingV1HttpApiClientPeerRouting } from './routings.js'
 import type { DelegatedRoutingV1HttpApiClient, DelegatedRoutingV1HttpApiClientInit, GetProvidersOptions, GetPeersOptions, GetIPNSOptions, PeerRecord } from './index.js'
@@ -22,7 +21,8 @@ const log = logger('delegated-routing-v1-http-api-client')
 const defaultValues = {
   concurrentRequests: 4,
   timeout: 30e3,
-  cacheTTL: 5 * 60 * 1000 // 5 minutes default as per https://specs.ipfs.tech/routing/http-routing-v1/#response-headers
+  cacheTTL: 5 * 60 * 1000, // 5 minutes default as per https://specs.ipfs.tech/routing/http-routing-v1/#response-headers
+  cacheName: 'delegated-routing-v1-cache'
 }
 
 export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpApiClient {
@@ -57,7 +57,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
     this.contentRouting = new DelegatedRoutingV1HttpApiClientContentRouting(this)
     this.peerRouting = new DelegatedRoutingV1HttpApiClientPeerRouting(this)
 
-    this.cacheName = init.cacheName ?? CACHE_NAME
+    this.cacheName = init.cacheName ?? defaultValues.cacheName
     this.cacheTTL = init.cacheTTL ?? defaultValues.cacheTTL
   }
 
