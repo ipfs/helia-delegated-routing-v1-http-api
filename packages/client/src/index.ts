@@ -192,10 +192,16 @@ export interface DelegatedRoutingV1HttpApiClient {
   putIPNS(libp2pKey: CID<unknown, 0x72, 0x00 | 0x12, 1>, record: IPNSRecord, options?: AbortOptions): Promise<void>
 
   /**
+   * Create the request/response cache used to ensure duplicate requests aren't
+   * made for the same data
+   */
+  start(): Promise<void>
+
+  /**
    * Shut down any currently running HTTP requests and clear up any resources
    * that are in use
    */
-  stop(): void
+  stop(): Promise<void>
 }
 
 /**
