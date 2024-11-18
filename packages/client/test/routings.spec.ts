@@ -2,7 +2,7 @@
 /* eslint-env mocha */
 
 import { generateKeyPair } from '@libp2p/crypto/keys'
-import { contentRoutingSymbol, peerRoutingSymbol } from '@libp2p/interface'
+import { contentRoutingSymbol, peerRoutingSymbol, start, stop } from '@libp2p/interface'
 import { peerIdFromPrivateKey } from '@libp2p/peer-id'
 import { expect } from 'aegir/chai'
 import { createIPNSRecord, marshalIPNSRecord, multihashToIPNSRoutingKey } from 'ipns'
@@ -22,14 +22,13 @@ if (serverUrl == null) {
 describe('libp2p content-routing', () => {
   let client: DelegatedRoutingV1HttpApiClient
 
-  beforeEach(() => {
+  beforeEach(async () => {
     client = createDelegatedRoutingV1HttpApiClient(new URL(serverUrl), { cacheTTL: 0 })
+    await start(client)
   })
 
   afterEach(async () => {
-    if (client != null) {
-      client.stop()
-    }
+    await stop(client)
 
     const res = await fetch(`${process.env.ECHO_SERVER}/reset-call-count`)
     await res.text()
@@ -192,14 +191,13 @@ describe('libp2p content-routing', () => {
 describe('libp2p peer-routing', () => {
   let client: DelegatedRoutingV1HttpApiClient
 
-  beforeEach(() => {
+  beforeEach(async () => {
     client = createDelegatedRoutingV1HttpApiClient(new URL(serverUrl))
+    await start(client)
   })
 
   afterEach(async () => {
-    if (client != null) {
-      client.stop()
-    }
+    await stop(client)
   })
 
   describe('peer routing', () => {

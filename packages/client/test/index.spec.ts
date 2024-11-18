@@ -1,7 +1,7 @@
 /* eslint-env mocha */
 
 import { generateKeyPair } from '@libp2p/crypto/keys'
-import { start } from '@libp2p/interface'
+import { start, stop } from '@libp2p/interface'
 import { peerIdFromPrivateKey, peerIdFromString } from '@libp2p/peer-id'
 import { multiaddr } from '@multiformats/multiaddr'
 import { expect } from 'aegir/chai'
@@ -20,14 +20,13 @@ const serverUrl = process.env.ECHO_SERVER
 describe('delegated-routing-v1-http-api-client', () => {
   let client: DelegatedRoutingV1HttpApiClient
 
-  beforeEach(() => {
+  beforeEach(async () => {
     client = createDelegatedRoutingV1HttpApiClient(new URL(serverUrl), { cacheTTL: 0 })
+    await start(client)
   })
 
   afterEach(async () => {
-    if (client != null) {
-      client.stop()
-    }
+    await stop(client)
   })
 
   it('should find providers', async () => {
@@ -396,6 +395,6 @@ describe('delegated-routing-v1-http-api-client', () => {
     callCount = parseInt(await (await fetch(`${process.env.ECHO_SERVER}/get-call-count`)).text(), 10)
     expect(callCount).to.equal(2) // Second server call after cache expired
 
-    clientWithShortTTL.stop()
+    await stop(clientWithShortTTL)
   })
 })
