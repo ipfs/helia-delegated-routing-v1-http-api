@@ -144,6 +144,15 @@ export interface DelegatedRoutingV1HttpApiClientInit extends FilterOptions {
    * If 0, caching is disabled
    */
   cacheTTL?: number
+
+  /**
+   * Where a [Cache](https://developer.mozilla.org/en-US/docs/Web/API/Cache) is
+   * available in the global scope, we will store request/responses to avoid
+   * making duplicate requests.
+   *
+   * @default 'delegated-routing-v1-cache'
+   */
+  cacheName?: string
 }
 
 export interface GetIPNSOptions extends AbortOptions {

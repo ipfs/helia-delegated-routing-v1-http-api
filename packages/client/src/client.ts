@@ -9,6 +9,7 @@ import { ipnsValidator } from 'ipns/validator'
 import { parse as ndjson } from 'it-ndjson'
 import defer from 'p-defer'
 import PQueue from 'p-queue'
+import { CACHE_NAME } from './constants.js'
 import { BadResponseError, InvalidRequestError } from './errors.js'
 import { DelegatedRoutingV1HttpApiClientContentRouting, DelegatedRoutingV1HttpApiClientPeerRouting } from './routings.js'
 import type { DelegatedRoutingV1HttpApiClient, DelegatedRoutingV1HttpApiClientInit, GetProvidersOptions, GetPeersOptions, GetIPNSOptions, PeerRecord } from './index.js'
@@ -35,6 +36,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
   private readonly filterAddrs?: string[]
   private readonly filterProtocols?: string[]
   private readonly inFlightRequests: Map<string, Promise<Response>>
+  private readonly cacheName: string
   private cache?: Cache
   private readonly cacheTTL: number
   /**
@@ -55,17 +57,8 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
     this.contentRouting = new DelegatedRoutingV1HttpApiClientContentRouting(this)
     this.peerRouting = new DelegatedRoutingV1HttpApiClientPeerRouting(this)
 
+    this.cacheName = init.cacheName ?? CACHE_NAME
     this.cacheTTL = init.cacheTTL ?? defaultValues.cacheTTL
-    const cacheEnabled = (typeof globalThis.caches !== 'undefined') && (this.cacheTTL > 0)
-
-    if (cacheEnabled) {
-      log('cache enabled with ttl %d', this.cacheTTL)
-      globalThis.caches.open('delegated-routing-v1-cache').then(cache => {
-        this.cache = cache
-      }).catch(() => {
-        this.cache = undefined
-      })
-    }
   }
 
   get [contentRoutingSymbol] (): ContentRouting {
@@ -80,19 +73,30 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
     return this.started
   }
 
-  start (): void {
+  async start (): Promise<void> {
+    if (this.started) {
+      return
+    }
+
     this.started = true
+
+    if (this.cacheTTL > 0) {
+      this.cache = await globalThis.caches?.open(this.cacheName)
+
+      if (this.cache != null) {
+        log('cache enabled with ttl %d', this.cacheTTL)
+      }
+    }
   }
 
-  stop (): void {
+  async stop (): Promise<void> {
     this.httpQueue.clear()
     this.shutDownController.abort()
-    this.started = false
 
     // Clear the cache when stopping
-    if (this.cache != null) {
-      void this.cache.delete('delegated-routing-v1-cache')
-    }
+    await globalThis.caches?.delete(this.cacheName)
+
+    this.started = false
   }
 
   async * getProviders (cid: CID, options: GetProvidersOptions = {}): AsyncGenerator<PeerRecord> {

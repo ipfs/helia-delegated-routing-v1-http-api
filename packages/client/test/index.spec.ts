@@ -1,21 +1,21 @@
 /* eslint-env mocha */
 
 import { generateKeyPair } from '@libp2p/crypto/keys'
+import { start } from '@libp2p/interface'
 import { peerIdFromPrivateKey, peerIdFromString } from '@libp2p/peer-id'
 import { multiaddr } from '@multiformats/multiaddr'
 import { expect } from 'aegir/chai'
 import { createIPNSRecord, marshalIPNSRecord } from 'ipns'
 import all from 'it-all'
 import { CID } from 'multiformats/cid'
-import { isBrowser } from 'wherearewe'
 import { createDelegatedRoutingV1HttpApiClient, type DelegatedRoutingV1HttpApiClient } from '../src/index.js'
+import { itBrowser } from './fixtures/it.js'
 
 if (process.env.ECHO_SERVER == null) {
   throw new Error('Echo server not configured correctly')
 }
 
 const serverUrl = process.env.ECHO_SERVER
-const itBrowser = (isBrowser ? it : it.skip)
 
 describe('delegated-routing-v1-http-api-client', () => {
   let client: DelegatedRoutingV1HttpApiClient
@@ -357,6 +357,7 @@ describe('delegated-routing-v1-http-api-client', () => {
     const clientWithShortTTL = createDelegatedRoutingV1HttpApiClient(new URL(serverUrl), {
       cacheTTL: shortTTL
     })
+    await start(clientWithShortTTL)
 
     const cid = CID.parse('QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn')
     const providers = [{
