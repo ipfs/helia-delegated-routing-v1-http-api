@@ -1,3 +1,9 @@
+## [@helia/delegated-routing-v1-http-api-client-v4.2.1](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-4.2.0...@helia/delegated-routing-v1-http-api-client-4.2.1) (2024-11-19)
+
+### Bug Fixes
+
+* fixes cache leak and unhandled promise rejection ([#152](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues/152)) ([1c54723](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/1c54723de57042ca86a6c8c50171a20a047010fe))
+
 ## [@helia/delegated-routing-v1-http-api-client-v4.2.0](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-4.1.2...@helia/delegated-routing-v1-http-api-client-4.2.0) (2024-11-11)
 
 ### Features
