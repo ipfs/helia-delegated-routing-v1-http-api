@@ -144,6 +144,15 @@ export interface DelegatedRoutingV1HttpApiClientInit extends FilterOptions {
    * If 0, caching is disabled
    */
   cacheTTL?: number
+
+  /**
+   * Where a [Cache](https://developer.mozilla.org/en-US/docs/Web/API/Cache) is
+   * available in the global scope, we will store request/responses to avoid
+   * making duplicate requests.
+   *
+   * @default 'delegated-routing-v1-cache'
+   */
+  cacheName?: string
 }
 
 export interface GetIPNSOptions extends AbortOptions {
@@ -183,10 +192,16 @@ export interface DelegatedRoutingV1HttpApiClient {
   putIPNS(libp2pKey: CID<unknown, 0x72, 0x00 | 0x12, 1>, record: IPNSRecord, options?: AbortOptions): Promise<void>
 
   /**
+   * Create the request/response cache used to ensure duplicate requests aren't
+   * made for the same data
+   */
+  start(): Promise<void>
+
+  /**
    * Shut down any currently running HTTP requests and clear up any resources
    * that are in use
    */
-  stop(): void
+  stop(): Promise<void>
 }
 
 /**
