@@ -139,7 +139,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       }
 
       const contentType = res.headers.get('Content-Type')
-      if (contentType === 'application/json') {
+      if (contentType?.startsWith('application/json')) {
         const body = await res.json()
 
         for (const provider of body.Providers) {
