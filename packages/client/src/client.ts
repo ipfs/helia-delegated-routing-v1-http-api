@@ -125,7 +125,6 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       if (res == null) {
         throw new BadResponseError('No response received')
       }
-
       if (!res.ok) {
         if (res.status === 404) {
         // https://specs.ipfs.tech/routing/http-routing-v1/#response-status-codes
@@ -159,16 +158,19 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
             yield record
           }
         }
-      } else {
+      } else if (contentType.includes('application/x-ndjson')) {
         for await (const provider of ndjson(toIt(res.body))) {
           const record = this.#conformToPeerSchema(provider)
           if (record != null) {
             yield record
           }
         }
+      } else {
+        throw new BadResponseError(`Unsupported Content-Type: ${contentType}`)
       }
     } catch (err) {
       log.error('getProviders errored:', err)
+      throw err
     } finally {
       signal.clear()
       onFinish.resolve()

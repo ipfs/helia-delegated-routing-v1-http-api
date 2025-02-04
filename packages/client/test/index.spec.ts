@@ -35,26 +35,22 @@ describe('delegated-routing-v1-http-api-client', () => {
   })
 
   it('should find providers', async () => {
-    const providers = [
-      {
-        Protocol: 'transport-bitswap',
-        Schema: 'bitswap',
-        Metadata: 'gBI=',
-        ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
-        Addrs: ['/ip4/41.41.41.41/tcp/1234']
-      },
-      {
-        Protocol: 'transport-bitswap',
-        Schema: 'peer',
-        Metadata: 'gBI=',
-        ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
-        Addrs: ['/ip4/42.42.42.42/tcp/1234']
-      },
-      {
-        ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
-        Addrs: ['/ip4/43.43.43.43/tcp/1234']
-      }
-    ]
+    const providers = [{
+      Protocol: 'transport-bitswap',
+      Schema: 'bitswap',
+      Metadata: 'gBI=',
+      ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
+      Addrs: ['/ip4/41.41.41.41/tcp/1234']
+    }, {
+      Protocol: 'transport-bitswap',
+      Schema: 'peer',
+      Metadata: 'gBI=',
+      ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
+      Addrs: ['/ip4/42.42.42.42/tcp/1234']
+    }, {
+      ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
+      Addrs: ['/ip4/43.43.43.43/tcp/1234']
+    }]
 
     const cid = CID.parse('QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn')
 
@@ -87,15 +83,13 @@ describe('delegated-routing-v1-http-api-client', () => {
   })
 
   it('should handle different Content-Type headers for JSON responses', async () => {
-    const providers = [
-      {
-        Protocol: 'transport-bitswap',
-        Schema: 'bitswap',
-        Metadata: 'gBI=',
-        ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
-        Addrs: ['/ip4/41.41.41.41/tcp/1234']
-      }
-    ]
+    const providers = [{
+      Protocol: 'transport-bitswap',
+      Schema: 'bitswap',
+      Metadata: 'gBI=',
+      ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
+      Addrs: ['/ip4/41.41.41.41/tcp/1234']
+    }]
 
     const cid = CID.parse('QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn')
 
@@ -127,12 +121,6 @@ describe('delegated-routing-v1-http-api-client', () => {
         `Failed for Content-Type: ${contentType}`
       )
 
-      // Updated assertions to match the transformed structure
-      expect(provs[0]).to.deep.include({
-        Schema: 'peer',
-        Metadata: 'gBI=',
-        Protocols: ['transport-bitswap'] // Protocol is moved to Protocols array
-      })
       expect(provs[0].ID.toString()).to.equal(providers[0].ID)
       expect(provs[0].Addrs[0].toString()).to.equal(providers[0].Addrs[0])
     }
@@ -162,26 +150,22 @@ describe('delegated-routing-v1-http-api-client', () => {
   })
 
   it('should add filter parameters the query of the request url', async () => {
-    const providers = [
-      {
-        Protocol: 'transport-bitswap',
-        Schema: 'bitswap',
-        Metadata: 'gBI=',
-        ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
-        Addrs: []
-      },
-      {
-        Protocol: 'transport-bitswap',
-        Schema: 'peer',
-        Metadata: 'gBI=',
-        ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
-        Addrs: ['/ip4/42.42.42.42/tcp/1234']
-      },
-      {
-        ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
-        Addrs: []
-      }
-    ]
+    const providers = [{
+      Protocol: 'transport-bitswap',
+      Schema: 'bitswap',
+      Metadata: 'gBI=',
+      ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
+      Addrs: []
+    }, {
+      Protocol: 'transport-bitswap',
+      Schema: 'peer',
+      Metadata: 'gBI=',
+      ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
+      Addrs: ['/ip4/42.42.42.42/tcp/1234']
+    }, {
+      ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
+      Addrs: []
+    }]
 
     const cid = CID.parse('QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn')
 
@@ -251,21 +235,18 @@ describe('delegated-routing-v1-http-api-client', () => {
   })
 
   it('should handle bad input providers', async () => {
-    const providers = [
-      {
-        Metadata: 'gBI=',
-        Provider: {
-          Bad: 'field'
-        }
-      },
-      {
-        Metadata: 'gBI=',
-        ContextID: '',
-        Another: {
-          Bad: 'field'
-        }
+    const providers = [{
+      Metadata: 'gBI=',
+      Provider: {
+        Bad: 'field'
       }
-    ]
+    }, {
+      Metadata: 'gBI=',
+      ContextID: '',
+      Another: {
+        Bad: 'field'
+      }
+    }]
 
     const cid = CID.parse('QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn')
 
@@ -289,77 +270,65 @@ describe('delegated-routing-v1-http-api-client', () => {
   it('should conform records to peer schema', async () => {
     const privateKey = await generateKeyPair('Ed25519')
 
-    const records = [
-      {
-        Protocol: 'transport-bitswap',
-        Schema: 'bitswap',
-        Metadata: 'gBI=',
-        ID: privateKey.publicKey.toString(),
-        Addrs: ['/ip4/41.41.41.41/tcp/1234']
-      },
-      {
-        Protocol: 'transport-saddle',
-        Schema: 'horse-ride',
-        Metadata: 'gBI=',
-        ID: privateKey.publicKey.toString(),
-        Addrs: ['/ip4/41.41.41.41/tcp/1234']
-      },
-      {
-        Protocols: ['transport-bitswap'],
-        Schema: 'peer',
-        Metadata: 'gBI=',
-        ID: privateKey.publicKey.toString(),
-        Addrs: ['/ip4/42.42.42.42/tcp/1234']
-      },
-      {
-        Protocol: 'transport-bitswap',
-        Schema: 'peer',
-        Metadata: 'gBI=',
-        ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
-        Addrs: ['/ip4/42.42.42.42/tcp/1234']
-      },
-      {
-        Schema: 'peer',
-        ID: (await generateKeyPair('Ed25519')).publicKey.toString()
-      }
-    ]
+    const records = [{
+      Protocol: 'transport-bitswap',
+      Schema: 'bitswap',
+      Metadata: 'gBI=',
+      ID: privateKey.publicKey.toString(),
+      Addrs: ['/ip4/41.41.41.41/tcp/1234']
+    }, {
+      Protocol: 'transport-saddle',
+      Schema: 'horse-ride',
+      Metadata: 'gBI=',
+      ID: privateKey.publicKey.toString(),
+      Addrs: ['/ip4/41.41.41.41/tcp/1234']
+    }, {
+      Protocols: ['transport-bitswap'],
+      Schema: 'peer',
+      Metadata: 'gBI=',
+      ID: privateKey.publicKey.toString(),
+      Addrs: ['/ip4/42.42.42.42/tcp/1234']
+    }, {
+      Protocol: 'transport-bitswap',
+      Schema: 'peer',
+      Metadata: 'gBI=',
+      ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
+      Addrs: ['/ip4/42.42.42.42/tcp/1234']
+    }, {
+      Schema: 'peer',
+      ID: (await generateKeyPair('Ed25519')).publicKey.toString()
+    }]
 
-    const peers = [
-      {
-        Protocols: ['transport-bitswap'],
-        Schema: 'peer',
-        Metadata: 'gBI=',
-        ID: peerIdFromString(records[0].ID),
-        Addrs: [multiaddr('/ip4/41.41.41.41/tcp/1234')]
-      },
-      {
-        Protocols: ['transport-saddle'],
-        Schema: 'peer',
-        Metadata: 'gBI=',
-        ID: peerIdFromString(records[1].ID),
-        Addrs: [multiaddr('/ip4/41.41.41.41/tcp/1234')]
-      },
-      {
-        Protocols: ['transport-bitswap'],
-        Schema: 'peer',
-        Metadata: 'gBI=',
-        ID: peerIdFromString(records[2].ID),
-        Addrs: [multiaddr('/ip4/42.42.42.42/tcp/1234')]
-      },
-      {
-        Protocols: ['transport-bitswap'],
-        Schema: 'peer',
-        Metadata: 'gBI=',
-        ID: peerIdFromString(records[3].ID),
-        Addrs: [multiaddr('/ip4/42.42.42.42/tcp/1234')]
-      },
-      {
-        Protocols: [],
-        Schema: 'peer',
-        ID: peerIdFromString(records[4].ID),
-        Addrs: []
-      }
-    ]
+    const peers = [{
+      Protocols: ['transport-bitswap'],
+      Schema: 'peer',
+      Metadata: 'gBI=',
+      ID: peerIdFromString(records[0].ID),
+      Addrs: [multiaddr('/ip4/41.41.41.41/tcp/1234')]
+    }, {
+      Protocols: ['transport-saddle'],
+      Schema: 'peer',
+      Metadata: 'gBI=',
+      ID: peerIdFromString(records[1].ID),
+      Addrs: [multiaddr('/ip4/41.41.41.41/tcp/1234')]
+    }, {
+      Protocols: ['transport-bitswap'],
+      Schema: 'peer',
+      Metadata: 'gBI=',
+      ID: peerIdFromString(records[2].ID),
+      Addrs: [multiaddr('/ip4/42.42.42.42/tcp/1234')]
+    }, {
+      Protocols: ['transport-bitswap'],
+      Schema: 'peer',
+      Metadata: 'gBI=',
+      ID: peerIdFromString(records[3].ID),
+      Addrs: [multiaddr('/ip4/42.42.42.42/tcp/1234')]
+    }, {
+      Protocols: [],
+      Schema: 'peer',
+      ID: peerIdFromString(records[4].ID),
+      Addrs: []
+    }]
 
     // load peer for the router to fetch
     await fetch(
@@ -456,15 +425,13 @@ describe('delegated-routing-v1-http-api-client', () => {
 
   it('should deduplicate concurrent requests to the same URL', async () => {
     const cid = CID.parse('QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn')
-    const providers = [
-      {
-        Protocol: 'transport-bitswap',
-        Schema: 'bitswap',
-        Metadata: 'gBI=',
-        ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
-        Addrs: ['/ip4/41.41.41.41/tcp/1234']
-      }
-    ]
+    const providers = [{
+      Protocol: 'transport-bitswap',
+      Schema: 'bitswap',
+      Metadata: 'gBI=',
+      ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
+      Addrs: ['/ip4/41.41.41.41/tcp/1234']
+    }]
 
     // load providers for the router to fetch
     await fetch(`${process.env.ECHO_SERVER}/add-providers/${cid.toString()}`, {
@@ -522,28 +489,27 @@ describe('delegated-routing-v1-http-api-client', () => {
     await start(clientWithShortTTL)
 
     const cid = CID.parse('QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn')
-    const providers = [
-      {
-        Protocol: 'transport-bitswap',
-        Schema: 'bitswap',
-        Metadata: 'gBI=',
-        ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
-        Addrs: ['/ip4/41.41.41.41/tcp/1234']
-      }
-    ]
+    const providers = [{
+      Protocol: 'transport-bitswap',
+      Schema: 'bitswap',
+      Metadata: 'gBI=',
+      ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
+      Addrs: ['/ip4/41.41.41.41/tcp/1234']
+    }]
 
     // load providers for the router to fetch
     await fetch(`${process.env.ECHO_SERVER}/add-providers/${cid.toString()}`, {
       method: 'POST',
-      body: providers.map((prov) => JSON.stringify(prov)).join('\n')
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ Providers: providers })
     })
 
     // Reset call count
     await fetch(`${process.env.ECHO_SERVER}/reset-call-count`)
-
     // First request should hit the server
     await all(clientWithShortTTL.getProviders(cid))
-
     // Second and third request should use cache
     await all(clientWithShortTTL.getProviders(cid))
     await all(clientWithShortTTL.getProviders(cid))

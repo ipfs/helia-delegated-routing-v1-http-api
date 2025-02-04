@@ -61,26 +61,22 @@ describe('libp2p content-routing', () => {
       throw new Error('ContentRouting not found')
     }
 
-    const providers = [
-      {
-        Protocol: 'transport-bitswap',
-        Schema: 'bitswap',
-        Metadata: 'gBI=',
-        ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
-        Addrs: ['/ip4/41.41.41.41/tcp/1234']
-      },
-      {
-        Protocol: 'transport-bitswap',
-        Schema: 'peer',
-        Metadata: 'gBI=',
-        ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
-        Addrs: ['/ip4/42.42.42.42/tcp/1234']
-      },
-      {
-        ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
-        Addrs: ['/ip4/43.43.43.43/tcp/1234']
-      }
-    ]
+    const providers = [{
+      Protocol: 'transport-bitswap',
+      Schema: 'bitswap',
+      Metadata: 'gBI=',
+      ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
+      Addrs: ['/ip4/41.41.41.41/tcp/1234']
+    }, {
+      Protocol: 'transport-bitswap',
+      Schema: 'peer',
+      Metadata: 'gBI=',
+      ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
+      Addrs: ['/ip4/42.42.42.42/tcp/1234']
+    }, {
+      ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
+      Addrs: ['/ip4/43.43.43.43/tcp/1234']
+    }]
 
     const cid = CID.parse('QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn')
 
@@ -250,15 +246,13 @@ describe('libp2p peer-routing', () => {
       const privateKey = await generateKeyPair('Ed25519')
       const peerId = peerIdFromPrivateKey(privateKey)
 
-      const records = [
-        {
-          Protocol: 'transport-bitswap',
-          Schema: 'peer',
-          Metadata: 'gBI=',
-          ID: peerId.toString(),
-          Addrs: ['/ip4/41.41.41.41/tcp/1234']
-        }
-      ]
+      const records = [{
+        Protocol: 'transport-bitswap',
+        Schema: 'peer',
+        Metadata: 'gBI=',
+        ID: peerId.toString(),
+        Addrs: ['/ip4/41.41.41.41/tcp/1234']
+      }]
 
       // load peer for the router to fetch
       await fetch(

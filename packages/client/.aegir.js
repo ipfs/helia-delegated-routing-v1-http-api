@@ -19,77 +19,120 @@ const options = {
         next();
         lastCalledUrl = req.url;
       });
+      // echo.polka.post("/add-providers/:cid", (req, res) => {
+      //   callCount++;
+      //   try {
+      //     console.log("Received POST request body:", req.body);
+      //     console.log("Content-Type:", req.headers["content-type"]);
 
-      echo.polka.post("/add-providers/:cid", (req, res) => {
-        callCount++;
+      //     if (req.headers["content-type"]?.includes("application/json")) {
+      //       const data =
+      //         typeof req.body === "string"
+      //           ? {
+      //               Providers: req.body
+      //                 .split("\n")
+      //                 .map((line) => JSON.parse(line)),
+      //             }
+      //           : req.body;
+      //       providers.set(req.params.cid, data);
+      //       res.end(JSON.stringify({ success: true }));
+      //     } else {
+      //       res.statusCode = 400;
+      //       res.end(
+      //         JSON.stringify({
+      //           error: "Invalid content type. Expected application/json",
+      //           code: "ERR_INVALID_INPUT",
+      //         })
+      //       );
+      //       providers.delete(req.params.cid);
+      //     }
+      //   } catch (err) {
+      //     console.error("Error in add-providers:", err);
+      //     res.statusCode = 400;
+      //     res.end(
+      //       JSON.stringify({
+      //         error: err.message,
+      //         code: "ERR_INVALID_INPUT",
+      //       })
+      //     );
+      //     providers.delete(req.params.cid);
+      //   }
+      // });
+      echo.polka.post('/add-providers/:cid', (req, res) => {
+        callCount++
         try {
-          console.log("Received POST request body:", req.body);
-          console.log("Content-Type:", req.headers["content-type"]);
-
-          // Only process if content-type is application/json
-          if (req.headers["content-type"]?.includes("application/json")) {
-            const data =
-              typeof req.body === "string"
-                ? {
-                    Providers: req.body
-                      .split("\n")
-                      .map((line) => JSON.parse(line)),
-                  }
-                : req.body;
-            providers.set(req.params.cid, data);
-            res.end(JSON.stringify({ success: true }));
+          if (!req.headers['content-type']?.includes('application/json')) {
+            res.statusCode = 400
+            res.end(JSON.stringify({
+              error: 'Invalid content type. Expected application/json',
+              code: 'ERR_INVALID_INPUT'
+            }))
+            providers.delete(req.params.cid)
+            return
+          }
+      
+          const data = typeof req.body === 'string' 
+            ? { Providers: req.body.split('\n').map(line => JSON.parse(line)) }
+            : req.body
+      
+          providers.set(req.params.cid, data)
+          res.end(JSON.stringify({ success: true }))
+        } catch (err) {
+          console.error('Error in add-providers:', err)
+          res.statusCode = 400
+          res.end(JSON.stringify({
+            error: err.message,
+            code: 'ERR_INVALID_INPUT'
+          }))
+          providers.delete(req.params.cid)
+        }
+      })
+      echo.polka.get('/routing/v1/providers/:cid', (req, res) => {
+        callCount++
+        try {
+          const providerData = providers.get(req.params.cid) || { Providers: [] }
+          const acceptHeader = req.headers.accept
+      
+          if (acceptHeader?.includes('application/x-ndjson')) {
+            res.setHeader('Content-Type', 'application/x-ndjson')
+            const providers = Array.isArray(providerData.Providers) ? providerData.Providers : []
+            res.end(providers.map(p => JSON.stringify(p)).join('\n'))
           } else {
-            res.statusCode = 400;
-            res.end(
-              JSON.stringify({
-                error: "Invalid content type. Expected application/json",
-                code: "ERR_INVALID_INPUT",
-              })
-            );
-            // Clear any existing providers for this CID
-            providers.delete(req.params.cid);
+            res.setHeader('Content-Type', 'application/json')
+            res.end(JSON.stringify(providerData))
           }
         } catch (err) {
-          console.error("Error in add-providers:", err);
-          res.statusCode = 400;
-          res.end(
-            JSON.stringify({
-              error: err.message,
-              code: "ERR_INVALID_INPUT",
-            })
-          );
-          providers.delete(req.params.cid);
+          console.error('Error in get providers:', err)
+          res.statusCode = 500
+          res.end(JSON.stringify({ error: err.message }))
         }
-      });
+      })
+      // echo.polka.get("/routing/v1/providers/:cid", (req, res) => {
+      //   callCount++;
+      //   try {
+      //     console.log("GET request for CID:", req.params.cid);
+      //     console.log("Accept header:", req.headers.accept);
 
-      echo.polka.get("/routing/v1/providers/:cid", (req, res) => {
-        callCount++;
-        try {
-          console.log("GET request for CID:", req.params.cid);
-          console.log("Accept header:", req.headers.accept);
-
-          const providerData = providers.get(req.params.cid) || {
-            Providers: [],
-          };
-
-          const acceptHeader = req.headers.accept;
-          if (acceptHeader?.includes("application/x-ndjson")) {
-            res.setHeader("Content-Type", "application/x-ndjson");
-            const providers = Array.isArray(providerData.Providers)
-              ? providerData.Providers
-              : [];
-            res.end(providers.map((p) => JSON.stringify(p)).join("\n"));
-          } else {
-            res.setHeader("Content-Type", "application/json");
-            res.end(JSON.stringify(providerData));
-          }
-        } catch (err) {
-          console.error("Error in get providers:", err);
-          res.statusCode = 500;
-          res.end(JSON.stringify({ error: err.message }));
-        }
-      });
-
+      //     const providerData = providers.get(req.params.cid) || {
+      //       Providers: [],
+      //     };
+      //     const acceptHeader = req.headers.accept;
+      //     if (acceptHeader?.includes("application/x-ndjson")) {
+      //       res.setHeader("Content-Type", "application/x-ndjson");
+      //       const providers = Array.isArray(providerData.Providers)
+      //         ? providerData.Providers
+      //         : [];
+      //       res.end(providers.map((p) => JSON.stringify(p)).join("\n"));
+      //     } else {
+      //       res.setHeader("Content-Type", "application/json");
+      //       res.end(JSON.stringify(providerData));
+      //     }
+      //   } catch (err) {
+      //     console.error("Error in get providers:", err);
+      //     res.statusCode = 500;
+      //     res.end(JSON.stringify({ error: err.message }));
+      //   }
+      // });
       echo.polka.post("/add-peers/:peerId", (req, res) => {
         callCount++;
         peers.set(req.params.peerId, req.body);
