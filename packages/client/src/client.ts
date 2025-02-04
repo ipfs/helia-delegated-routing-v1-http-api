@@ -121,7 +121,6 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       this.#addFilterParams(url, options.filterAddrs, options.filterProtocols)
       const getOptions = { headers: { Accept: 'application/x-ndjson' }, signal }
       const res = await this.#makeRequest(url.toString(), getOptions)
-
       if (res == null) {
         throw new BadResponseError('No response received')
       }
@@ -170,7 +169,6 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       }
     } catch (err) {
       log.error('getProviders errored:', err)
-      throw err
     } finally {
       signal.clear()
       onFinish.resolve()
@@ -397,6 +395,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
     const requestMethod = options.method ?? 'GET'
     const key = `${requestMethod}-${url}`
 
+    // Only try to use cache for GET requests
     if (requestMethod === 'GET') {
       const cachedResponse = await this.cache?.match(url)
       if (cachedResponse?.ok === true) {
