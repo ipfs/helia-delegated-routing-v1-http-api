@@ -122,16 +122,23 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       const getOptions = { headers: { Accept: 'application/x-ndjson' }, signal }
       const res = await this.#makeRequest(url.toString(), getOptions)
 
-      if (res.status === 404) {
-        // https://specs.ipfs.tech/routing/http-routing-v1/#response-status-codes
-        // 404 (Not Found): must be returned if no matching records are found
-        throw new NotFoundError('No matching records found')
+      if (res == null) {
+        throw new BadResponseError('No response received')
       }
 
-      if (res.status === 422) {
+      if (!res.ok) {
+        if (res.status === 404) {
+        // https://specs.ipfs.tech/routing/http-routing-v1/#response-status-codes
+        // 404 (Not Found): must be returned if no matching records are found
+          throw new NotFoundError('No matching records found')
+        }
+
+        if (res.status === 422) {
         // https://specs.ipfs.tech/routing/http-routing-v1/#response-status-codes
         // 422 (Unprocessable Entity): request does not conform to schema or semantic constraints
-        throw new InvalidRequestError('Request does not conform to schema or semantic constraints')
+          throw new InvalidRequestError('Request does not conform to schema or semantic constraints')
+        }
+        throw new BadResponseError(`Unexpected status code: ${res.status}`)
       }
 
       if (res.body == null) {
@@ -139,6 +146,10 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       }
 
       const contentType = res.headers.get('Content-Type')
+      if (contentType == null) {
+        throw new BadResponseError('No Content-Type header received')
+      }
+
       if (contentType?.startsWith('application/json')) {
         const body = await res.json()
 
@@ -384,10 +395,9 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
     const requestMethod = options.method ?? 'GET'
     const key = `${requestMethod}-${url}`
 
-    // Only try to use cache for GET requests
     if (requestMethod === 'GET') {
       const cachedResponse = await this.cache?.match(url)
-      if (cachedResponse != null) {
+      if (cachedResponse?.ok === true) {
         // Check if the cached response has expired
         const expires = parseInt(cachedResponse.headers.get('x-cache-expires') ?? '0', 10)
         if (expires > Date.now()) {
