@@ -8,10 +8,7 @@ import { expect } from 'aegir/chai'
 import { createIPNSRecord, marshalIPNSRecord } from 'ipns'
 import all from 'it-all'
 import { CID } from 'multiformats/cid'
-import {
-  createDelegatedRoutingV1HttpApiClient,
-  type DelegatedRoutingV1HttpApiClient
-} from '../src/index.js'
+import { createDelegatedRoutingV1HttpApiClient, type DelegatedRoutingV1HttpApiClient } from '../src/index.js'
 import { itBrowser } from './fixtures/it.js'
 
 if (process.env.ECHO_SERVER == null) {
@@ -24,9 +21,7 @@ describe('delegated-routing-v1-http-api-client', () => {
   let client: DelegatedRoutingV1HttpApiClient
 
   beforeEach(async () => {
-    client = createDelegatedRoutingV1HttpApiClient(new URL(serverUrl), {
-      cacheTTL: 0
-    })
+    client = createDelegatedRoutingV1HttpApiClient(new URL(serverUrl), { cacheTTL: 0 })
     await start(client)
   })
 
@@ -55,31 +50,22 @@ describe('delegated-routing-v1-http-api-client', () => {
     const cid = CID.parse('QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn')
 
     // load providers for the router to fetch
-    await fetch(
-      `${process.env.ECHO_SERVER}/add-providers/${cid.toString()}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ Providers: providers })
-      }
-    )
+    await fetch(`${process.env.ECHO_SERVER}/add-providers/${cid.toString()}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ Providers: providers})
+    })
 
-    await new Promise((resolve) => setTimeout(resolve, 100))
     const provs = await all(client.getProviders(cid))
-
-    expect(
-      provs.map((prov) => ({
-        id: prov.ID.toString(),
-        addrs: prov.Addrs?.map((ma) => ma.toString())
-      }))
-    ).to.deep.equal(
-      providers.map((prov) => ({
-        id: prov.ID,
-        addrs: prov.Addrs
-      }))
-    )
+    expect(provs.map(prov => ({
+      id: prov.ID.toString(),
+      addrs: prov.Addrs?.map(ma => ma.toString())
+    }))).to.deep.equal(providers.map(prov => ({
+      id: prov.ID,
+      addrs: prov.Addrs
+    })))
   })
 
   it('should handle different Content-Type headers for JSON responses', async () => {
@@ -92,7 +78,6 @@ describe('delegated-routing-v1-http-api-client', () => {
     }]
 
     const cid = CID.parse('QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn')
-
     const contentTypes = [
       'application/json',
       'application/json; charset=utf-8',
@@ -101,26 +86,18 @@ describe('delegated-routing-v1-http-api-client', () => {
 
     for (const contentType of contentTypes) {
       // Add providers with proper payload structure
-      await fetch(
-        `${process.env.ECHO_SERVER}/add-providers/${cid.toString()}`,
-        {
+      await fetch(`${process.env.ECHO_SERVER}/add-providers/${cid.toString()}`, {
           method: 'POST',
           headers: {
             'Content-Type': contentType
           },
           body: JSON.stringify({ Providers: providers })
-        }
-      )
+        })
 
       await new Promise((resolve) => setTimeout(resolve, 100))
-
       const provs = await all(client.getProviders(cid))
 
-      expect(provs).to.have.lengthOf(
-        1,
-        `Failed for Content-Type: ${contentType}`
-      )
-
+      expect(provs).to.have.lengthOf(1, `Failed for Content-Type: ${contentType}`)
       expect(provs[0].ID.toString()).to.equal(providers[0].ID)
       expect(provs[0].Addrs[0].toString()).to.equal(providers[0].Addrs[0])
     }
@@ -129,16 +106,13 @@ describe('delegated-routing-v1-http-api-client', () => {
   it('should handle non-json input', async () => {
     const cid = CID.parse('QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn')
 
-    const response = await fetch(
-      `${process.env.ECHO_SERVER}/add-providers/${cid.toString()}`,
-      {
+    const response = await fetch(`${process.env.ECHO_SERVER}/add-providers/${cid.toString()}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'text/plain'
         },
         body: 'not json'
-      }
-    )
+      })
 
     expect(response.status).to.equal(400)
     const errorData = await response.json()
@@ -172,30 +146,19 @@ describe('delegated-routing-v1-http-api-client', () => {
     // load providers for the router to fetch
     await fetch(`${process.env.ECHO_SERVER}/add-providers/${cid.toString()}`, {
       method: 'POST',
-      body: providers.map((prov) => JSON.stringify(prov)).join('\n')
+      body: providers.map(prov => JSON.stringify(prov)).join('\n')
     })
 
-    await all(
-      client.getProviders(cid, {
-        filterProtocols: ['transport-bitswap', 'unknown'],
-        filterAddrs: ['webtransport', '!p2p-circuit']
-      })
-    )
+    await all(client.getProviders(cid, { filterProtocols: ['transport-bitswap', 'unknown'], filterAddrs: ['webtransport', '!p2p-circuit'] }))
 
     // Check if the correct URL was called with filter parameters
-    const lastCalledUrl = await fetch(
-      `${process.env.ECHO_SERVER}/last-called-url`
-    )
+    const lastCalledUrl = await fetch(`${process.env.ECHO_SERVER}/last-called-url`)
     const lastCalledUrlText = await lastCalledUrl.text()
 
     const searchParams = new URLSearchParams(lastCalledUrlText.split('?')[1])
 
-    expect(searchParams.get('filter-protocols')).to.equal(
-      'transport-bitswap,unknown'
-    )
-    expect(searchParams.get('filter-addrs')).to.equal(
-      'webtransport,!p2p-circuit'
-    )
+    expect(searchParams.get('filter-protocols')).to.equal('transport-bitswap,unknown')
+    expect(searchParams.get('filter-addrs')).to.equal('webtransport,!p2p-circuit')
   })
 
   it('should add filter parameters the query of the request url based on global filter', async () => {
@@ -208,16 +171,12 @@ describe('delegated-routing-v1-http-api-client', () => {
     await all(client.getProviders(cid))
 
     // Check if the correct URL was called with filter parameters
-    const lastCalledUrl = await fetch(
-      `${process.env.ECHO_SERVER}/last-called-url`
-    )
+    const lastCalledUrl = await fetch(`${process.env.ECHO_SERVER}/last-called-url`)
     const lastCalledUrlText = await lastCalledUrl.text()
 
     const searchParams = new URLSearchParams(lastCalledUrlText.split('?')[1])
 
-    expect(searchParams.get('filter-protocols')).to.equal(
-      'transport-bitswap,unknown'
-    )
+    expect(searchParams.get('filter-protocols')).to.equal('transport-bitswap,unknown')
     expect(searchParams.get('filter-addrs')).to.equal('tcp,!p2p-circuit')
   })
 
@@ -253,7 +212,7 @@ describe('delegated-routing-v1-http-api-client', () => {
     // load providers for the router to fetch
     await fetch(`${process.env.ECHO_SERVER}/add-providers/${cid.toString()}`, {
       method: 'POST',
-      body: providers.map((prov) => JSON.stringify(prov)).join('\n')
+      body: providers.map(prov => JSON.stringify(prov)).join('\n')
     })
 
     const provs = await all(client.getProviders(cid))
@@ -331,30 +290,21 @@ describe('delegated-routing-v1-http-api-client', () => {
     }]
 
     // load peer for the router to fetch
-    await fetch(
-      `${process.env.ECHO_SERVER}/add-peers/${privateKey.publicKey.toCID()}`,
-      {
-        method: 'POST',
-        body: records.map((prov) => JSON.stringify(prov)).join('\n')
-      }
-    )
+    await fetch(`${process.env.ECHO_SERVER}/add-peers/${privateKey.publicKey.toCID()}`, {
+      method: 'POST',
+      body: records.map(prov => JSON.stringify(prov)).join('\n')
+    })
 
-    const peerRecords = await all(
-      client.getPeers(peerIdFromPrivateKey(privateKey))
-    )
-    expect(
-      peerRecords.map((peerRecord) => ({
-        ...peerRecord,
-        ID: peerRecord.ID.toString(),
-        Addrs: peerRecord.Addrs?.map((ma) => ma.toString()) ?? []
-      }))
-    ).to.deep.equal(
-      peers.map((peerRecord) => ({
-        ...peerRecord,
-        ID: peerRecord.ID.toString(),
-        Addrs: peerRecord.Addrs?.map((ma) => ma.toString())
-      }))
-    )
+    const peerRecords = await all(client.getPeers(peerIdFromPrivateKey(privateKey)))
+    expect(peerRecords.map(peerRecord => ({
+      ...peerRecord,
+      ID: peerRecord.ID.toString(),
+      Addrs: peerRecord.Addrs?.map(ma => ma.toString()) ?? []
+    }))).to.deep.equal(peers.map(peerRecord => ({
+      ...peerRecord,
+      ID: peerRecord.ID.toString(),
+      Addrs: peerRecord.Addrs?.map(ma => ma.toString())
+    })))
   })
 
   it('should get ipns record', async () => {
@@ -363,21 +313,16 @@ describe('delegated-routing-v1-http-api-client', () => {
     const record = await createIPNSRecord(privateKey, cid, 0, 1000)
 
     // load record for the router to fetch
-    await fetch(
-      `${process.env.ECHO_SERVER}/add-ipns/${privateKey.publicKey.toCID()}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/vnd.ipfs.ipns-record'
-        },
-        body: marshalIPNSRecord(record)
-      }
-    )
+    await fetch(`${process.env.ECHO_SERVER}/add-ipns/${privateKey.publicKey.toCID()}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/vnd.ipfs.ipns-record'
+      },
+      body: marshalIPNSRecord(record)
+    })
 
     const ipnsRecord = await client.getIPNS(privateKey.publicKey.toCID())
-    expect(marshalIPNSRecord(ipnsRecord)).to.equalBytes(
-      marshalIPNSRecord(record)
-    )
+    expect(marshalIPNSRecord(ipnsRecord)).to.equalBytes(marshalIPNSRecord(record))
   })
 
   it('get ipns record fails with bad record', async () => {
@@ -387,16 +332,13 @@ describe('delegated-routing-v1-http-api-client', () => {
     const record = await createIPNSRecord(otherPrivateKey, cid, 0, 1000)
 
     // load record for the router to fetch
-    await fetch(
-      `${process.env.ECHO_SERVER}/add-ipns/${privateKey.publicKey.toCID()}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/vnd.ipfs.ipns-record'
-        },
-        body: marshalIPNSRecord(record)
-      }
-    )
+    await fetch(`${process.env.ECHO_SERVER}/add-ipns/${privateKey.publicKey.toCID()}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/vnd.ipfs.ipns-record'
+      },
+      body: marshalIPNSRecord(record)
+    })
 
     await expect(client.getIPNS(privateKey.publicKey.toCID())).to.be.rejected()
   })
@@ -409,15 +351,12 @@ describe('delegated-routing-v1-http-api-client', () => {
     await client.putIPNS(privateKey.publicKey.toCID(), record)
 
     // load record that our client just PUT to remote server
-    const res = await fetch(
-      `${process.env.ECHO_SERVER}/get-ipns/${privateKey.publicKey.toCID()}`,
-      {
-        method: 'GET',
-        headers: {
-          Accept: 'application/vnd.ipfs.ipns-record'
-        }
+    const res = await fetch(`${process.env.ECHO_SERVER}/get-ipns/${privateKey.publicKey.toCID()}`, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/vnd.ipfs.ipns-record'
       }
-    )
+    })
 
     const receivedRecord = new Uint8Array(await res.arrayBuffer())
     expect(marshalIPNSRecord(record)).to.equalBytes(receivedRecord)
@@ -437,9 +376,9 @@ describe('delegated-routing-v1-http-api-client', () => {
     await fetch(`${process.env.ECHO_SERVER}/add-providers/${cid.toString()}`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json' // Add this header
+        'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ Providers: providers })
+      body: JSON.stringify({ Providers: providers})
     })
 
     // Reset call count before our test
@@ -454,38 +393,30 @@ describe('delegated-routing-v1-http-api-client', () => {
     ])
 
     // Get the number of times the server was called
-    const callCountRes = await fetch(
-    `${process.env.ECHO_SERVER}/get-call-count`
-    )
+    const callCountRes = await fetch(`${process.env.ECHO_SERVER}/get-call-count`)
     const callCount = parseInt(await callCountRes.text(), 10)
 
     // Verify server was only called once
     expect(callCount).to.equal(1)
 
     // Verify all results are the same
-    results.forEach((resultProviders) => {
-      expect(
-        resultProviders.map((prov) => ({
-          id: prov.ID.toString(),
-          addrs: prov.Addrs?.map((ma) => ma.toString())
-        }))
-      ).to.deep.equal(
-        providers.map((prov) => ({
-          id: prov.ID,
-          addrs: prov.Addrs
-        }))
-      )
+    results.forEach(resultProviders => {
+      expect(resultProviders.map(prov => ({
+        id: prov.ID.toString(),
+        // eslint-disable-next-line max-nested-callbacks
+        addrs: prov.Addrs?.map(ma => ma.toString())
+      }))).to.deep.equal(providers.map(prov => ({
+        id: prov.ID,
+        addrs: prov.Addrs
+      })))
     })
   })
 
   itBrowser('should respect cache TTL', async () => {
     const shortTTL = 100 // 100ms TTL for testing
-    const clientWithShortTTL = createDelegatedRoutingV1HttpApiClient(
-      new URL(serverUrl),
-      {
-        cacheTTL: shortTTL
-      }
-    )
+    const clientWithShortTTL = createDelegatedRoutingV1HttpApiClient(new URL(serverUrl), {
+      cacheTTL: shortTTL
+    })
     await start(clientWithShortTTL)
 
     const cid = CID.parse('QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn')
@@ -503,33 +434,29 @@ describe('delegated-routing-v1-http-api-client', () => {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ Providers: providers })
+      body: JSON.stringify({ Providers: providers})
     })
 
     // Reset call count
     await fetch(`${process.env.ECHO_SERVER}/reset-call-count`)
+
     // First request should hit the server
     await all(clientWithShortTTL.getProviders(cid))
+
     // Second and third request should use cache
     await all(clientWithShortTTL.getProviders(cid))
     await all(clientWithShortTTL.getProviders(cid))
 
-    let callCount = parseInt(
-      await (await fetch(`${process.env.ECHO_SERVER}/get-call-count`)).text(),
-      10
-    )
+    let callCount = parseInt(await (await fetch(`${process.env.ECHO_SERVER}/get-call-count`)).text(), 10)
     expect(callCount).to.equal(1) // Only one server call so far
 
     // Wait for cache to expire
-    await new Promise((resolve) => setTimeout(resolve, shortTTL + 50))
+    await new Promise(resolve => setTimeout(resolve, shortTTL + 50))
 
     // This request should hit the server again because cache expired
     await all(clientWithShortTTL.getProviders(cid))
 
-    callCount = parseInt(
-      await (await fetch(`${process.env.ECHO_SERVER}/get-call-count`)).text(),
-      10
-    )
+    callCount = parseInt(await (await fetch(`${process.env.ECHO_SERVER}/get-call-count`)).text(), 10)
     expect(callCount).to.equal(2) // Second server call after cache expired
 
     await stop(clientWithShortTTL)

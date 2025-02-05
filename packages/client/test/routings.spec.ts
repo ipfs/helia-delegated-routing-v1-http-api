@@ -2,27 +2,15 @@
 /* eslint-env mocha */
 
 import { generateKeyPair } from '@libp2p/crypto/keys'
-import {
-  contentRoutingSymbol,
-  peerRoutingSymbol,
-  start,
-  stop
-} from '@libp2p/interface'
+import { contentRoutingSymbol, peerRoutingSymbol, start, stop } from '@libp2p/interface'
 import { peerIdFromPrivateKey } from '@libp2p/peer-id'
 import { expect } from 'aegir/chai'
-import {
-  createIPNSRecord,
-  marshalIPNSRecord,
-  multihashToIPNSRoutingKey
-} from 'ipns'
+import { createIPNSRecord, marshalIPNSRecord, multihashToIPNSRoutingKey } from 'ipns'
 import all from 'it-all'
 import { CID } from 'multiformats/cid'
 import { concat as uint8ArrayConcat } from 'uint8arrays/concat'
 import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
-import {
-  createDelegatedRoutingV1HttpApiClient,
-  type DelegatedRoutingV1HttpApiClient
-} from '../src/index.js'
+import { createDelegatedRoutingV1HttpApiClient, type DelegatedRoutingV1HttpApiClient } from '../src/index.js'
 import type { PeerRouting, ContentRouting } from '@libp2p/interface'
 
 const serverUrl = process.env.ECHO_SERVER
@@ -35,9 +23,7 @@ describe('libp2p content-routing', () => {
   let client: DelegatedRoutingV1HttpApiClient
 
   beforeEach(async () => {
-    client = createDelegatedRoutingV1HttpApiClient(new URL(serverUrl), {
-      cacheTTL: 0
-    })
+    client = createDelegatedRoutingV1HttpApiClient(new URL(serverUrl), { cacheTTL: 0 })
     await start(client)
   })
 
@@ -80,7 +66,7 @@ describe('libp2p content-routing', () => {
 
     const cid = CID.parse('QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn')
 
-    // load providers for the router to fetch with proper JSON formatting
+    // load providers for the router to fetch
     await fetch(`${process.env.ECHO_SERVER}/add-providers/${cid.toString()}`, {
       method: 'POST',
       headers: {
@@ -89,18 +75,14 @@ describe('libp2p content-routing', () => {
       body: JSON.stringify({ Providers: providers })
     })
 
-    const foundProviders = await all(routing.findProviders(cid))
-    expect(
-      foundProviders.map((p) => ({
-        id: p.id.toString(),
-        multiaddrs: p.multiaddrs.map((ma) => ma.toString())
-      }))
-    ).to.deep.equal(
-      providers.map((prov) => ({
-        id: prov.ID,
-        multiaddrs: prov.Addrs
-      }))
-    )
+    const provs = await all(routing.findProviders(cid))
+    expect(provs.map(prov => ({
+      id: prov.id.toString(),
+      multiaddrs: prov.multiaddrs.map(ma => ma.toString())
+    }))).to.deep.equal(providers.map(prov => ({
+      id: prov.ID,
+      multiaddrs: prov.Addrs
+    })))
   })
 
   it('should provide without error', async () => {
@@ -130,15 +112,12 @@ describe('libp2p content-routing', () => {
     await routing.put(key, marshalIPNSRecord(record))
 
     // load record that our client just PUT to remote server
-    const res = await fetch(
-      `${process.env.ECHO_SERVER}/get-ipns/${privateKey.publicKey.toCID()}`,
-      {
-        method: 'GET',
-        headers: {
-          Accept: 'application/vnd.ipfs.ipns-record'
-        }
+    const res = await fetch(`${process.env.ECHO_SERVER}/get-ipns/${privateKey.publicKey.toCID()}`, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/vnd.ipfs.ipns-record'
       }
-    )
+    })
 
     const receivedRecord = new Uint8Array(await res.arrayBuffer())
     expect(marshalIPNSRecord(record)).to.equalBytes(receivedRecord)
@@ -174,16 +153,13 @@ describe('libp2p content-routing', () => {
     const record = await createIPNSRecord(privateKey, cid, 0, 1000)
 
     // load record for the router to fetch
-    await fetch(
-      `${process.env.ECHO_SERVER}/add-ipns/${privateKey.publicKey.toCID()}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/vnd.ipfs.ipns-record'
-        },
-        body: marshalIPNSRecord(record)
-      }
-    )
+    await fetch(`${process.env.ECHO_SERVER}/add-ipns/${privateKey.publicKey.toCID()}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/vnd.ipfs.ipns-record'
+      },
+      body: marshalIPNSRecord(record)
+    })
 
     const key = uint8ArrayConcat([
       uint8ArrayFromString('/ipns/'),
@@ -208,10 +184,8 @@ describe('libp2p content-routing', () => {
       privateKey.publicKey.toMultihash().bytes
     ])
 
-    await expect(routing.get(key)).to.eventually.be.rejected.with.property(
-      'name',
-      'NotFoundError'
-    )
+    await expect(routing.get(key)).to.eventually.be.rejected
+      .with.property('name', 'NotFoundError')
 
     await expect(getServerCallCount()).to.eventually.equal(0)
   })
@@ -255,20 +229,15 @@ describe('libp2p peer-routing', () => {
       }]
 
       // load peer for the router to fetch
-      await fetch(
-        `${process.env.ECHO_SERVER}/add-peers/${peerId.toCID().toString()}`,
-        {
-          method: 'POST',
-          body: records.map((prov) => JSON.stringify(prov)).join('\n')
-        }
-      )
+      await fetch(`${process.env.ECHO_SERVER}/add-peers/${peerId.toCID().toString()}`, {
+        method: 'POST',
+        body: records.map(prov => JSON.stringify(prov)).join('\n')
+      })
 
       const peerInfo = await routing.findPeer(peerId)
 
       expect(peerInfo.id.toString()).to.equal(records[0].ID)
-      expect(peerInfo.multiaddrs.map((ma) => ma.toString())).to.deep.equal(
-        records[0].Addrs
-      )
+      expect(peerInfo.multiaddrs.map(ma => ma.toString())).to.deep.equal(records[0].Addrs)
     })
 
     it('should not get closest peers', async () => {
@@ -278,9 +247,7 @@ describe('libp2p peer-routing', () => {
         throw new Error('PeerRouting not found')
       }
 
-      await expect(
-        all(routing.getClosestPeers(Uint8Array.from([0, 1, 2, 3, 4])))
-      ).to.eventually.be.empty()
+      await expect(all(routing.getClosestPeers(Uint8Array.from([0, 1, 2, 3, 4])))).to.eventually.be.empty()
     })
   })
 })

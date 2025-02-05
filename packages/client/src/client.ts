@@ -170,7 +170,6 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       }
     } catch (err) {
       log.error('getProviders errored:', err)
-      throw err
     } finally {
       signal.clear()
       onFinish.resolve()
@@ -397,6 +396,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
     const requestMethod = options.method ?? 'GET'
     const key = `${requestMethod}-${url}`
 
+    // Only try to use cache for GET requests
     if (requestMethod === 'GET') {
       const cachedResponse = await this.cache?.match(url)
       if (cachedResponse?.ok === true) {
