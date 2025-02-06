@@ -397,7 +397,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
     const key = `${requestMethod}-${url}`
 
     // Only try to use cache for GET requests
-    if (requestMethod === 'GET') {
+    if (requestMethod === 'GET' && this.cache != null) {
       const cachedResponse = await this.cache?.match(url)
       if (cachedResponse?.ok === true) {
         // Check if the cached response has expired
