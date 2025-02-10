@@ -55,7 +55,7 @@ describe('delegated-routing-v1-http-api-client', () => {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ Providers: providers})
+      body: JSON.stringify({ Providers: providers })
     })
 
     const provs = await all(client.getProviders(cid))
@@ -87,12 +87,12 @@ describe('delegated-routing-v1-http-api-client', () => {
     for (const contentType of contentTypes) {
       // Add providers with proper payload structure
       await fetch(`${process.env.ECHO_SERVER}/add-providers/${cid.toString()}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': contentType
-          },
-          body: JSON.stringify({ Providers: providers })
-        })
+        method: 'POST',
+        headers: {
+          'Content-Type': contentType
+        },
+        body: JSON.stringify({ Providers: providers })
+      })
 
       await new Promise((resolve) => setTimeout(resolve, 100))
       const provs = await all(client.getProviders(cid))
@@ -107,12 +107,12 @@ describe('delegated-routing-v1-http-api-client', () => {
     const cid = CID.parse('QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn')
 
     const response = await fetch(`${process.env.ECHO_SERVER}/add-providers/${cid.toString()}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain'
-        },
-        body: 'not json'
-      })
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain'
+      },
+      body: 'not json'
+    })
 
     expect(response.status).to.equal(400)
     const errorData = await response.json()
@@ -378,7 +378,7 @@ describe('delegated-routing-v1-http-api-client', () => {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ Providers: providers})
+      body: JSON.stringify({ Providers: providers })
     })
 
     // Reset call count before our test
@@ -434,7 +434,7 @@ describe('delegated-routing-v1-http-api-client', () => {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ Providers: providers})
+      body: JSON.stringify({ Providers: providers })
     })
 
     // Reset call count
