@@ -22,20 +22,16 @@ const options = {
       echo.polka.post('/add-providers/:cid', (req, res) => {
         callCount++
         try {
-          if (!req.headers['content-type']?.includes('application/json')) {
-            res.statusCode = 400
-            res.end(JSON.stringify({
-              error: 'Invalid content type. Expected application/json',
-              code: 'ERR_INVALID_INPUT'
-            }))
-            providers.delete(req.params.cid)
-            return
+
+          let data
+          try {
+            // when passed data from a test where `body=providers.map(prov => JSON.stringify(prov)).join('\n')`
+            data = { Providers: req.body.split('\n').map(line => JSON.parse(line)) }
+          } catch (err) {
+            // when passed data from a test where `body=JSON.stringify({ Providers: providers })`
+            data = req.body
           }
-      
-          const data = typeof req.body === 'string' 
-            ? { Providers: req.body.split('\n').map(line => JSON.parse(line)) }
-            : req.body
-      
+
           providers.set(req.params.cid, data)
           res.end(JSON.stringify({ success: true }))
         } catch (err) {
@@ -53,7 +49,7 @@ const options = {
         try {
           const providerData = providers.get(req.params.cid) || { Providers: [] }
           const acceptHeader = req.headers.accept
-      
+
           if (acceptHeader?.includes('application/x-ndjson')) {
             res.setHeader('Content-Type', 'application/x-ndjson')
             const providers = Array.isArray(providerData.Providers) ? providerData.Providers : []

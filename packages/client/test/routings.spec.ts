@@ -69,10 +69,7 @@ describe('libp2p content-routing', () => {
     // load providers for the router to fetch
     await fetch(`${process.env.ECHO_SERVER}/add-providers/${cid.toString()}`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ Providers: providers })
+      body: providers.map(prov => JSON.stringify(prov)).join('\n')
     })
 
     const provs = await all(routing.findProviders(cid))

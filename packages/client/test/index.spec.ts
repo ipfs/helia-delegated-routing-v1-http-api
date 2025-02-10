@@ -52,10 +52,7 @@ describe('delegated-routing-v1-http-api-client', () => {
     // load providers for the router to fetch
     await fetch(`${process.env.ECHO_SERVER}/add-providers/${cid.toString()}`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ Providers: providers })
+      body: providers.map(prov => JSON.stringify(prov)).join('\n')
     })
 
     const provs = await all(client.getProviders(cid))
@@ -101,26 +98,6 @@ describe('delegated-routing-v1-http-api-client', () => {
       expect(provs[0].ID.toString()).to.equal(providers[0].ID)
       expect(provs[0].Addrs[0].toString()).to.equal(providers[0].Addrs[0])
     }
-  })
-
-  it('should handle non-json input', async () => {
-    const cid = CID.parse('QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn')
-
-    const response = await fetch(`${process.env.ECHO_SERVER}/add-providers/${cid.toString()}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'text/plain'
-      },
-      body: 'not json'
-    })
-
-    expect(response.status).to.equal(400)
-    const errorData = await response.json()
-    expect(errorData).to.have.property('error')
-    expect(errorData).to.have.property('code', 'ERR_INVALID_INPUT')
-
-    const provs = await all(client.getProviders(cid))
-    expect(provs).to.be.empty()
   })
 
   it('should add filter parameters the query of the request url', async () => {
@@ -180,7 +157,7 @@ describe('delegated-routing-v1-http-api-client', () => {
     expect(searchParams.get('filter-addrs')).to.equal('tcp,!p2p-circuit')
   })
 
-  it('should handle non-json input without content-type header', async () => {
+  it('should handle non-json input', async () => {
     const cid = CID.parse('QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn')
 
     // load providers for the router to fetch
@@ -375,10 +352,7 @@ describe('delegated-routing-v1-http-api-client', () => {
     // load providers for the router to fetch
     await fetch(`${process.env.ECHO_SERVER}/add-providers/${cid.toString()}`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ Providers: providers })
+      body: providers.map(prov => JSON.stringify(prov)).join('\n')
     })
 
     // Reset call count before our test
@@ -431,10 +405,7 @@ describe('delegated-routing-v1-http-api-client', () => {
     // load providers for the router to fetch
     await fetch(`${process.env.ECHO_SERVER}/add-providers/${cid.toString()}`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ Providers: providers })
+      body: providers.map(prov => JSON.stringify(prov)).join('\n')
     })
 
     // Reset call count
