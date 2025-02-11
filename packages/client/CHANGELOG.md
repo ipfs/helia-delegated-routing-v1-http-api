@@ -1,3 +1,9 @@
+## [@helia/delegated-routing-v1-http-api-client-v4.2.2](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-4.2.1...@helia/delegated-routing-v1-http-api-client-4.2.2) (2025-02-11)
+
+### Bug Fixes
+
+* getProviders recognizes application/json accept header ([#155](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues/155)) ([8fd603b](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/8fd603b7384973192e6d94fa031c73464315347d))
+
 ## [@helia/delegated-routing-v1-http-api-client-v4.2.1](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-4.2.0...@helia/delegated-routing-v1-http-api-client-4.2.1) (2024-11-19)
 
 ### Bug Fixes
