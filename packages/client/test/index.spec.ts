@@ -65,6 +65,41 @@ describe('delegated-routing-v1-http-api-client', () => {
     })))
   })
 
+  it('should handle different Content-Type headers for JSON responses', async () => {
+    const providers = [{
+      Protocol: 'transport-bitswap',
+      Schema: 'bitswap',
+      Metadata: 'gBI=',
+      ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
+      Addrs: ['/ip4/41.41.41.41/tcp/1234']
+    }]
+
+    const cid = CID.parse('QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn')
+    const contentTypes = [
+      'application/json',
+      'application/json; charset=utf-8',
+      'application/json;charset=UTF-8'
+    ]
+
+    for (const contentType of contentTypes) {
+      // Add providers with proper payload structure
+      await fetch(`${process.env.ECHO_SERVER}/add-providers/${cid.toString()}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': contentType
+        },
+        body: JSON.stringify({ Providers: providers })
+      })
+
+      await new Promise((resolve) => setTimeout(resolve, 100))
+      const provs = await all(client.getProviders(cid))
+
+      expect(provs).to.have.lengthOf(1, `Failed for Content-Type: ${contentType}`)
+      expect(provs[0].ID.toString()).to.equal(providers[0].ID)
+      expect(provs[0].Addrs[0].toString()).to.equal(providers[0].Addrs[0])
+    }
+  })
+
   it('should add filter parameters the query of the request url', async () => {
     const providers = [{
       Protocol: 'transport-bitswap',

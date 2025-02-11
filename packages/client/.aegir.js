@@ -14,20 +14,55 @@ const options = {
       const echo = new EchoServer()
       echo.polka.use(body.raw({ type: 'application/vnd.ipfs.ipns-record'}))
       echo.polka.use(body.text())
+      echo.polka.use(body.json())
       echo.polka.use((req, res, next) => {
         next()
         lastCalledUrl = req.url
       })
       echo.polka.post('/add-providers/:cid', (req, res) => {
         callCount++
-        providers.set(req.params.cid, req.body)
-        res.end()
+        try {
+
+          let data
+          try {
+            // when passed data from a test where `body=providers.map(prov => JSON.stringify(prov)).join('\n')`
+            data = { Providers: req.body.split('\n').map(line => JSON.parse(line)) }
+          } catch (err) {
+            // when passed data from a test where `body=JSON.stringify({ Providers: providers })`
+            data = req.body
+          }
+
+          providers.set(req.params.cid, data)
+          res.end(JSON.stringify({ success: true }))
+        } catch (err) {
+          console.error('Error in add-providers:', err)
+          res.statusCode = 400
+          res.end(JSON.stringify({
+            error: err.message,
+            code: 'ERR_INVALID_INPUT'
+          }))
+          providers.delete(req.params.cid)
+        }
       })
       echo.polka.get('/routing/v1/providers/:cid', (req, res) => {
         callCount++
-        const records = providers.get(req.params.cid) ?? '[]'
-        providers.delete(req.params.cid)
-        res.end(records)
+        try {
+          const providerData = providers.get(req.params.cid) || { Providers: [] }
+          const acceptHeader = req.headers.accept
+
+          if (acceptHeader?.includes('application/x-ndjson')) {
+            res.setHeader('Content-Type', 'application/x-ndjson')
+            const providers = Array.isArray(providerData.Providers) ? providerData.Providers : []
+            res.end(providers.map(p => JSON.stringify(p)).join('\n'))
+          } else {
+            res.setHeader('Content-Type', 'application/json')
+            res.end(JSON.stringify(providerData))
+          }
+        } catch (err) {
+          console.error('Error in get providers:', err)
+          res.statusCode = 500
+          res.end(JSON.stringify({ error: err.message }))
+        }
       })
       echo.polka.post('/add-peers/:peerId', (req, res) => {
         callCount++

@@ -122,16 +122,22 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       const getOptions = { headers: { Accept: 'application/x-ndjson' }, signal }
       const res = await this.#makeRequest(url.toString(), getOptions)
 
-      if (res.status === 404) {
+      if (res == null) {
+        throw new BadResponseError('No response received')
+      }
+      if (!res.ok) {
+        if (res.status === 404) {
         // https://specs.ipfs.tech/routing/http-routing-v1/#response-status-codes
         // 404 (Not Found): must be returned if no matching records are found
-        throw new NotFoundError('No matching records found')
-      }
+          throw new NotFoundError('No matching records found')
+        }
 
-      if (res.status === 422) {
+        if (res.status === 422) {
         // https://specs.ipfs.tech/routing/http-routing-v1/#response-status-codes
         // 422 (Unprocessable Entity): request does not conform to schema or semantic constraints
-        throw new InvalidRequestError('Request does not conform to schema or semantic constraints')
+          throw new InvalidRequestError('Request does not conform to schema or semantic constraints')
+        }
+        throw new BadResponseError(`Unexpected status code: ${res.status}`)
       }
 
       if (res.body == null) {
@@ -139,7 +145,11 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       }
 
       const contentType = res.headers.get('Content-Type')
-      if (contentType === 'application/json') {
+      if (contentType == null) {
+        throw new BadResponseError('No Content-Type header received')
+      }
+
+      if (contentType?.startsWith('application/json')) {
         const body = await res.json()
 
         for (const provider of body.Providers) {
@@ -148,13 +158,15 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
             yield record
           }
         }
-      } else {
+      } else if (contentType.includes('application/x-ndjson')) {
         for await (const provider of ndjson(toIt(res.body))) {
           const record = this.#conformToPeerSchema(provider)
           if (record != null) {
             yield record
           }
         }
+      } else {
+        throw new BadResponseError(`Unsupported Content-Type: ${contentType}`)
       }
     } catch (err) {
       log.error('getProviders errored:', err)
