@@ -1,3 +1,9 @@
+## [@helia/delegated-routing-v1-http-api-client-v4.2.3](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-4.2.2...@helia/delegated-routing-v1-http-api-client-4.2.3) (2025-04-29)
+
+### Bug Fixes
+
+* client bubbles up errors ([#166](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues/166)) ([35308b4](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/35308b495e903b4bbc788eac5803c50cc83f50f1))
+
 ## [@helia/delegated-routing-v1-http-api-client-v4.2.2](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-4.2.1...@helia/delegated-routing-v1-http-api-client-4.2.2) (2025-02-11)
 
 ### Bug Fixes
