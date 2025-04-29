@@ -168,8 +168,6 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       } else {
         throw new BadResponseError(`Unsupported Content-Type: ${contentType}`)
       }
-    } catch (err) {
-      log.error('getProviders errored:', err)
     } finally {
       signal.clear()
       onFinish.resolve()
