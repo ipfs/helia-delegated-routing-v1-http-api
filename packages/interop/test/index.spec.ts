@@ -5,6 +5,7 @@ import { createDelegatedRoutingV1HttpApiServer } from '@helia/delegated-routing-
 import { ipns } from '@helia/ipns'
 import { generateKeyPair } from '@libp2p/crypto/keys'
 import { start, stop } from '@libp2p/interface'
+import { type Ping } from '@libp2p/ping'
 import { expect } from 'aegir/chai'
 import { createIPNSRecord } from 'ipns'
 import first from 'it-first'
@@ -19,7 +20,7 @@ import type { FastifyInstance } from 'fastify'
 import type { HeliaLibp2p } from 'helia'
 
 describe('delegated-routing-v1-http-api interop', () => {
-  let network: Array<HeliaLibp2p<Libp2p<{ dht: KadDHT }>>>
+  let network: Array<HeliaLibp2p<Libp2p<{ dht: KadDHT, ping: Ping }>>>
   let server: FastifyInstance
   let client: DelegatedRoutingV1HttpApiClient
 
