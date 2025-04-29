@@ -82,6 +82,40 @@ describe('libp2p content-routing', () => {
     })))
   })
 
+  it('should respect abort signal when finding providers', async () => {
+    const routing = getContentRouting(client)
+
+    if (routing == null) {
+      throw new Error('ContentRouting not found')
+    }
+
+    const providers = [{
+      ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
+      Addrs: ['/ip4/43.43.43.43/tcp/1234']
+    }]
+
+    const cid = CID.parse('QmawceGscqN4o8Y8Fv26UUmB454kn2bnkXV5tEQYc4jBd6')
+
+    // load providers for the router to fetch
+    await fetch(`${process.env.ECHO_SERVER}/add-providers/${cid.toString()}`, {
+      method: 'POST',
+      body: providers.map(prov => JSON.stringify(prov)).join('\n')
+    })
+
+    let findProvidersFinished = false
+    let error: any = new Error('temporary error that should be replaced')
+    try {
+      const controller = new AbortController()
+      controller.abort()
+      await all(routing.findProviders(cid, { signal: controller.signal }))
+      findProvidersFinished = true
+    } catch (err: any) {
+      error = err
+    }
+    expect(findProvidersFinished).to.be.false()
+    expect(error).to.have.property('message').that.includes('abort', error.message)
+  })
+
   it('should provide without error', async () => {
     const routing = getContentRouting(client)
 

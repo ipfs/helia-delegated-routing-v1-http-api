@@ -1,4 +1,4 @@
-import { NotFoundError, contentRoutingSymbol, peerRoutingSymbol, setMaxListeners } from '@libp2p/interface'
+import { AbortError, NotFoundError, contentRoutingSymbol, peerRoutingSymbol, setMaxListeners } from '@libp2p/interface'
 import { logger } from '@libp2p/logger'
 import { peerIdFromString } from '@libp2p/peer-id'
 import { multiaddr } from '@multiformats/multiaddr'
@@ -170,6 +170,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       }
     } catch (err) {
       log.error('getProviders errored:', err)
+      throw err
     } finally {
       signal.clear()
       onFinish.resolve()
