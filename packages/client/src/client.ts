@@ -1,4 +1,4 @@
-import { AbortError, NotFoundError, contentRoutingSymbol, peerRoutingSymbol, setMaxListeners } from '@libp2p/interface'
+import { NotFoundError, contentRoutingSymbol, peerRoutingSymbol, setMaxListeners } from '@libp2p/interface'
 import { logger } from '@libp2p/logger'
 import { peerIdFromString } from '@libp2p/peer-id'
 import { multiaddr } from '@multiformats/multiaddr'
