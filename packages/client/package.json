@@ -155,7 +155,7 @@
   },
   "devDependencies": {
     "@libp2p/crypto": "^5.0.1",
-    "aegir": "^45.0.1",
+    "aegir": "^46.0.0",
     "body-parser": "^1.20.3",
     "it-all": "^3.0.6",
     "wherearewe": "^2.0.1"
