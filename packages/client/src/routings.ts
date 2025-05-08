@@ -1,4 +1,4 @@
-import { type ContentRouting, type PeerRouting, type AbortOptions, type PeerId, type PeerInfo, NotFoundError } from '@libp2p/interface'
+import { NotFoundError } from '@libp2p/interface'
 import { marshalIPNSRecord, multihashFromIPNSRoutingKey, unmarshalIPNSRecord } from 'ipns'
 import first from 'it-first'
 import map from 'it-map'
@@ -6,6 +6,7 @@ import { CID } from 'multiformats/cid'
 import { equals as uint8ArrayEquals } from 'uint8arrays/equals'
 import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
 import type { DelegatedRoutingV1HttpApiClient } from './index.js'
+import type { ContentRouting, PeerRouting, AbortOptions, PeerId, PeerInfo } from '@libp2p/interface'
 
 const IPNS_PREFIX = uint8ArrayFromString('/ipns/')
 

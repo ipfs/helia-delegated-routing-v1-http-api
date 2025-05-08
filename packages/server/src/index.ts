@@ -52,12 +52,10 @@
  */
 
 import cors from '@fastify/cors'
-import fastify, {
-  type FastifyListenOptions,
-  type FastifyInstance
-} from 'fastify'
+import fastify from 'fastify'
 import routes from './routes/index.js'
 import type { Helia } from '@helia/interface'
+import type { FastifyListenOptions, FastifyInstance } from 'fastify'
 
 export interface ServerInit {
   fastify?: FastifyInstance

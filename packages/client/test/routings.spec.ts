@@ -10,7 +10,8 @@ import all from 'it-all'
 import { CID } from 'multiformats/cid'
 import { concat as uint8ArrayConcat } from 'uint8arrays/concat'
 import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
-import { createDelegatedRoutingV1HttpApiClient, type DelegatedRoutingV1HttpApiClient } from '../src/index.js'
+import { createDelegatedRoutingV1HttpApiClient } from '../src/index.js'
+import type { DelegatedRoutingV1HttpApiClient } from '../src/index.js'
 import type { PeerRouting, ContentRouting } from '@libp2p/interface'
 
 const serverUrl = process.env.ECHO_SERVER

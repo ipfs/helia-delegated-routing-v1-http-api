@@ -8,8 +8,9 @@ import { expect } from 'aegir/chai'
 import { createIPNSRecord, marshalIPNSRecord } from 'ipns'
 import all from 'it-all'
 import { CID } from 'multiformats/cid'
-import { createDelegatedRoutingV1HttpApiClient, type DelegatedRoutingV1HttpApiClient } from '../src/index.js'
+import { createDelegatedRoutingV1HttpApiClient } from '../src/index.js'
 import { itBrowser } from './fixtures/it.js'
+import type { DelegatedRoutingV1HttpApiClient } from '../src/index.js'
 
 if (process.env.ECHO_SERVER == null) {
   throw new Error('Echo server not configured correctly')

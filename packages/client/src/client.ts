@@ -4,7 +4,7 @@ import { peerIdFromString } from '@libp2p/peer-id'
 import { multiaddr } from '@multiformats/multiaddr'
 import { anySignal } from 'any-signal'
 import toIt from 'browser-readablestream-to-it'
-import { unmarshalIPNSRecord, type IPNSRecord, marshalIPNSRecord, multihashToIPNSRoutingKey } from 'ipns'
+import { unmarshalIPNSRecord, marshalIPNSRecord, multihashToIPNSRoutingKey } from 'ipns'
 import { ipnsValidator } from 'ipns/validator'
 import { parse as ndjson } from 'it-ndjson'
 import defer from 'p-defer'
@@ -14,6 +14,7 @@ import { DelegatedRoutingV1HttpApiClientContentRouting, DelegatedRoutingV1HttpAp
 import type { DelegatedRoutingV1HttpApiClient, DelegatedRoutingV1HttpApiClientInit, GetProvidersOptions, GetPeersOptions, GetIPNSOptions, PeerRecord } from './index.js'
 import type { ContentRouting, PeerRouting, AbortOptions, PeerId } from '@libp2p/interface'
 import type { Multiaddr } from '@multiformats/multiaddr'
+import type { IPNSRecord } from 'ipns'
 import type { CID } from 'multiformats'
 
 const log = logger('delegated-routing-v1-http-api-client')
