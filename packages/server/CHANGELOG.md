@@ -1,3 +1,9 @@
+## [@helia/delegated-routing-v1-http-api-server-v4.0.5](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-server-4.0.4...@helia/delegated-routing-v1-http-api-server-4.0.5) (2025-05-08)
+
+### Dependencies
+
+* **dev:** bump aegir from 45.2.1 to 46.0.0 ([#168](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues/168)) ([d118915](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/d1189151595d5e10881b82a6e3957dfc4b6e95c2))
+
 ## [@helia/delegated-routing-v1-http-api-server-v4.0.4](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-server-4.0.3...@helia/delegated-routing-v1-http-api-server-4.0.4) (2024-11-18)
 
 ### Bug Fixes
