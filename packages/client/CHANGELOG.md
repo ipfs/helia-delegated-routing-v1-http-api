@@ -1,3 +1,9 @@
+## [@helia/delegated-routing-v1-http-api-client-v4.2.5](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-4.2.4...@helia/delegated-routing-v1-http-api-client-4.2.5) (2025-05-08)
+
+### Dependencies
+
+* update deps ([#169](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues/169)) ([3b13ba8](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/3b13ba8f8edeaaf5ff8eabccec8d60daedf77dbc))
+
 ## [@helia/delegated-routing-v1-http-api-client-v4.2.4](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-4.2.3...@helia/delegated-routing-v1-http-api-client-4.2.4) (2025-05-08)
 
 ### Dependencies
