@@ -1,5 +1,6 @@
 import { identify } from '@libp2p/identify'
 import { kadDHT, removePublicAddressesMapper } from '@libp2p/kad-dht'
+import { ping } from '@libp2p/ping'
 import { createHelia as createNode } from 'helia'
 import { ipnsSelector } from 'ipns/selector'
 import { ipnsValidator } from 'ipns/validator'
@@ -23,7 +24,8 @@ export async function createHelia (init?: Partial<HeliaInit>): Promise<HeliaLibp
             ipns: ipnsSelector
           }
         }),
-        identify: identify()
+        identify: identify(),
+        ping: ping()
       }
     }
   })
