@@ -61,8 +61,7 @@ export default function getIpnsV1 (fastify: FastifyInstance, helia: Helia): void
 
         return await reply
           .header('Content-Type', 'application/vnd.ipfs.ipns-record')
-          // one cannot simply send rawRecord https://github.com/fastify/fastify/issues/5118
-          .send(Buffer.from(rawRecord, 0, rawRecord.byteLength))
+          .send(rawRecord)
       } catch (err: any) {
         if (err.code === 'ERR_NOT_FOUND' || err.errors?.[0].code === 'ERR_NOT_FOUND' ||
             err.name === 'NotFoundError' || err.errors?.[0].name === 'NotFoundError'
