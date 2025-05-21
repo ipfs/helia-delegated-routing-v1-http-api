@@ -167,7 +167,7 @@
     "@libp2p/crypto": "^5.0.1",
     "@multiformats/multiaddr": "^12.3.1",
     "@types/sinon": "^17.0.3",
-    "aegir": "^46.0.0",
+    "aegir": "^47.0.10",
     "sinon": "^20.0.0",
     "sinon-ts": "^2.0.0"
   }

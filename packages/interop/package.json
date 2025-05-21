@@ -124,7 +124,7 @@
     "@libp2p/interface": "^2.0.1",
     "@libp2p/kad-dht": "^15.0.2",
     "@libp2p/ping": "^2.0.29",
-    "aegir": "^46.0.0",
+    "aegir": "^47.0.10",
     "fastify": "^5.0.0",
     "helia": "^5.1.0",
     "ipns": "^10.0.0",
