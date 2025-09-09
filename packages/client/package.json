@@ -142,7 +142,7 @@
     "@libp2p/interface": "^2.10.1",
     "@libp2p/logger": "^5.1.17",
     "@libp2p/peer-id": "^5.1.4",
-    "@multiformats/multiaddr": "^12.4.0",
+    "@multiformats/multiaddr": "^13.0.1",
     "any-signal": "^4.1.1",
     "browser-readablestream-to-it": "^2.0.9",
     "ipns": "^10.0.2",
