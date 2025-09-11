@@ -4,11 +4,9 @@ import { ping } from '@libp2p/ping'
 import { createHelia as createNode } from 'helia'
 import { ipnsSelector } from 'ipns/selector'
 import { ipnsValidator } from 'ipns/validator'
-import type { Libp2p } from '@libp2p/interface'
-import type { KadDHT } from '@libp2p/kad-dht'
 import type { HeliaInit, HeliaLibp2p } from 'helia'
 
-export async function createHelia (init?: Partial<HeliaInit>): Promise<HeliaLibp2p<Libp2p<{ dht: KadDHT }>>> {
+export async function createHelia (init?: Partial<HeliaInit>): Promise<HeliaLibp2p> {
   const helia = await createNode({
     libp2p: {
       peerDiscovery: [],
@@ -30,6 +28,5 @@ export async function createHelia (init?: Partial<HeliaInit>): Promise<HeliaLibp
     }
   })
 
-  // @ts-expect-error cannot derive service map type
   return helia
 }

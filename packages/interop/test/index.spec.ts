@@ -13,13 +13,11 @@ import * as raw from 'multiformats/codecs/raw'
 import { sha256 } from 'multiformats/hashes/sha2'
 import { createHelia } from './fixtures/create-helia.js'
 import type { DelegatedRoutingV1HttpApiClient } from '@helia/delegated-routing-v1-http-api-client'
-import type { Libp2p } from '@libp2p/interface'
-import type { KadDHT } from '@libp2p/kad-dht'
 import type { FastifyInstance } from 'fastify'
 import type { HeliaLibp2p } from 'helia'
 
 describe('delegated-routing-v1-http-api interop', () => {
-  let network: Array<HeliaLibp2p<Libp2p<{ dht: KadDHT }>>>
+  let network: Array<HeliaLibp2p>
   let server: FastifyInstance
   let client: DelegatedRoutingV1HttpApiClient
 
