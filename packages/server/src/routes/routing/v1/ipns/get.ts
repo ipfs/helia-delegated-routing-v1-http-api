@@ -3,6 +3,7 @@ import { multihashToIPNSRoutingKey } from 'ipns'
 import { CID } from 'multiformats/cid'
 import { hasCode } from 'multiformats/hashes/digest'
 import { LIBP2P_KEY_CODEC } from '../../../../constants.js'
+import { isNotFoundError } from '../errors.js'
 import type { Helia } from '@helia/interface'
 import type { FastifyInstance } from 'fastify'
 
@@ -39,7 +40,7 @@ export default function getIpnsV1 (fastify: FastifyInstance, helia: Helia): void
         // PeerId must be encoded as a Libp2p-key CID.
         const { name: cidStr } = request.params
         cid = CID.parse(cidStr)
-      } catch (err) {
+      } catch (err: any) {
         fastify.log.error('could not parse CID from params', err)
         return reply.code(422).type('text/html').send('Unprocessable Entity')
       }
@@ -63,10 +64,12 @@ export default function getIpnsV1 (fastify: FastifyInstance, helia: Helia): void
           .header('Content-Type', 'application/vnd.ipfs.ipns-record')
           .send(rawRecord)
       } catch (err: any) {
-        if (err.code === 'ERR_NOT_FOUND' || err.errors?.[0].code === 'ERR_NOT_FOUND' ||
-            err.name === 'NotFoundError' || err.errors?.[0].name === 'NotFoundError'
-        ) {
-          return reply.code(404).send('Record not found')
+        if (isNotFoundError(err)) {
+          // Per IPIP-0513: Return 200 with text/plain to indicate no record found
+          return reply
+            .code(200)
+            .header('Content-Type', 'text/plain; charset=utf-8')
+            .send('Record not found')
         }
 
         throw err

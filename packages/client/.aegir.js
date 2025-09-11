@@ -1,6 +1,23 @@
 import EchoServer from 'aegir/echo-server'
 import body from 'body-parser'
 
+// Special test CIDs that trigger specific fixtures
+const TEST_CIDS = {
+  // Providers endpoint test CIDs
+  PROVIDERS_404: 'bafkreig3o4e7r4bpsc3hqirlzjeuie3w25tfjgmp6ufeaabwvuial3r4h4', // return404providers
+  PROVIDERS_NULL: 'bafkreicyicgkpqid2qs3kfc277f4tsx5tew3e63fgv7fn6t74sicjkv76i', // returnnullproviders
+
+  // Peers endpoint test CIDs (libp2p-key format)
+  PEERS_404: 'k2k4r8pqu6ui9p0d0fewul7462tsb0pa57pi238gunrjxpfrg6zawrho', // return404peers
+  PEERS_NULL: 'k2k4r8nyb48mv6n6olsob1zsz77mhdrvwtjcryjil2qqqzye5jds4uur', // returnnullpeers
+
+  // IPNS endpoint test CIDs (libp2p-key format)
+  IPNS_404: 'k2k4r8o3937xct4wma8gooitiip4mik0phkg8kt3b5x9y93a9dntvwjz', // return404ipns
+  IPNS_JSON: 'k2k4r8pajj9txni0h9nv9gxuj1mju4jmi94iq2r4jwhxk87hnuo94yom', // returnjsonipns
+  IPNS_HTML: 'k2k4r8kddkyieizgq7a32d9jc4nm99yupniet962vssrm34hamolquzk', // returnhtmlipns
+  IPNS_NO_CONTENT_TYPE: 'k2k4r8okqrya8gr449btdy5b6vw0q68dh7y3fps9qbi0zmcmybz7bjpu' // returnnocontentipns
+}
+
 /** @type {import('aegir').PartialOptions} */
 const options = {
   test: {
@@ -47,16 +64,32 @@ const options = {
       echo.polka.get('/routing/v1/providers/:cid', (req, res) => {
         callCount++
         try {
-          const providerData = providers.get(req.params.cid) || { Providers: [] }
+          const providerData = providers.get(req.params.cid)
+
+          // Support testing 404 responses for backward compatibility
+          if (req.params.cid === TEST_CIDS.PROVIDERS_404) {
+            res.statusCode = 404
+            res.end('Not Found')
+            return
+          }
+
+          // Support testing null Providers field
+          if (req.params.cid === TEST_CIDS.PROVIDERS_NULL) {
+            res.setHeader('Content-Type', 'application/json')
+            res.end(JSON.stringify({ Providers: null }))
+            return
+          }
+
           const acceptHeader = req.headers.accept
+          const data = providerData || { Providers: [] }
 
           if (acceptHeader?.includes('application/x-ndjson')) {
             res.setHeader('Content-Type', 'application/x-ndjson')
-            const providers = Array.isArray(providerData.Providers) ? providerData.Providers : []
+            const providers = Array.isArray(data.Providers) ? data.Providers : []
             res.end(providers.map(p => JSON.stringify(p)).join('\n'))
           } else {
             res.setHeader('Content-Type', 'application/json')
-            res.end(JSON.stringify(providerData))
+            res.end(JSON.stringify(data))
           }
         } catch (err) {
           console.error('Error in get providers:', err)
@@ -71,10 +104,36 @@ const options = {
       })
       echo.polka.get('/routing/v1/peers/:peerId', (req, res) => {
         callCount++
-        const records = peers.get(req.params.peerId) ?? '[]'
-        peers.delete(req.params.peerId)
 
-        res.end(records)
+        // Support testing 404 responses for backward compatibility
+        if (req.params.peerId === TEST_CIDS.PEERS_404) {
+          res.statusCode = 404
+          res.end('Not Found')
+          return
+        }
+
+        // Support testing null Peers field
+        if (req.params.peerId === TEST_CIDS.PEERS_NULL) {
+          res.setHeader('Content-Type', 'application/json')
+          res.end(JSON.stringify({ Peers: null }))
+          return
+        }
+
+        const records = peers.get(req.params.peerId)
+        if (records) {
+          peers.delete(req.params.peerId)
+          res.end(records)
+        } else {
+          // Return empty JSON response
+          const acceptHeader = req.headers.accept
+          if (acceptHeader?.includes('application/x-ndjson')) {
+            res.setHeader('Content-Type', 'application/x-ndjson')
+            res.end('')
+          } else {
+            res.setHeader('Content-Type', 'application/json')
+            res.end(JSON.stringify({ Peers: [] }))
+          }
+        }
       })
       echo.polka.post('/add-ipns/:peerId', (req, res) => {
         callCount++
@@ -83,10 +142,42 @@ const options = {
       })
       echo.polka.get('/routing/v1/ipns/:peerId', (req, res) => {
         callCount++
-        const record = ipnsGet.get(req.params.peerId) ?? ''
+        const record = ipnsGet.get(req.params.peerId)
         ipnsGet.delete(req.params.peerId)
 
-        res.end(record)
+        // Support testing different content-types
+        if (req.params.peerId === TEST_CIDS.IPNS_404) {
+          res.statusCode = 404
+          res.end('Not Found')
+          return
+        }
+
+        if (req.params.peerId === TEST_CIDS.IPNS_JSON) {
+          res.setHeader('Content-Type', 'application/json')
+          res.end(JSON.stringify({ error: 'not found' }))
+          return
+        }
+
+        if (req.params.peerId === TEST_CIDS.IPNS_HTML) {
+          res.setHeader('Content-Type', 'text/html')
+          res.end('<html>Not Found</html>')
+          return
+        }
+
+        if (req.params.peerId === TEST_CIDS.IPNS_NO_CONTENT_TYPE) {
+          // No content-type header
+          res.end('No record')
+          return
+        }
+
+        if (record) {
+          res.setHeader('Content-Type', 'application/vnd.ipfs.ipns-record')
+          res.end(record)
+        } else {
+          // Per IPIP-0513: Return 200 with text/plain for no record found
+          res.setHeader('Content-Type', 'text/plain; charset=utf-8')
+          res.end('Record not found')
+        }
       })
       echo.polka.put('/routing/v1/ipns/:peerId', (req, res) => {
         callCount++

@@ -2,6 +2,7 @@ import { PassThrough } from 'node:stream'
 import { setMaxListeners } from '@libp2p/interface'
 import { peerIdFromCID } from '@libp2p/peer-id'
 import { CID } from 'multiformats/cid'
+import { isNotFoundError } from '../errors.js'
 import type { Helia } from '@helia/interface'
 import type { PeerId } from '@libp2p/interface'
 import type { FastifyInstance } from 'fastify'
@@ -39,35 +40,55 @@ export default function getPeersV1 (fastify: FastifyInstance, helia: Helia): voi
         const { peerId: cidStr } = request.params
         const peerCid = CID.parse(cidStr)
         peerId = peerIdFromCID(peerCid)
-      } catch (err) {
+      } catch (err: any) {
         fastify.log.error('could not parse CID from params', err)
         return reply.code(422).type('text/html').send('Unprocessable Entity')
       }
 
-      const peerInfo = await helia.routing.findPeer(peerId, {
-        signal: controller.signal
-      })
-      const peerRecord = {
-        Schema: 'peer',
-        ID: peerInfo.id.toString(),
-        Addrs: peerInfo.multiaddrs.map(ma => ma.toString())
-      }
+      try {
+        const peerInfo = await helia.routing.findPeer(peerId, {
+          signal: controller.signal
+        })
+        const peerRecord = {
+          Schema: 'peer',
+          ID: peerInfo.id.toString(),
+          Addrs: peerInfo.multiaddrs.map(ma => ma.toString())
+        }
 
-      if (request.headers.accept?.includes('application/x-ndjson') === true) {
-        const stream = new PassThrough()
-        stream.push(JSON.stringify(peerRecord) + '\n')
-        stream.end()
+        if (request.headers.accept?.includes('application/x-ndjson') === true) {
+          const stream = new PassThrough()
+          stream.push(JSON.stringify(peerRecord) + '\n')
+          stream.end()
 
-        // these are .thenables but not .catchables?
-        return reply
-          .header('Content-Type', 'application/x-ndjson')
-          .send(stream)
-      } else {
-        return reply
-          .header('Content-Type', 'application/json')
-          .send({
-            Peers: [peerRecord]
-          })
+          // these are .thenables but not .catchables?
+          return await reply
+            .header('Content-Type', 'application/x-ndjson')
+            .send(stream)
+        } else {
+          return await reply
+            .header('Content-Type', 'application/json')
+            .send({
+              Peers: [peerRecord]
+            })
+        }
+      } catch (err: any) {
+        // Per IPIP-0513: Return 200 with empty results when peer is not found
+        if (isNotFoundError(err)) {
+          if (request.headers.accept?.includes('application/x-ndjson') === true) {
+            const stream = new PassThrough()
+            stream.end() // Empty NDJSON stream
+            return reply
+              .header('Content-Type', 'application/x-ndjson')
+              .send(stream)
+          } else {
+            return reply
+              .header('Content-Type', 'application/json')
+              .send({
+                Peers: []
+              })
+          }
+        }
+        throw err
       }
     }
   })

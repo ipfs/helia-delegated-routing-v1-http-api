@@ -47,7 +47,7 @@ export default function putIpnsV1 (fastify: FastifyInstance, helia: Helia): void
         // PeerId must be encoded as a Libp2p-key CID.
         const { name: cidStr } = request.params
         cid = CID.parse(cidStr)
-      } catch (err) {
+      } catch (err: any) {
         fastify.log.error('could not parse CID from params', err)
         return reply.code(422).type('text/html').send('Unprocessable Entity')
       }

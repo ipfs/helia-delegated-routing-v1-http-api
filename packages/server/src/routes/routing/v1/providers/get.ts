@@ -51,7 +51,7 @@ export default function getProvidersV1 (fastify: FastifyInstance, helia: Helia):
       try {
         const { cid: cidStr } = request.params
         cid = CID.parse(cidStr)
-      } catch (err) {
+      } catch (err: any) {
         fastify.log.error('could not parse CID from params', err)
         return reply.code(422).type('text/html').send('Unprocessable Entity')
       }
@@ -81,22 +81,22 @@ export default function getProvidersV1 (fastify: FastifyInstance, helia: Helia):
             .finally(() => {
               stream.end()
             })
-
-          return reply
-            .header('Content-Type', 'application/x-ndjson')
-            .send(stream)
+        } else {
+          // Per IPIP-0513: Return 200 with empty NDJSON stream for no results
+          stream.end()
         }
+
+        return reply
+          .header('Content-Type', 'application/x-ndjson')
+          .send(stream)
       } else {
         const result = await nonStreamingHandler(cid, helia, {
           signal: controller.signal
         })
 
-        if (result.Providers.length > 0) {
-          return reply.header('Content-Type', 'application/json').send(result)
-        }
+        // Per IPIP-0513: Always return 200 with results (which may be empty)
+        return reply.header('Content-Type', 'application/json').send(result)
       }
-
-      reply.callNotFound()
     }
   })
 }
