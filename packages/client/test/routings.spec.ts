@@ -1,4 +1,3 @@
-/* eslint-disable max-nested-callbacks */
 /* eslint-env mocha */
 
 import { generateKeyPair } from '@libp2p/crypto/keys'
