@@ -40,8 +40,8 @@ export default function getPeersV1 (fastify: FastifyInstance, helia: Helia): voi
         const { peerId: cidStr } = request.params
         const peerCid = CID.parse(cidStr)
         peerId = peerIdFromCID(peerCid)
-      } catch (err: any) {
-        fastify.log.error('could not parse CID from params', err)
+      } catch (err) {
+        fastify.log.error({ err }, 'could not parse CID from params')
         return reply.code(422).type('text/html').send('Unprocessable Entity')
       }
 

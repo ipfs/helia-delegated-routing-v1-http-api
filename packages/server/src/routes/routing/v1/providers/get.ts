@@ -51,8 +51,8 @@ export default function getProvidersV1 (fastify: FastifyInstance, helia: Helia):
       try {
         const { cid: cidStr } = request.params
         cid = CID.parse(cidStr)
-      } catch (err: any) {
-        fastify.log.error('could not parse CID from params', err)
+      } catch (err) {
+        fastify.log.error({ err }, 'could not parse CID from params')
         return reply.code(422).type('text/html').send('Unprocessable Entity')
       }
 

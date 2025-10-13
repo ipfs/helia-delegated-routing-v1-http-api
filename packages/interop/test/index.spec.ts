@@ -13,11 +13,14 @@ import * as raw from 'multiformats/codecs/raw'
 import { sha256 } from 'multiformats/hashes/sha2'
 import { createHelia } from './fixtures/create-helia.js'
 import type { DelegatedRoutingV1HttpApiClient } from '@helia/delegated-routing-v1-http-api-client'
+import type { Libp2p } from '@libp2p/interface'
+import type { KadDHT } from '@libp2p/kad-dht'
+import type { Keychain } from '@libp2p/keychain'
 import type { FastifyInstance } from 'fastify'
-import type { HeliaLibp2p } from 'helia'
+import type { Helia } from 'helia'
 
 describe('delegated-routing-v1-http-api interop', () => {
-  let network: Array<HeliaLibp2p>
+  let network: Array<Helia<Libp2p<{ dht: KadDHT, keychain: Keychain }>>>
   let server: FastifyInstance
   let client: DelegatedRoutingV1HttpApiClient
 
@@ -91,11 +94,10 @@ describe('delegated-routing-v1-http-api interop', () => {
     // publish a record using a remote host
     const i = ipns(network[5])
     const cid = CID.parse('bafybeiczsscdsbs7ffqz55asqdf3smv6klcw3gofszvwlyarci47bgf354')
-    const privateKey = await generateKeyPair('Ed25519')
-    await i.publish(privateKey, cid)
+    const result = await i.publish('key-name', cid)
 
     // use client to resolve the published record
-    const record = await client.getIPNS(privateKey.publicKey.toCID())
+    const record = await client.getIPNS(result.publicKey.toCID())
     expect(record.value).to.equal(`/ipfs/${cid.toString()}`)
   })
 
@@ -109,7 +111,6 @@ describe('delegated-routing-v1-http-api interop', () => {
 
     // resolve the record using a remote host
     const i = ipns(network[8])
-    // @ts-expect-error helia needs to be updated to the latest libp2p deps
     const result = await i.resolve(privateKey.publicKey.toCID())
     expect(result.cid.toString()).to.equal(cid.toString())
   })
