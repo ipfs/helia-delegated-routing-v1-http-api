@@ -378,7 +378,7 @@ describe('delegated-routing-v1-http-api-client', () => {
     results.forEach(resultProviders => {
       expect(resultProviders.map(prov => ({
         id: prov.ID.toString(),
-        // eslint-disable-next-line max-nested-callbacks
+
         addrs: prov.Addrs?.map(ma => ma.toString())
       }))).to.deep.equal(providers.map(prov => ({
         id: prov.ID,
