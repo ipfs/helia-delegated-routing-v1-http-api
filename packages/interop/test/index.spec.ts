@@ -50,13 +50,9 @@ describe('delegated-routing-v1-http-api interop', () => {
   })
 
   afterEach(async () => {
-    await stop(client)
-
-    if (server != null) {
-      await server.close()
-    }
-
     await Promise.all(network.map(async node => node.stop()))
+    await server?.close()
+    await stop(client)
   })
 
   it('should find providers', async () => {
@@ -98,7 +94,7 @@ describe('delegated-routing-v1-http-api interop', () => {
 
     // use client to resolve the published record
     const record = await client.getIPNS(result.publicKey.toCID())
-    expect(record.value).to.equal(`/ipfs/${cid.toString()}`)
+    expect(record.value).to.equal(`/ipfs/${cid}`)
   })
 
   it.skip('should put an IPNS record', async () => {
