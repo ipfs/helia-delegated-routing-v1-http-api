@@ -1,3 +1,9 @@
+## [@helia/delegated-routing-v1-http-api-client-v5.0.1](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-5.0.0...@helia/delegated-routing-v1-http-api-client-5.0.1) (2025-10-27)
+
+### Bug Fixes
+
+* do not throw when routing fails to find providers ([#178](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues/178)) ([6d7b7c0](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/6d7b7c004b9dbed1b94cd6f218bfbf87274c8ea5))
+
 ## [@helia/delegated-routing-v1-http-api-client-v5.0.0](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-4.2.5...@helia/delegated-routing-v1-http-api-client-5.0.0) (2025-10-13)
 
 ### ⚠ BREAKING CHANGES
