@@ -25,12 +25,22 @@ export class DelegatedRoutingV1HttpApiClientContentRouting implements ContentRou
   }
 
   async * findProviders (cid: CID, options: AbortOptions = {}): AsyncIterable<PeerInfo> {
-    yield * map(this.client.getProviders(cid, options), (record) => {
-      return {
-        id: record.ID,
-        multiaddrs: record.Addrs ?? []
+    try {
+      yield * map(this.client.getProviders(cid, options), (record) => {
+        return {
+          id: record.ID,
+          multiaddrs: record.Addrs ?? []
+        }
+      })
+    } catch (err) {
+      // NotFoundError means no providers were found so end the iterator instead
+      // of throwing which means there was an error
+      if (err instanceof NotFoundError) {
+        return
       }
-    })
+
+      throw err
+    }
   }
 
   async provide (): Promise<void> {

@@ -118,7 +118,8 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       await onStart.promise
 
       // https://specs.ipfs.tech/routing/http-routing-v1/
-      const url = new URL(`${this.clientUrl}routing/v1/providers/${cid.toString()}`)
+      const url = new URL(`${this.clientUrl}routing/v1/providers/${cid}`)
+
       this.#addFilterParams(url, options.filterAddrs, options.filterProtocols)
       const getOptions = { headers: { Accept: 'application/x-ndjson' }, signal }
       const res = await this.#makeRequest(url.toString(), getOptions)
@@ -126,6 +127,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       if (res == null) {
         throw new BadResponseError('No response received')
       }
+
       if (!res.ok) {
         if (res.status === 404) {
         // https://specs.ipfs.tech/routing/http-routing-v1/#response-status-codes

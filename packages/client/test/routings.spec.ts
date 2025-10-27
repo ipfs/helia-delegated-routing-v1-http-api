@@ -67,9 +67,11 @@ describe('libp2p content-routing', () => {
     const cid = CID.parse('QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn')
 
     // load providers for the router to fetch
-    await fetch(`${process.env.ECHO_SERVER}/add-providers/${cid.toString()}`, {
+    await fetch(`${process.env.ECHO_SERVER}/add-providers/${cid}`, {
       method: 'POST',
-      body: providers.map(prov => JSON.stringify(prov)).join('\n')
+      body: JSON.stringify({
+        Providers: providers
+      })
     })
 
     const provs = await all(routing.findProviders(cid))
@@ -80,6 +82,26 @@ describe('libp2p content-routing', () => {
       id: prov.ID,
       multiaddrs: prov.Addrs
     })))
+  })
+
+  it('should yield no results if no providers exist', async () => {
+    const routing = getContentRouting(client)
+
+    if (routing == null) {
+      throw new Error('ContentRouting not found')
+    }
+
+    const cid = CID.parse('QmawceGscqN4o8Y8Fv26UUmB454kn2bnkXV5tEQYc4jBd7')
+
+    // load providers for the router to fetch
+    await fetch(`${process.env.ECHO_SERVER}/add-providers/${cid}`, {
+      method: 'POST',
+      body: JSON.stringify({
+        Providers: []
+      })
+    })
+
+    await expect(all(routing.findProviders(cid))).to.eventually.have.lengthOf(0)
   })
 
   it('should respect abort signal when finding providers', async () => {
@@ -97,9 +119,11 @@ describe('libp2p content-routing', () => {
     const cid = CID.parse('QmawceGscqN4o8Y8Fv26UUmB454kn2bnkXV5tEQYc4jBd6')
 
     // load providers for the router to fetch
-    await fetch(`${process.env.ECHO_SERVER}/add-providers/${cid.toString()}`, {
+    await fetch(`${process.env.ECHO_SERVER}/add-providers/${cid}`, {
       method: 'POST',
-      body: providers.map(prov => JSON.stringify(prov)).join('\n')
+      body: JSON.stringify({
+        Providers: providers
+      })
     })
 
     let findProvidersFinished = false
