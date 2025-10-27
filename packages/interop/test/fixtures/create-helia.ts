@@ -11,7 +11,7 @@ import type { Keychain } from '@libp2p/keychain'
 import type { HeliaInit, Helia } from 'helia'
 
 export async function createHelia (init?: Partial<HeliaInit>): Promise<Helia<Libp2p<{ dht: KadDHT, keychain: Keychain }>>> {
-  const helia = await createNode({
+  const helia = await createNode<Libp2p<{ dht: KadDHT, keychain: Keychain }>>({
     libp2p: {
       peerDiscovery: [],
       services: {
@@ -33,6 +33,5 @@ export async function createHelia (init?: Partial<HeliaInit>): Promise<Helia<Lib
     }
   })
 
-  // @ts-expect-error cannot derive service map type
   return helia
 }

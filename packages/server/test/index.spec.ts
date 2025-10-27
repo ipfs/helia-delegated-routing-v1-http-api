@@ -66,17 +66,19 @@ describe('delegated-routing-v1-http-api-server', () => {
     expect(res.status).to.equal(404)
   })
 
-  it('GET providers returns 404 if no providers are found', async () => {
+  it('GET providers returns 200 with empty array if no providers are found', async () => {
     helia.routing.findProviders = async function * () {}
 
     const res = await fetch(`${url}routing/v1/providers/QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn`, {
       method: 'GET'
     })
 
-    expect(res.status).to.equal(404)
+    expect(res.status).to.equal(200)
+    const json = await res.json()
+    expect(json).to.have.property('Providers').that.is.an('array').with.lengthOf(0)
   })
 
-  it('GET providers returns 404 if no providers are found when streaming', async () => {
+  it('GET providers returns 200 with empty NDJSON if no providers are found when streaming', async () => {
     helia.routing.findProviders = async function * () {}
 
     const res = await fetch(`${url}routing/v1/providers/QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn`, {
@@ -86,7 +88,9 @@ describe('delegated-routing-v1-http-api-server', () => {
       }
     })
 
-    expect(res.status).to.equal(404)
+    expect(res.status).to.equal(200)
+    const text = await res.text()
+    expect(text).to.equal('')
   })
 
   it('GET providers returns providers', async () => {
@@ -204,6 +208,47 @@ describe('delegated-routing-v1-http-api-server', () => {
     expect(json).to.have.deep.nested.property('Peers[0].Addrs', peer.multiaddrs.map(ma => ma.toString()))
   })
 
+  it('GET peers returns 200 with empty array if peer is not found', async () => {
+    const peerId = peerIdFromPrivateKey(await generateKeyPair('Ed25519'))
+
+    helia.routing.findPeer = async function () {
+      const error = new Error('Not found')
+      // @ts-expect-error - code property not on Error
+      error.code = 'ERR_NOT_FOUND'
+      throw error
+    }
+
+    const res = await fetch(`${url}routing/v1/peers/${peerId.toCID().toString()}`, {
+      method: 'GET'
+    })
+    expect(res.status).to.equal(200)
+
+    const json = await res.json()
+    expect(json).to.have.property('Peers').that.is.an('array').with.lengthOf(0)
+  })
+
+  it('GET peers returns 200 with empty NDJSON if peer is not found when streaming', async () => {
+    const peerId = peerIdFromPrivateKey(await generateKeyPair('Ed25519'))
+
+    helia.routing.findPeer = async function () {
+      const error = new Error('Not found')
+      // @ts-expect-error - code property not on Error
+      error.code = 'ERR_NOT_FOUND'
+      throw error
+    }
+
+    const res = await fetch(`${url}routing/v1/peers/${peerId.toCID().toString()}`, {
+      method: 'GET',
+      headers: {
+        accept: 'application/x-ndjson'
+      }
+    })
+    expect(res.status).to.equal(200)
+
+    const text = await res.text()
+    expect(text).to.equal('')
+  })
+
   it('GET ipns returns 422 if peer id is not cid', async () => {
     const res = await fetch(`${url}routing/v1/ipns/${peerIdFromPrivateKey(await generateKeyPair('Ed25519')).toString()}`, {
       method: 'GET'
@@ -240,6 +285,29 @@ describe('delegated-routing-v1-http-api-server', () => {
     expect(res.status).to.equal(200)
     const arrayBuffer = await res.arrayBuffer()
     expect(new Uint8Array(arrayBuffer)).to.equalBytes(marshalIPNSRecord(record))
+  })
+
+  it('GET ipns returns 200 with text/plain if record is not found', async () => {
+    const peerId = peerIdFromPrivateKey(await generateKeyPair('Ed25519'))
+
+    helia.routing.get = async function () {
+      const error = new Error('Not found')
+      // @ts-expect-error - code property not on Error
+      error.code = 'ERR_NOT_FOUND'
+      throw error
+    }
+
+    const res = await fetch(`${url}routing/v1/ipns/${peerId.toCID().toString()}`, {
+      method: 'GET',
+      headers: {
+        accept: 'application/vnd.ipfs.ipns-record'
+      }
+    })
+
+    expect(res.status).to.equal(200)
+    expect(res.headers.get('content-type')).to.equal('text/plain; charset=utf-8')
+    const text = await res.text()
+    expect(text).to.equal('Record not found')
   })
 
   it('PUT ipns puts record', async () => {

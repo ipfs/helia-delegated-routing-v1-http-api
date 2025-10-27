@@ -124,15 +124,13 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       const getOptions = { headers: { Accept: 'application/x-ndjson' }, signal }
       const res = await this.#makeRequest(url.toString(), getOptions)
 
-      if (res == null) {
-        throw new BadResponseError('No response received')
-      }
-
       if (!res.ok) {
+        // Per IPIP-0513: Handle 404 as empty results (not an error)
+        // Old servers return 404, new servers return 200 with empty array
+        // Both should result in an empty iterator, not an error
         if (res.status === 404) {
-        // https://specs.ipfs.tech/routing/http-routing-v1/#response-status-codes
-        // 404 (Not Found): must be returned if no matching records are found
-          throw new NotFoundError('No matching records found')
+          // Return empty iterator
+          return
         }
 
         if (res.status === 422) {
@@ -140,6 +138,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
         // 422 (Unprocessable Entity): request does not conform to schema or semantic constraints
           throw new InvalidRequestError('Request does not conform to schema or semantic constraints')
         }
+
         throw new BadResponseError(`Unexpected status code: ${res.status}`)
       }
 
@@ -152,10 +151,12 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
         throw new BadResponseError('No Content-Type header received')
       }
 
-      if (contentType?.startsWith('application/json')) {
+      if (contentType.startsWith('application/json')) {
         const body = await res.json()
+        // Handle null/undefined Providers from servers (both old and new may return empty arrays)
+        const providers = body.Providers ?? []
 
-        for (const provider of body.Providers) {
+        for (const provider of providers) {
           const record = this.#conformToPeerSchema(provider)
           if (record != null) {
             yield record
@@ -202,10 +203,11 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       const getOptions = { headers: { Accept: 'application/x-ndjson' }, signal }
       const res = await this.#makeRequest(url.toString(), getOptions)
 
+      // Per IPIP-0513: Handle 404 as empty results (not an error)
+      // Old servers return 404, new servers return 200 with empty array
+      // Both should result in an empty iterator, not an error
       if (res.status === 404) {
-        // https://specs.ipfs.tech/routing/http-routing-v1/#response-status-codes
-        // 404 (Not Found): must be returned if no matching records are found.
-        throw new NotFoundError('No matching records found')
+        return // Return empty iterator
       }
 
       if (res.status === 422) {
@@ -219,10 +221,12 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       }
 
       const contentType = res.headers.get('Content-Type')
-      if (contentType === 'application/json') {
+      if (contentType?.startsWith('application/json')) {
         const body = await res.json()
+        // Handle null/undefined Peers from servers (both old and new may return empty arrays)
+        const peers = body.Peers ?? []
 
-        for (const peer of body.Peers) {
+        for (const peer of peers) {
           const record = this.#conformToPeerSchema(peer)
           if (record != null) {
             yield record
@@ -270,9 +274,10 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
 
       log('getIPNS GET %s %d', resource, res.status)
 
+      // Per IPIP-0513: Handle 404 as "no record found" for backward compatibility
+      // IPNS is different - we still throw NotFoundError for 404 (backward compat)
+      // and also for 200 with non-IPNS content type (new behavior)
       if (res.status === 404) {
-        // https://specs.ipfs.tech/routing/http-routing-v1/#response-status-codes
-        // 404 (Not Found): must be returned if no matching records are found
         throw new NotFoundError('No matching records found')
       }
 
@@ -280,6 +285,17 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
         // https://specs.ipfs.tech/routing/http-routing-v1/#response-status-codes
         // 422 (Unprocessable Entity): request does not conform to schema or semantic constraints
         throw new InvalidRequestError('Request does not conform to schema or semantic constraints')
+      }
+
+      if (!res.ok) {
+        throw new BadResponseError(`Unexpected status code: ${res.status}`)
+      }
+
+      // Per IPIP-0513: Only Content-Type: application/vnd.ipfs.ipns-record indicates a valid record
+      // ANY other content type (or missing content-type) means no record found
+      const contentType = res.headers.get('Content-Type')
+      if (contentType == null || !contentType.includes('application/vnd.ipfs.ipns-record')) {
+        throw new NotFoundError('No matching records found')
       }
 
       if (res.body == null) {

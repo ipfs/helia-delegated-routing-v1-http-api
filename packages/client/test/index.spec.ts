@@ -2,7 +2,7 @@
 
 import { generateKeyPair } from '@libp2p/crypto/keys'
 import { start, stop } from '@libp2p/interface'
-import { peerIdFromPrivateKey, peerIdFromString } from '@libp2p/peer-id'
+import { peerIdFromPrivateKey, peerIdFromString, peerIdFromCID } from '@libp2p/peer-id'
 import { multiaddr } from '@multiformats/multiaddr'
 import { expect } from 'aegir/chai'
 import { createIPNSRecord, marshalIPNSRecord } from 'ipns'
@@ -11,6 +11,23 @@ import { CID } from 'multiformats/cid'
 import { createDelegatedRoutingV1HttpApiClient } from '../src/index.js'
 import { itBrowser } from './fixtures/it.js'
 import type { DelegatedRoutingV1HttpApiClient } from '../src/index.js'
+
+// Special test CIDs generated with: echo -n "<purpose>" | ipfs add --cid-version 1 -n -Q
+const TEST_CIDS = {
+  // Providers endpoint test CIDs
+  PROVIDERS_404: 'bafkreig3o4e7r4bpsc3hqirlzjeuie3w25tfjgmp6ufeaabwvuial3r4h4', // return404providers
+  PROVIDERS_NULL: 'bafkreicyicgkpqid2qs3kfc277f4tsx5tew3e63fgv7fn6t74sicjkv76i', // returnnullproviders
+
+  // Peers endpoint test CIDs (libp2p-key format)
+  PEERS_404: 'k2k4r8pqu6ui9p0d0fewul7462tsb0pa57pi238gunrjxpfrg6zawrho', // return404peers
+  PEERS_NULL: 'k2k4r8nyb48mv6n6olsob1zsz77mhdrvwtjcryjil2qqqzye5jds4uur', // returnnullpeers
+
+  // IPNS endpoint test CIDs (libp2p-key format)
+  IPNS_404: 'k2k4r8o3937xct4wma8gooitiip4mik0phkg8kt3b5x9y93a9dntvwjz', // return404ipns
+  IPNS_JSON: 'k2k4r8pajj9txni0h9nv9gxuj1mju4jmi94iq2r4jwhxk87hnuo94yom', // returnjsonipns
+  IPNS_HTML: 'k2k4r8kddkyieizgq7a32d9jc4nm99yupniet962vssrm34hamolquzk', // returnhtmlipns
+  IPNS_NO_CONTENT_TYPE: 'k2k4r8okqrya8gr449btdy5b6vw0q68dh7y3fps9qbi0zmcmybz7bjpu' // returnnocontentipns
+}
 
 if (process.env.ECHO_SERVER == null) {
   throw new Error('Echo server not configured correctly')
@@ -66,6 +83,66 @@ describe('delegated-routing-v1-http-api-client', () => {
       id: prov.ID,
       addrs: prov.Addrs
     })))
+  })
+
+  it('should return empty array when no providers found (200 with empty JSON array)', async () => {
+    const cid = CID.parse('QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn')
+
+    // Clear any providers
+    await fetch(`${process.env.ECHO_SERVER}/add-providers/${cid.toString()}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ Providers: [] })
+    })
+
+    const provs = await all(client.getProviders(cid))
+    expect(provs).to.be.empty()
+  })
+
+  it('should return empty array when no providers found (200 with empty NDJSON)', async () => {
+    const cid = CID.parse('QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn')
+
+    // Clear any providers - send empty NDJSON
+    await fetch(`${process.env.ECHO_SERVER}/add-providers/${cid.toString()}`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/x-ndjson'
+      },
+      body: '' // Empty NDJSON stream
+    })
+
+    const provs = await all(client.getProviders(cid))
+    expect(provs).to.be.empty()
+  })
+
+  it('should return empty array when server returns 404 for providers (old server behavior)', async () => {
+    // Test backward compatibility with old servers that return 404
+    const cid = CID.parse(TEST_CIDS.PROVIDERS_404)
+
+    const provs = await all(client.getProviders(cid))
+    expect(provs).to.be.empty()
+  })
+
+  it('should return empty array when server returns 404 for providers with NDJSON', async () => {
+    // Test backward compatibility with old servers that return 404 for NDJSON
+    const cid = CID.parse(TEST_CIDS.PROVIDERS_404)
+
+    // Force NDJSON by using streaming
+    const provs = []
+    for await (const provider of client.getProviders(cid)) {
+      provs.push(provider)
+    }
+    expect(provs).to.be.empty()
+  })
+
+  it('should handle null Providers field in JSON response', async () => {
+    // Some servers might return { Providers: null } instead of empty array
+    const cid = CID.parse(TEST_CIDS.PROVIDERS_NULL)
+
+    const provs = await all(client.getProviders(cid))
+    expect(provs).to.be.empty()
   })
 
   it('should handle different Content-Type headers for JSON responses', async () => {
@@ -216,6 +293,24 @@ describe('delegated-routing-v1-http-api-client', () => {
     expect(provs).to.be.empty()
   })
 
+  it('should return empty array when server returns 404 for peers (old server behavior)', async () => {
+    // Test backward compatibility with old servers that return 404
+    const peerCid = CID.parse(TEST_CIDS.PEERS_404)
+    const testPeerId = peerIdFromCID(peerCid)
+
+    const peers = await all(client.getPeers(testPeerId))
+    expect(peers).to.be.empty()
+  })
+
+  it('should handle null Peers field in JSON response', async () => {
+    // Some servers might return { Peers: null } instead of empty array
+    const peerCid = CID.parse(TEST_CIDS.PEERS_NULL)
+    const testPeerId = peerIdFromCID(peerCid)
+
+    const peers = await all(client.getPeers(testPeerId))
+    expect(peers).to.be.empty()
+  })
+
   it('should conform records to peer schema', async () => {
     const privateKey = await generateKeyPair('Ed25519')
 
@@ -333,6 +428,42 @@ describe('delegated-routing-v1-http-api-client', () => {
     await expect(client.getIPNS(privateKey.publicKey.toCID())).to.be.rejected()
   })
 
+  it('should throw NotFoundError when IPNS record not found', async () => {
+    const privateKey = await generateKeyPair('Ed25519')
+
+    // Try to get a record that doesn't exist
+    // The mock server will return 200 with text/plain "Record not found"
+    await expect(client.getIPNS(privateKey.publicKey.toCID())).to.be.rejectedWith('No matching records found')
+  })
+
+  it('should throw NotFoundError when IPNS returns 404 (old server)', async () => {
+    // Test backward compatibility - old servers return 404
+    const cid = CID.parse(TEST_CIDS.IPNS_404) as CID<unknown, 0x72, 0x00 | 0x12, 1>
+
+    await expect(client.getIPNS(cid)).to.be.rejectedWith('No matching records found')
+  })
+
+  it('should throw NotFoundError when IPNS returns 200 with application/json', async () => {
+    // Per IPIP-0513: Only application/vnd.ipfs.ipns-record indicates a valid record
+    const cid = CID.parse(TEST_CIDS.IPNS_JSON) as CID<unknown, 0x72, 0x00 | 0x12, 1>
+
+    await expect(client.getIPNS(cid)).to.be.rejectedWith('No matching records found')
+  })
+
+  it('should throw NotFoundError when IPNS returns 200 with text/html', async () => {
+    // Per IPIP-0513: Only application/vnd.ipfs.ipns-record indicates a valid record
+    const cid = CID.parse(TEST_CIDS.IPNS_HTML) as CID<unknown, 0x72, 0x00 | 0x12, 1>
+
+    await expect(client.getIPNS(cid)).to.be.rejectedWith('No matching records found')
+  })
+
+  it('should throw NotFoundError when IPNS returns 200 with no content-type', async () => {
+    // Per IPIP-0513: Missing content-type means no record found
+    const cid = CID.parse(TEST_CIDS.IPNS_NO_CONTENT_TYPE) as CID<unknown, 0x72, 0x00 | 0x12, 1>
+
+    await expect(client.getIPNS(cid)).to.be.rejectedWith('No matching records found')
+  })
+
   it('should put ipns', async () => {
     const cid = CID.parse('QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn')
     const privateKey = await generateKeyPair('Ed25519')
@@ -392,7 +523,6 @@ describe('delegated-routing-v1-http-api-client', () => {
     results.forEach(resultProviders => {
       expect(resultProviders.map(prov => ({
         id: prov.ID.toString(),
-
         addrs: prov.Addrs?.map(ma => ma.toString())
       }))).to.deep.equal(providers.map(prov => ({
         id: prov.ID,
