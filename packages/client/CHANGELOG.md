@@ -1,3 +1,9 @@
+## [@helia/delegated-routing-v1-http-api-client-v5.1.0](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-5.0.1...@helia/delegated-routing-v1-http-api-client-5.1.0) (2025-10-27)
+
+### Features
+
+* **routing/http:** return 200 for empty results per IPIP-513 ([#174](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues/174)) ([a0aebb7](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/a0aebb7a68d446ae8d966f500bfbdc8c5f0c582c))
+
 ## [@helia/delegated-routing-v1-http-api-client-v5.0.1](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-5.0.0...@helia/delegated-routing-v1-http-api-client-5.0.1) (2025-10-27)
 
 ### Bug Fixes
