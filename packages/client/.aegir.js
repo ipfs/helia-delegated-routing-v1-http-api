@@ -40,13 +40,11 @@ const options = {
         callCount++
         try {
 
-          let data
-          try {
-            // when passed data from a test where `body=providers.map(prov => JSON.stringify(prov)).join('\n')`
-            data = { Providers: req.body.split('\n').map(line => JSON.parse(line)) }
-          } catch (err) {
-            // when passed data from a test where `body=JSON.stringify({ Providers: providers })`
-            data = req.body
+          // if request body content-type was json it's already been parsed
+          const data = typeof req.body === 'string' ? JSON.parse(req.body) : req.body
+
+          if (!Array.isArray(data.Providers)) {
+            throw new Error('Data must be { Providers: [] }')
           }
 
           providers.set(req.params.cid, data)
@@ -82,6 +80,12 @@ const options = {
 
           const acceptHeader = req.headers.accept
           const data = providerData || { Providers: [] }
+
+          if (providerData?.Providers?.length === 0) {
+            res.statusCode = 404
+            res.end()
+            return
+          }
 
           if (acceptHeader?.includes('application/x-ndjson')) {
             res.setHeader('Content-Type', 'application/x-ndjson')

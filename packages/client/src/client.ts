@@ -118,24 +118,27 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       await onStart.promise
 
       // https://specs.ipfs.tech/routing/http-routing-v1/
-      const url = new URL(`${this.clientUrl}routing/v1/providers/${cid.toString()}`)
+      const url = new URL(`${this.clientUrl}routing/v1/providers/${cid}`)
+
       this.#addFilterParams(url, options.filterAddrs, options.filterProtocols)
       const getOptions = { headers: { Accept: 'application/x-ndjson' }, signal }
       const res = await this.#makeRequest(url.toString(), getOptions)
 
-      // Per IPIP-0513: Handle 404 as empty results (not an error)
-      // Old servers return 404, new servers return 200 with empty array
-      // Both should result in an empty iterator, not an error
-      if (res.status === 404) {
-        return // Return empty iterator
-      }
-
       if (!res.ok) {
+        // Per IPIP-0513: Handle 404 as empty results (not an error)
+        // Old servers return 404, new servers return 200 with empty array
+        // Both should result in an empty iterator, not an error
+        if (res.status === 404) {
+          // Return empty iterator
+          return
+        }
+
         if (res.status === 422) {
         // https://specs.ipfs.tech/routing/http-routing-v1/#response-status-codes
         // 422 (Unprocessable Entity): request does not conform to schema or semantic constraints
           throw new InvalidRequestError('Request does not conform to schema or semantic constraints')
         }
+
         throw new BadResponseError(`Unexpected status code: ${res.status}`)
       }
 

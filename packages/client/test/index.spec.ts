@@ -68,9 +68,11 @@ describe('delegated-routing-v1-http-api-client', () => {
     const cid = CID.parse('QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn')
 
     // load providers for the router to fetch
-    await fetch(`${process.env.ECHO_SERVER}/add-providers/${cid.toString()}`, {
+    await fetch(`${process.env.ECHO_SERVER}/add-providers/${cid}`, {
       method: 'POST',
-      body: providers.map(prov => JSON.stringify(prov)).join('\n')
+      body: JSON.stringify({
+        Providers: providers
+      })
     })
 
     const provs = await all(client.getProviders(cid))
@@ -161,12 +163,14 @@ describe('delegated-routing-v1-http-api-client', () => {
 
     for (const contentType of contentTypes) {
       // Add providers with proper payload structure
-      await fetch(`${process.env.ECHO_SERVER}/add-providers/${cid.toString()}`, {
+      await fetch(`${process.env.ECHO_SERVER}/add-providers/${cid}`, {
         method: 'POST',
         headers: {
           'Content-Type': contentType
         },
-        body: JSON.stringify({ Providers: providers })
+        body: JSON.stringify({
+          Providers: providers
+        })
       })
 
       await new Promise((resolve) => setTimeout(resolve, 100))
@@ -199,9 +203,11 @@ describe('delegated-routing-v1-http-api-client', () => {
     const cid = CID.parse('QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn')
 
     // load providers for the router to fetch
-    await fetch(`${process.env.ECHO_SERVER}/add-providers/${cid.toString()}`, {
+    await fetch(`${process.env.ECHO_SERVER}/add-providers/${cid}`, {
       method: 'POST',
-      body: providers.map(prov => JSON.stringify(prov)).join('\n')
+      body: JSON.stringify({
+        Providers: providers
+      })
     })
 
     await all(client.getProviders(cid, { filterProtocols: ['transport-bitswap', 'unknown'], filterAddrs: ['webtransport', '!p2p-circuit'] }))
@@ -239,9 +245,13 @@ describe('delegated-routing-v1-http-api-client', () => {
     const cid = CID.parse('QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn')
 
     // load providers for the router to fetch
-    await fetch(`${process.env.ECHO_SERVER}/add-providers/${cid.toString()}`, {
+    await fetch(`${process.env.ECHO_SERVER}/add-providers/${cid}`, {
       method: 'POST',
-      body: 'not json'
+      body: JSON.stringify({
+        Providers: [
+          'not json'
+        ]
+      })
     })
 
     const provs = await all(client.getProviders(cid))
@@ -265,9 +275,11 @@ describe('delegated-routing-v1-http-api-client', () => {
     const cid = CID.parse('QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn')
 
     // load providers for the router to fetch
-    await fetch(`${process.env.ECHO_SERVER}/add-providers/${cid.toString()}`, {
+    await fetch(`${process.env.ECHO_SERVER}/add-providers/${cid}`, {
       method: 'POST',
-      body: providers.map(prov => JSON.stringify(prov)).join('\n')
+      body: JSON.stringify({
+        Providers: providers
+      })
     })
 
     const provs = await all(client.getProviders(cid))
@@ -482,9 +494,11 @@ describe('delegated-routing-v1-http-api-client', () => {
     }]
 
     // load providers for the router to fetch
-    await fetch(`${process.env.ECHO_SERVER}/add-providers/${cid.toString()}`, {
+    await fetch(`${process.env.ECHO_SERVER}/add-providers/${cid}`, {
       method: 'POST',
-      body: providers.map(prov => JSON.stringify(prov)).join('\n')
+      body: JSON.stringify({
+        Providers: providers
+      })
     })
 
     // Reset call count before our test
@@ -534,9 +548,11 @@ describe('delegated-routing-v1-http-api-client', () => {
     }]
 
     // load providers for the router to fetch
-    await fetch(`${process.env.ECHO_SERVER}/add-providers/${cid.toString()}`, {
+    await fetch(`${process.env.ECHO_SERVER}/add-providers/${cid}`, {
       method: 'POST',
-      body: providers.map(prov => JSON.stringify(prov)).join('\n')
+      body: JSON.stringify({
+        Providers: providers
+      })
     })
 
     // Reset call count

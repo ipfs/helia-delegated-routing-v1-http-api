@@ -20,8 +20,8 @@
     "lint": "aegir lint",
     "dep-check": "aegir dep-check",
     "build": "aegir build --bundle false",
-    "test": "aegir test -t node",
-    "test:node": "aegir test -t node --cov"
+    "test": "aegir test -t node -- --exit",
+    "test:node": "aegir test -t node --cov -- --exit"
   },
   "devDependencies": {
     "@helia/delegated-routing-v1-http-api-client": "^5.0.0",
