@@ -9,7 +9,7 @@ import { CID } from 'multiformats'
 import { stubInterface } from 'sinon-ts'
 import { createDelegatedRoutingV1HttpApiServer } from '../src/index.js'
 import type { Helia } from '@helia/interface'
-import type { PeerInfo } from '@libp2p/interface'
+import type { PeerInfo, Provider } from '@libp2p/interface'
 import type { FastifyInstance } from 'fastify'
 import type { StubbedInstance } from 'sinon-ts'
 
@@ -94,17 +94,19 @@ describe('delegated-routing-v1-http-api-server', () => {
   })
 
   it('GET providers returns providers', async () => {
-    const provider1: PeerInfo = {
+    const provider1: Provider = {
       id: peerIdFromPrivateKey(await generateKeyPair('Ed25519')),
       multiaddrs: [
         multiaddr('/ip4/123.123.123.123/tcp/123')
-      ]
+      ],
+      routing: 'test-routing'
     }
-    const provider2: PeerInfo = {
+    const provider2: Provider = {
       id: peerIdFromPrivateKey(await generateKeyPair('Ed25519')),
       multiaddrs: [
         multiaddr('/ip4/123.123.123.123/tcp/123')
-      ]
+      ],
+      routing: 'test-routing'
     }
 
     helia.routing.findProviders = async function * () {
@@ -129,17 +131,19 @@ describe('delegated-routing-v1-http-api-server', () => {
   })
 
   it('GET providers returns provider stream', async () => {
-    const provider1: PeerInfo = {
+    const provider1: Provider = {
       id: peerIdFromPrivateKey(await generateKeyPair('Ed25519')),
       multiaddrs: [
         multiaddr('/ip4/123.123.123.123/tcp/123')
-      ]
+      ],
+      routing: 'test-routing'
     }
-    const provider2: PeerInfo = {
+    const provider2: Provider = {
       id: peerIdFromPrivateKey(await generateKeyPair('Ed25519')),
       multiaddrs: [
         multiaddr('/ip4/123.123.123.123/tcp/123')
-      ]
+      ],
+      routing: 'test-routing'
     }
 
     helia.routing.findProviders = async function * () {
