@@ -1,3 +1,9 @@
+## [@helia/delegated-routing-v1-http-api-server-v5.1.1](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-server-5.1.0...@helia/delegated-routing-v1-http-api-server-5.1.1) (2025-10-29)
+
+### Bug Fixes
+
+* add routing field to providers ([#180](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues/180)) ([c988cd7](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/c988cd7eabfebbffb25e6a530af5df104355e8e7))
+
 ## [@helia/delegated-routing-v1-http-api-server-v5.1.0](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-server-5.0.0...@helia/delegated-routing-v1-http-api-server-5.1.0) (2025-10-27)
 
 ### Features
