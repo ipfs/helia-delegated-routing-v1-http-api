@@ -27,10 +27,10 @@ const defaultValues = {
 }
 
 export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpApiClient {
+  public endpoint: URL
   private started: boolean
   private readonly httpQueue: PQueue
   private readonly shutDownController: AbortController
-  private readonly clientUrl: URL
   private readonly timeout: number
   private readonly contentRouting: ContentRouting
   private readonly peerRouting: PeerRouting
@@ -51,7 +51,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       concurrency: init.concurrentRequests ?? defaultValues.concurrentRequests
     })
     this.inFlightRequests = new Map() // Tracks in-flight requests to avoid duplicate requests
-    this.clientUrl = url instanceof URL ? url : new URL(url)
+    this.endpoint = url instanceof URL ? url : new URL(url)
     this.timeout = init.timeout ?? defaultValues.timeout
     this.filterAddrs = init.filterAddrs
     this.filterProtocols = init.filterProtocols
@@ -118,7 +118,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       await onStart.promise
 
       // https://specs.ipfs.tech/routing/http-routing-v1/
-      const url = new URL(`${this.clientUrl}routing/v1/providers/${cid}`)
+      const url = new URL(`${this.endpoint}routing/v1/providers/${cid}`)
 
       this.#addFilterParams(url, options.filterAddrs, options.filterProtocols)
       const getOptions = { headers: { Accept: 'application/x-ndjson' }, signal }
@@ -197,7 +197,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       await onStart.promise
 
       // https://specs.ipfs.tech/routing/http-routing-v1/
-      const url = new URL(`${this.clientUrl}routing/v1/peers/${peerId.toCID().toString()}`)
+      const url = new URL(`${this.endpoint}routing/v1/peers/${peerId.toCID().toString()}`)
       this.#addFilterParams(url, options.filterAddrs, options.filterProtocols)
 
       const getOptions = { headers: { Accept: 'application/x-ndjson' }, signal }
@@ -264,7 +264,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
     })
 
     // https://specs.ipfs.tech/routing/http-routing-v1/
-    const resource = `${this.clientUrl}routing/v1/ipns/${libp2pKey}`
+    const resource = `${this.endpoint}routing/v1/ipns/${libp2pKey}`
 
     try {
       await onStart.promise
@@ -336,7 +336,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
     })
 
     // https://specs.ipfs.tech/routing/http-routing-v1/
-    const resource = `${this.clientUrl}routing/v1/ipns/${libp2pKey}`
+    const resource = `${this.endpoint}routing/v1/ipns/${libp2pKey}`
 
     try {
       await onStart.promise

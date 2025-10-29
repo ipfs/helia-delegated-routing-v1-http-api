@@ -170,6 +170,11 @@ export type GetPeersOptions = FilterOptions & AbortOptions
 
 export interface DelegatedRoutingV1HttpApiClient {
   /**
+   * Where this client sends routing requests
+   */
+  endpoint: URL
+
+  /**
    * Returns an async generator of {@link PeerRecord}s that can provide the
    * content for the passed {@link CID}
    */
