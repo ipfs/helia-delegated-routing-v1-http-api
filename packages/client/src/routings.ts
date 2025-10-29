@@ -6,7 +6,7 @@ import { CID } from 'multiformats/cid'
 import { equals as uint8ArrayEquals } from 'uint8arrays/equals'
 import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
 import type { DelegatedRoutingV1HttpApiClient } from './index.js'
-import type { ContentRouting, PeerRouting, AbortOptions, PeerId, PeerInfo } from '@libp2p/interface'
+import type { ContentRouting, PeerRouting, AbortOptions, PeerId, PeerInfo, Provider } from '@libp2p/interface'
 
 const IPNS_PREFIX = uint8ArrayFromString('/ipns/')
 
@@ -24,12 +24,13 @@ export class DelegatedRoutingV1HttpApiClientContentRouting implements ContentRou
     this.client = client
   }
 
-  async * findProviders (cid: CID, options: AbortOptions = {}): AsyncIterable<PeerInfo> {
+  async * findProviders (cid: CID, options: AbortOptions = {}): AsyncIterable<Provider> {
     try {
       yield * map(this.client.getProviders(cid, options), (record) => {
         return {
           id: record.ID,
-          multiaddrs: record.Addrs ?? []
+          multiaddrs: record.Addrs ?? [],
+          routing: 'delegated-http-routing-v1'
         }
       })
     } catch (err) {
