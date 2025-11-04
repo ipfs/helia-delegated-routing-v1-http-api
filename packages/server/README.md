@@ -87,7 +87,7 @@ $ npm i @helia/delegated-routing-v1-http-api-server
 
 # API Docs
 
-- <https://ipfs.github.io/helia-delegated-routing-v1-http-api/modules/_helia_delegated_routing_v1_http_api_server.html>
+- <https://ipfs.github.io/helia-delegated-routing-v1-http-api/modules/_helia_delegated-routing-v1-http-api-server.html>
 
 # License
 
