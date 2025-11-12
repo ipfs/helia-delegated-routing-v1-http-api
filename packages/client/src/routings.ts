@@ -86,6 +86,10 @@ export class DelegatedRoutingV1HttpApiClientContentRouting implements ContentRou
       throw err
     }
   }
+
+  toString (): string {
+    return `DelegatedRoutingV1HttpApiClientContentRouting(${this.client.url})`
+  }
 }
 
 /**
@@ -113,5 +117,9 @@ export class DelegatedRoutingV1HttpApiClientPeerRouting implements PeerRouting {
 
   async * getClosestPeers (key: Uint8Array, options: AbortOptions = {}): AsyncIterable<PeerInfo> {
     // noop
+  }
+
+  toString (): string {
+    return `DelegatedRoutingV1HttpApiClientPeerRouting(${this.client.url})`
   }
 }

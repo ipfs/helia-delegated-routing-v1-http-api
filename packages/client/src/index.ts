@@ -83,8 +83,9 @@
  * ```
  */
 
-import { DefaultDelegatedRoutingV1HttpApiClient } from './client.js'
-import type { AbortOptions, PeerId } from '@libp2p/interface'
+import { defaultLogger } from '@libp2p/logger'
+import { DelegatedRoutingV1HttpApiClient as DelegatedRoutingV1HttpApiClientClass } from './client.js'
+import type { AbortOptions, ComponentLogger, PeerId } from '@libp2p/interface'
 import type { Multiaddr } from '@multiformats/multiaddr'
 import type { IPNSRecord } from 'ipns'
 import type { CID } from 'multiformats/cid'
@@ -155,6 +156,10 @@ export interface DelegatedRoutingV1HttpApiClientInit extends FilterOptions {
   cacheName?: string
 }
 
+export interface DelegatedRoutingV1HttpApiClientComponents {
+  logger: ComponentLogger
+}
+
 export interface GetIPNSOptions extends AbortOptions {
   /**
    * By default incoming IPNS records are validated, pass false here to skip
@@ -169,6 +174,11 @@ export type GetProvidersOptions = FilterOptions & AbortOptions
 export type GetPeersOptions = FilterOptions & AbortOptions
 
 export interface DelegatedRoutingV1HttpApiClient {
+  /**
+   * The URL that requests are sent to
+   */
+  url: URL
+
   /**
    * Returns an async generator of {@link PeerRecord}s that can provide the
    * content for the passed {@link CID}
@@ -206,7 +216,23 @@ export interface DelegatedRoutingV1HttpApiClient {
 
 /**
  * Create and return a client to use with a Routing V1 HTTP API server
+ *
+ * @deprecated use `delegatedRoutingV1HttpApiClient` instead - this function will be removed in a future release
  */
-export function createDelegatedRoutingV1HttpApiClient (url: URL | string, init: DelegatedRoutingV1HttpApiClientInit = {}): DelegatedRoutingV1HttpApiClient {
-  return new DefaultDelegatedRoutingV1HttpApiClient(new URL(url), init)
+export function createDelegatedRoutingV1HttpApiClient (url: URL | string, init: Omit<DelegatedRoutingV1HttpApiClientInit, 'url'> = {}): DelegatedRoutingV1HttpApiClient {
+  return new DelegatedRoutingV1HttpApiClientClass({
+    logger: defaultLogger()
+  }, {
+    ...init,
+    url: new URL(url)
+  })
+}
+
+/**
+ * Create and return a client to use with a Routing V1 HTTP API server
+ *
+ * TODO: add `url` to `DelegatedRoutingV1HttpApiClientInit` interface and release as breaking change
+ */
+export function delegatedRoutingV1HttpApiClient (init: DelegatedRoutingV1HttpApiClientInit & { url: string | URL }): (components: DelegatedRoutingV1HttpApiClientComponents) => DelegatedRoutingV1HttpApiClient {
+  return (components) => new DelegatedRoutingV1HttpApiClientClass(components, init)
 }
