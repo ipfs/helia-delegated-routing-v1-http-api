@@ -1,3 +1,9 @@
+## [@helia/delegated-routing-v1-http-api-client-v5.1.2](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-5.1.1...@helia/delegated-routing-v1-http-api-client-5.1.2) (2025-11-13)
+
+### Bug Fixes
+
+* use passed logger ([#183](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues/183)) ([dacc999](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/dacc9997e2451b3bda0c96c352df44c4997d14f5))
+
 ## [@helia/delegated-routing-v1-http-api-client-v5.1.1](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-5.1.0...@helia/delegated-routing-v1-http-api-client-5.1.1) (2025-10-29)
 
 ### Bug Fixes
