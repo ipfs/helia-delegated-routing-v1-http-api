@@ -1,5 +1,4 @@
 import { NotFoundError, contentRoutingSymbol, peerRoutingSymbol, setMaxListeners } from '@libp2p/interface'
-import { logger } from '@libp2p/logger'
 import { peerIdFromString } from '@libp2p/peer-id'
 import { multiaddr } from '@multiformats/multiaddr'
 import { anySignal } from 'any-signal'
@@ -11,13 +10,11 @@ import defer from 'p-defer'
 import PQueue from 'p-queue'
 import { BadResponseError, InvalidRequestError } from './errors.js'
 import { DelegatedRoutingV1HttpApiClientContentRouting, DelegatedRoutingV1HttpApiClientPeerRouting } from './routings.js'
-import type { DelegatedRoutingV1HttpApiClient, DelegatedRoutingV1HttpApiClientInit, GetProvidersOptions, GetPeersOptions, GetIPNSOptions, PeerRecord } from './index.js'
-import type { ContentRouting, PeerRouting, AbortOptions, PeerId } from '@libp2p/interface'
+import type { DelegatedRoutingV1HttpApiClient as DelegatedRoutingV1HttpApiClientInterface, DelegatedRoutingV1HttpApiClientInit, GetProvidersOptions, GetPeersOptions, GetIPNSOptions, PeerRecord, DelegatedRoutingV1HttpApiClientComponents } from './index.js'
+import type { ContentRouting, PeerRouting, AbortOptions, PeerId, Logger } from '@libp2p/interface'
 import type { Multiaddr } from '@multiformats/multiaddr'
 import type { IPNSRecord } from 'ipns'
 import type { CID } from 'multiformats'
-
-const log = logger('delegated-routing-v1-http-api-client')
 
 const defaultValues = {
   concurrentRequests: 4,
@@ -26,11 +23,11 @@ const defaultValues = {
   cacheName: 'delegated-routing-v1-cache'
 }
 
-export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpApiClient {
+export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpApiClientInterface {
+  public readonly url: URL
   private started: boolean
   private readonly httpQueue: PQueue
   private readonly shutDownController: AbortController
-  private readonly clientUrl: URL
   private readonly timeout: number
   private readonly contentRouting: ContentRouting
   private readonly peerRouting: PeerRouting
@@ -40,10 +37,13 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
   private readonly cacheName: string
   private cache?: Cache
   private readonly cacheTTL: number
+  private log: Logger
+
   /**
    * Create a new DelegatedContentRouting instance
    */
-  constructor (url: string | URL, init: DelegatedRoutingV1HttpApiClientInit = {}) {
+  constructor (components: DelegatedRoutingV1HttpApiClientComponents, init: DelegatedRoutingV1HttpApiClientInit & { url: string | URL }) {
+    this.log = components.logger.forComponent('delegated-routing-v1-http-api-client')
     this.started = false
     this.shutDownController = new AbortController()
     setMaxListeners(Infinity, this.shutDownController.signal)
@@ -51,7 +51,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       concurrency: init.concurrentRequests ?? defaultValues.concurrentRequests
     })
     this.inFlightRequests = new Map() // Tracks in-flight requests to avoid duplicate requests
-    this.clientUrl = url instanceof URL ? url : new URL(url)
+    this.url = init.url instanceof URL ? init.url : new URL(init.url)
     this.timeout = init.timeout ?? defaultValues.timeout
     this.filterAddrs = init.filterAddrs
     this.filterProtocols = init.filterProtocols
@@ -85,7 +85,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       this.cache = await globalThis.caches?.open(this.cacheName)
 
       if (this.cache != null) {
-        log('cache enabled with ttl %d', this.cacheTTL)
+        this.log('cache enabled with ttl %d', this.cacheTTL)
       }
     }
   }
@@ -101,7 +101,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
   }
 
   async * getProviders (cid: CID, options: GetProvidersOptions = {}): AsyncGenerator<PeerRecord> {
-    log('getProviders starts: %c', cid)
+    this.log('getProviders starts: %c', cid)
 
     const timeoutSignal = AbortSignal.timeout(this.timeout)
     const signal = anySignal([this.shutDownController.signal, timeoutSignal, options.signal])
@@ -118,7 +118,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       await onStart.promise
 
       // https://specs.ipfs.tech/routing/http-routing-v1/
-      const url = new URL(`${this.clientUrl}routing/v1/providers/${cid}`)
+      const url = new URL(`${this.url}routing/v1/providers/${cid}`)
 
       this.#addFilterParams(url, options.filterAddrs, options.filterProtocols)
       const getOptions = { headers: { Accept: 'application/x-ndjson' }, signal }
@@ -175,12 +175,12 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
     } finally {
       signal.clear()
       onFinish.resolve()
-      log('getProviders finished: %c', cid)
+      this.log('getProviders finished: %c', cid)
     }
   }
 
   async * getPeers (peerId: PeerId, options: GetPeersOptions = {}): AsyncGenerator<PeerRecord> {
-    log('getPeers starts: %c', peerId)
+    this.log('getPeers starts: %c', peerId)
 
     const timeoutSignal = AbortSignal.timeout(this.timeout)
     const signal = anySignal([this.shutDownController.signal, timeoutSignal, options.signal])
@@ -197,7 +197,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       await onStart.promise
 
       // https://specs.ipfs.tech/routing/http-routing-v1/
-      const url = new URL(`${this.clientUrl}routing/v1/peers/${peerId.toCID().toString()}`)
+      const url = new URL(`${this.url}routing/v1/peers/${peerId.toCID().toString()}`)
       this.#addFilterParams(url, options.filterAddrs, options.filterProtocols)
 
       const getOptions = { headers: { Accept: 'application/x-ndjson' }, signal }
@@ -241,16 +241,16 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
         }
       }
     } catch (err) {
-      log.error('getPeers errored:', err)
+      this.log.error('getPeers errored - %e', err)
     } finally {
       signal.clear()
       onFinish.resolve()
-      log('getPeers finished: %c', peerId)
+      this.log('getPeers finished: %c', peerId)
     }
   }
 
   async getIPNS (libp2pKey: CID<unknown, 0x72, 0x00 | 0x12, 1>, options: GetIPNSOptions = {}): Promise<IPNSRecord> {
-    log('getIPNS starts: %s', libp2pKey)
+    this.log('getIPNS starts: %s', libp2pKey)
 
     const timeoutSignal = AbortSignal.timeout(this.timeout)
     const signal = anySignal([this.shutDownController.signal, timeoutSignal, options.signal])
@@ -264,7 +264,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
     })
 
     // https://specs.ipfs.tech/routing/http-routing-v1/
-    const resource = `${this.clientUrl}routing/v1/ipns/${libp2pKey}`
+    const resource = `${this.url}routing/v1/ipns/${libp2pKey}`
 
     try {
       await onStart.promise
@@ -272,7 +272,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       const getOptions = { headers: { Accept: 'application/vnd.ipfs.ipns-record' }, signal }
       const res = await this.#makeRequest(resource, getOptions)
 
-      log('getIPNS GET %s %d', resource, res.status)
+      this.log('getIPNS GET %s %d', resource, res.status)
 
       // Per IPIP-0513: Handle 404 as "no record found" for backward compatibility
       // IPNS is different - we still throw NotFoundError for 404 (backward compat)
@@ -311,18 +311,18 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
 
       return unmarshalIPNSRecord(body)
     } catch (err: any) {
-      log.error('getIPNS GET %s error:', resource, err)
+      this.log.error('getIPNS GET %s error - %e', resource, err)
 
       throw err
     } finally {
       signal.clear()
       onFinish.resolve()
-      log('getIPNS finished: %s', libp2pKey)
+      this.log('getIPNS finished: %s', libp2pKey)
     }
   }
 
   async putIPNS (libp2pKey: CID<unknown, 0x72, 0x00 | 0x12, 1>, record: IPNSRecord, options: AbortOptions = {}): Promise<void> {
-    log('putIPNS starts: %c', libp2pKey)
+    this.log('putIPNS starts: %c', libp2pKey)
 
     const timeoutSignal = AbortSignal.timeout(this.timeout)
     const signal = anySignal([this.shutDownController.signal, timeoutSignal, options.signal])
@@ -336,7 +336,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
     })
 
     // https://specs.ipfs.tech/routing/http-routing-v1/
-    const resource = `${this.clientUrl}routing/v1/ipns/${libp2pKey}`
+    const resource = `${this.url}routing/v1/ipns/${libp2pKey}`
 
     try {
       await onStart.promise
@@ -346,19 +346,19 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
       const getOptions = { method: 'PUT', headers: { 'Content-Type': 'application/vnd.ipfs.ipns-record' }, body, signal }
       const res = await this.#makeRequest(resource, getOptions)
 
-      log('putIPNS PUT %s %d', resource, res.status)
+      this.log('putIPNS PUT %s %d', resource, res.status)
 
       if (res.status !== 200) {
         throw new BadResponseError('PUT ipns response had status other than 200')
       }
     } catch (err: any) {
-      log.error('putIPNS PUT %s error:', resource, err.stack)
+      this.log.error('putIPNS PUT %s error - %e', resource, err.stack)
 
       throw err
     } finally {
       signal.clear()
       onFinish.resolve()
-      log('putIPNS finished: %c', libp2pKey)
+      this.log('putIPNS finished: %c', libp2pKey)
     }
   }
 
@@ -384,7 +384,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
         Protocols: protocols
       }
     } catch (err) {
-      log.error('could not conform record to peer schema', err)
+      this.log.error('could not conform record to peer schema - %e', err)
     }
   }
 
@@ -420,7 +420,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
         // Check if the cached response has expired
         const expires = parseInt(cachedResponse.headers.get('x-cache-expires') ?? '0', 10)
         if (expires > Date.now()) {
-          log('returning cached response for %s', key)
+          this.log('returning cached response for %s', key)
           return cachedResponse
         } else {
           // Remove expired response from cache
@@ -433,7 +433,7 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
     const existingRequest = this.inFlightRequests.get(key)
     if (existingRequest != null) {
       const response = await existingRequest
-      log('deduplicating outgoing request for %s', key)
+      this.log('deduplicating outgoing request for %s', key)
       return response.clone()
     }
 
@@ -463,5 +463,9 @@ export class DefaultDelegatedRoutingV1HttpApiClient implements DelegatedRoutingV
     this.inFlightRequests.set(key, requestPromise)
     const response = await requestPromise
     return response
+  }
+
+  toString (): string {
+    return `DefaultDelegatedRoutingV1HttpApiClient(${this.url})`
   }
 }

@@ -1,12 +1,16 @@
+import { defaultLogger } from '@libp2p/logger'
 import { expect } from 'aegir/chai'
-import { DefaultDelegatedRoutingV1HttpApiClient } from '../src/client.js'
+import { DelegatedRoutingV1HttpApiClient } from '../src/client.js'
 import { itBrowser } from './fixtures/it.js'
 
 describe('client', () => {
   itBrowser('should remove cache on stop', async function () {
     const cacheName = 'test-cache'
 
-    const client = new DefaultDelegatedRoutingV1HttpApiClient('http://example.com', {
+    const client = new DelegatedRoutingV1HttpApiClient({
+      logger: defaultLogger()
+    }, {
+      url: 'http://example.com',
       cacheName
     })
     await client.start()
