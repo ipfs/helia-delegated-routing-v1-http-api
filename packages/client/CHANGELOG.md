@@ -1,3 +1,9 @@
+## [@helia/delegated-routing-v1-http-api-client-v5.1.3](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-5.1.2...@helia/delegated-routing-v1-http-api-client-5.1.3) (2025-12-03)
+
+### Bug Fixes
+
+* cached response body can be undefined ([#185](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues/185)) ([7e3c88a](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/7e3c88a7188b5c85c26f731a01c252fedb27ab74))
+
 ## [@helia/delegated-routing-v1-http-api-client-v5.1.2](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-5.1.1...@helia/delegated-routing-v1-http-api-client-5.1.2) (2025-11-13)
 
 ### Bug Fixes
