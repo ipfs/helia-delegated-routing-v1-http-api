@@ -108,6 +108,7 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
     setMaxListeners(Infinity, timeoutSignal, signal)
     const onStart = defer()
     const onFinish = defer()
+    let found = 0
 
     void this.httpQueue.add(async () => {
       onStart.resolve()
@@ -123,7 +124,7 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
       this.#addFilterParams(url, options.filterAddrs, options.filterProtocols)
       const getOptions = {
         headers: {
-          accept: 'application/x-ndjson, application/json'
+          accept: 'application/x-ndjson, application/json;q=0.8'
         },
         signal
       }
@@ -171,6 +172,7 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
         for (const provider of providers) {
           const record = this.#conformToPeerSchema(provider)
           if (record != null) {
+            found++
             yield record
           }
         }
@@ -178,6 +180,7 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
         for await (const provider of ndjson(toIt(res.body))) {
           const record = this.#conformToPeerSchema(provider)
           if (record != null) {
+            found++
             yield record
           }
         }
@@ -187,7 +190,7 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
     } finally {
       signal.clear()
       onFinish.resolve()
-      this.log('getProviders finished: %c', cid)
+      this.log('getProviders finished: %c, found %d providers', cid, found++)
     }
   }
 
