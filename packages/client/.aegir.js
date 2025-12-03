@@ -39,7 +39,6 @@ const options = {
       echo.polka.post('/add-providers/:cid', (req, res) => {
         callCount++
         try {
-
           // if request body content-type was json it's already been parsed
           const data = typeof req.body === 'string' ? JSON.parse(req.body) : req.body
 
@@ -81,17 +80,17 @@ const options = {
           const acceptHeader = req.headers.accept
           const data = providerData || { Providers: [] }
 
-          if (providerData?.Providers?.length === 0) {
-            res.statusCode = 404
-            res.end()
-            return
-          }
-
           if (acceptHeader?.includes('application/x-ndjson')) {
             res.setHeader('Content-Type', 'application/x-ndjson')
             const providers = Array.isArray(data.Providers) ? data.Providers : []
             res.end(providers.map(p => JSON.stringify(p)).join('\n'))
           } else {
+            if (providerData?.Providers?.length === 0) {
+              res.statusCode = 404
+              res.end()
+              return
+            }
+
             res.setHeader('Content-Type', 'application/json')
             res.end(JSON.stringify(data))
           }

@@ -2,13 +2,15 @@
 
 import { generateKeyPair } from '@libp2p/crypto/keys'
 import { start, stop } from '@libp2p/interface'
+import { defaultLogger } from '@libp2p/logger'
 import { peerIdFromPrivateKey, peerIdFromString, peerIdFromCID } from '@libp2p/peer-id'
 import { multiaddr } from '@multiformats/multiaddr'
 import { expect } from 'aegir/chai'
 import { createIPNSRecord, marshalIPNSRecord } from 'ipns'
 import all from 'it-all'
 import { CID } from 'multiformats/cid'
-import { createDelegatedRoutingV1HttpApiClient } from '../src/index.js'
+import { isBrowser } from 'wherearewe'
+import { delegatedRoutingV1HttpApiClient } from '../src/index.js'
 import { itBrowser } from './fixtures/it.js'
 import type { DelegatedRoutingV1HttpApiClient } from '../src/index.js'
 
@@ -37,14 +39,27 @@ const serverUrl = process.env.ECHO_SERVER
 
 describe('delegated-routing-v1-http-api-client', () => {
   let client: DelegatedRoutingV1HttpApiClient
+  let clientWithCache: DelegatedRoutingV1HttpApiClient
 
   beforeEach(async () => {
-    client = createDelegatedRoutingV1HttpApiClient(new URL(serverUrl), { cacheTTL: 0 })
-    await start(client)
+    client = delegatedRoutingV1HttpApiClient({
+      url: new URL(serverUrl),
+      cacheTTL: 0
+    })({
+      logger: defaultLogger()
+    })
+    clientWithCache = delegatedRoutingV1HttpApiClient({
+      url: new URL(serverUrl),
+      cacheTTL: 30_000
+    })({
+      logger: defaultLogger()
+    })
+
+    await start(client, clientWithCache)
   })
 
   afterEach(async () => {
-    await stop(client)
+    await stop(client, clientWithCache)
   })
 
   it('should find providers', async () => {
@@ -108,13 +123,38 @@ describe('delegated-routing-v1-http-api-client', () => {
     await fetch(`${process.env.ECHO_SERVER}/add-providers/${cid.toString()}`, {
       method: 'POST',
       headers: {
-        Accept: 'application/x-ndjson'
+        'Content-Type': 'application/json'
       },
-      body: '' // Empty NDJSON stream
+      body: JSON.stringify({ Providers: [] })
     })
 
     const provs = await all(client.getProviders(cid))
     expect(provs).to.be.empty()
+  })
+
+  it('should return empty array when no providers found in cached response (200 with empty NDJSON)', async function () {
+    if (!isBrowser) {
+      // 'globalThis.caches are only availale in browser environments'
+      this.skip()
+    }
+
+    const cid = CID.parse('QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn')
+
+    // Clear any providers - send empty NDJSON
+    await fetch(`${process.env.ECHO_SERVER}/add-providers/${cid.toString()}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ Providers: [] })
+    })
+
+    const provs = await all(clientWithCache.getProviders(cid))
+    expect(provs).to.be.empty()
+
+    // invoke again immediately to get cached response
+    const cachedProvs = await all(clientWithCache.getProviders(cid))
+    expect(cachedProvs).to.be.empty()
   })
 
   it('should return empty array when server returns 404 for providers (old server behavior)', async () => {
@@ -223,9 +263,12 @@ describe('delegated-routing-v1-http-api-client', () => {
   })
 
   it('should add filter parameters the query of the request url based on global filter', async () => {
-    const client = createDelegatedRoutingV1HttpApiClient(new URL(serverUrl), {
+    const client = delegatedRoutingV1HttpApiClient({
+      url: new URL(serverUrl),
       filterProtocols: ['transport-bitswap', 'unknown'],
       filterAddrs: ['tcp', '!p2p-circuit']
+    })({
+      logger: defaultLogger()
     })
     const cid = CID.parse('QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn')
 
@@ -533,8 +576,11 @@ describe('delegated-routing-v1-http-api-client', () => {
 
   itBrowser('should respect cache TTL', async () => {
     const shortTTL = 100 // 100ms TTL for testing
-    const clientWithShortTTL = createDelegatedRoutingV1HttpApiClient(new URL(serverUrl), {
+    const clientWithShortTTL = delegatedRoutingV1HttpApiClient({
+      url: new URL(serverUrl),
       cacheTTL: shortTTL
+    })({
+      logger: defaultLogger()
     })
     await start(clientWithShortTTL)
 

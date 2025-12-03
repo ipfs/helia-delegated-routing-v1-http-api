@@ -121,7 +121,12 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
       const url = new URL(`${this.url}routing/v1/providers/${cid}`)
 
       this.#addFilterParams(url, options.filterAddrs, options.filterProtocols)
-      const getOptions = { headers: { Accept: 'application/x-ndjson' }, signal }
+      const getOptions = {
+        headers: {
+          accept: 'application/x-ndjson, application/json'
+        },
+        signal
+      }
       const res = await this.#makeRequest(url.toString(), getOptions)
 
       if (!res.ok) {
@@ -142,13 +147,20 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
         throw new BadResponseError(`Unexpected status code: ${res.status}`)
       }
 
-      if (res.body == null) {
-        throw new BadResponseError('Routing response had no body')
-      }
-
       const contentType = res.headers.get('Content-Type')
+
       if (contentType == null) {
         throw new BadResponseError('No Content-Type header received')
+      }
+
+      if (res.body == null) {
+        if (contentType !== 'application/x-ndjson') {
+          throw new BadResponseError('Routing response had no body')
+        }
+
+        // cached ndjson responses have no body property if the gateway returned
+        // no results
+        return
       }
 
       if (contentType.startsWith('application/json')) {
@@ -416,16 +428,22 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
     // Only try to use cache for GET requests
     if (requestMethod === 'GET') {
       const cachedResponse = await this.cache?.match(url)
+
       if (cachedResponse != null) {
         // Check if the cached response has expired
         const expires = parseInt(cachedResponse.headers.get('x-cache-expires') ?? '0', 10)
         if (expires > Date.now()) {
           this.log('returning cached response for %s', key)
+          this.logResponse(cachedResponse)
+
           return cachedResponse
         } else {
+          this.log('evicting cached response for %s', key)
           // Remove expired response from cache
           await this.cache?.delete(url)
         }
+      } else if (this.cache != null) {
+        this.log('cache miss for %s', key)
       }
     }
 
@@ -437,8 +455,14 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
       return response.clone()
     }
 
+    this.log('outgoing request:')
+    this.logRequest(url, options)
+
     // Create new request and track it
     const requestPromise = fetch(url, options).then(async response => {
+      this.log('incoming response:')
+      this.logResponse(response)
+
       // Only cache successful GET requests
       if (this.cache != null && response.ok && requestMethod === 'GET') {
         const expires = Date.now() + this.cacheTTL
@@ -467,5 +491,22 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
 
   toString (): string {
     return `DefaultDelegatedRoutingV1HttpApiClient(${this.url})`
+  }
+
+  private logRequest (url: string, init: RequestInit): void {
+    const headers = new Headers(init.headers)
+    this.log('%s %s HTTP/1.1', init.method ?? 'GET', url)
+
+    for (const [key, value] of headers.entries()) {
+      this.log('%s: %s', key, value)
+    }
+  }
+
+  private logResponse (response: Response): void {
+    this.log('HTTP/1.1 %d %s', response.status, response.statusText)
+
+    for (const [key, value] of response.headers.entries()) {
+      this.log('%s: %s', key, value)
+    }
   }
 }
