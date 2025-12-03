@@ -190,7 +190,7 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
     } finally {
       signal.clear()
       onFinish.resolve()
-      this.log('getProviders finished: %c, found %d providers', cid, found++)
+      this.log('getProviders finished found %d providers for %c', found, cid)
     }
   }
 
