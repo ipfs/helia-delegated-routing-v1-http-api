@@ -1,3 +1,10 @@
+## [@helia/delegated-routing-v1-http-api-client-v5.1.4](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-5.1.3...@helia/delegated-routing-v1-http-api-client-5.1.4) (2025-12-03)
+
+### Bug Fixes
+
+* add q factor to json in accept header ([#186](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues/186)) ([04fea57](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/04fea57ffd29c8ddd21d7c6245648a2f29b81b26))
+* fix log message ([9c2591d](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/9c2591dcb315a05d522e378e1292bc128a41ee1d))
+
 ## [@helia/delegated-routing-v1-http-api-client-v5.1.3](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-5.1.2...@helia/delegated-routing-v1-http-api-client-5.1.3) (2025-12-03)
 
 ### Bug Fixes
