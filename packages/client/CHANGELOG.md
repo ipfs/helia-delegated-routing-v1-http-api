@@ -1,3 +1,9 @@
+## [@helia/delegated-routing-v1-http-api-client-v5.2.0](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-5.1.4...@helia/delegated-routing-v1-http-api-client-5.2.0) (2026-01-15)
+
+### Features
+
+* add get closest peers (IPIP-476) ([#187](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues/187)) ([58d7bb0](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/58d7bb02f4b4648e1c66ae24350e23250329214e))
+
 ## [@helia/delegated-routing-v1-http-api-client-v5.1.4](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-5.1.3...@helia/delegated-routing-v1-http-api-client-5.1.4) (2025-12-03)
 
 ### Bug Fixes
