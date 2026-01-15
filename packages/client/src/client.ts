@@ -1,4 +1,4 @@
-import { NotFoundError, contentRoutingSymbol, peerRoutingSymbol, setMaxListeners } from '@libp2p/interface'
+import { InvalidParametersError, NotFoundError, contentRoutingSymbol, isPeerId, peerRoutingSymbol, setMaxListeners } from '@libp2p/interface'
 import { peerIdFromString } from '@libp2p/peer-id'
 import { multiaddr } from '@multiformats/multiaddr'
 import { anySignal } from 'any-signal'
@@ -6,15 +6,15 @@ import toIt from 'browser-readablestream-to-it'
 import { unmarshalIPNSRecord, marshalIPNSRecord, multihashToIPNSRoutingKey } from 'ipns'
 import { ipnsValidator } from 'ipns/validator'
 import { parse as ndjson } from 'it-ndjson'
+import { CID } from 'multiformats/cid'
 import defer from 'p-defer'
 import PQueue from 'p-queue'
 import { BadResponseError, InvalidRequestError } from './errors.js'
 import { DelegatedRoutingV1HttpApiClientContentRouting, DelegatedRoutingV1HttpApiClientPeerRouting } from './routings.js'
-import type { DelegatedRoutingV1HttpApiClient as DelegatedRoutingV1HttpApiClientInterface, DelegatedRoutingV1HttpApiClientInit, GetProvidersOptions, GetPeersOptions, GetIPNSOptions, PeerRecord, DelegatedRoutingV1HttpApiClientComponents } from './index.js'
+import type { DelegatedRoutingV1HttpApiClient as DelegatedRoutingV1HttpApiClientInterface, DelegatedRoutingV1HttpApiClientInit, GetProvidersOptions, GetPeersOptions, GetIPNSOptions, PeerRecord, DelegatedRoutingV1HttpApiClientComponents, GetClosestPeersOptions } from './index.js'
 import type { ContentRouting, PeerRouting, AbortOptions, PeerId, Logger } from '@libp2p/interface'
 import type { Multiaddr } from '@multiformats/multiaddr'
 import type { IPNSRecord } from 'ipns'
-import type { CID } from 'multiformats'
 
 const defaultValues = {
   concurrentRequests: 4,
@@ -261,6 +261,86 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
       signal.clear()
       onFinish.resolve()
       this.log('getPeers finished: %c', peerId)
+    }
+  }
+
+  async * getClosestPeers (key: CID | PeerId, options: GetClosestPeersOptions = {}): AsyncGenerator<PeerRecord> {
+    let target: string
+
+    if (isPeerId(key)) {
+      target = key.toCID().toString()
+    } else if (CID.asCID(key) === key || key instanceof CID) {
+      target = key.toV1().toString()
+    } else {
+      throw new InvalidParametersError('Key must be CID or PeerId')
+    }
+
+    this.log('getClosestPeers starts: %s', target)
+
+    const timeoutSignal = AbortSignal.timeout(this.timeout)
+    const signal = anySignal([this.shutDownController.signal, timeoutSignal, options.signal])
+    setMaxListeners(Infinity, timeoutSignal, signal)
+    const onStart = defer()
+    const onFinish = defer()
+
+    void this.httpQueue.add(async () => {
+      onStart.resolve()
+      return onFinish.promise
+    })
+
+    try {
+      await onStart.promise
+
+      // https://specs.ipfs.tech/routing/http-routing-v1/
+      const url = new URL(`${this.url}routing/v1/dht/closest/peers/${target}`)
+      this.#addFilterParams(url, options.filterAddrs, options.filterProtocols)
+
+      const getOptions = { headers: { Accept: 'application/x-ndjson' }, signal }
+      const res = await this.#makeRequest(url.toString(), getOptions)
+
+      // Per IPIP-0513: Handle 404 as empty results (not an error)
+      // Old servers return 404, new servers return 200 with empty array
+      // Both should result in an empty iterator, not an error
+      if (res.status === 404) {
+        return // Return empty iterator
+      }
+
+      if (res.status === 422) {
+        // https://specs.ipfs.tech/routing/http-routing-v1/#response-status-codes
+        // 422 (Unprocessable Entity): request does not conform to schema or semantic constraints
+        throw new InvalidRequestError('Request does not conform to schema or semantic constraints')
+      }
+
+      if (res.body == null) {
+        throw new BadResponseError('Routing response had no body')
+      }
+
+      const contentType = res.headers.get('Content-Type')
+      if (contentType?.startsWith('application/json')) {
+        const body = await res.json()
+        // Handle null/undefined Peers from servers (both old and new may return empty arrays)
+        const peers = body.Peers ?? []
+
+        for (const peer of peers) {
+          const record = this.#conformToPeerSchema(peer)
+          if (record != null) {
+            yield record
+          }
+        }
+      } else {
+        for await (const peer of ndjson(toIt(res.body))) {
+          const record = this.#conformToPeerSchema(peer)
+          if (record != null) {
+            yield record
+          }
+        }
+      }
+    } catch (err) {
+      this.log.error('getClosestPeers errored - %e', err)
+    } finally {
+      signal.clear()
+      onFinish.resolve()
+      this.log('getClosestPeers finished: %s', target)
     }
   }
 

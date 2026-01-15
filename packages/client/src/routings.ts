@@ -1,7 +1,9 @@
 import { NotFoundError } from '@libp2p/interface'
+import { peerIdFromMultihash } from '@libp2p/peer-id'
 import { marshalIPNSRecord, multihashFromIPNSRoutingKey, unmarshalIPNSRecord } from 'ipns'
 import first from 'it-first'
 import map from 'it-map'
+import { digest } from 'multiformats'
 import { CID } from 'multiformats/cid'
 import { equals as uint8ArrayEquals } from 'uint8arrays/equals'
 import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
@@ -116,7 +118,20 @@ export class DelegatedRoutingV1HttpApiClientPeerRouting implements PeerRouting {
   }
 
   async * getClosestPeers (key: Uint8Array, options: AbortOptions = {}): AsyncIterable<PeerInfo> {
-    // noop
+    let cidOrPeer: CID | PeerId
+
+    try {
+      cidOrPeer = CID.decode(key)
+    } catch {
+      cidOrPeer = peerIdFromMultihash(digest.decode(key))
+    }
+
+    for await (const peer of this.client.getClosestPeers(cidOrPeer, options)) {
+      yield {
+        id: peer.ID,
+        multiaddrs: peer.Addrs ?? []
+      }
+    }
   }
 
   toString (): string {

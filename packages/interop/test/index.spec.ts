@@ -1,10 +1,9 @@
-/* eslint-env mocha */
-
-import { createDelegatedRoutingV1HttpApiClient } from '@helia/delegated-routing-v1-http-api-client'
+import { delegatedRoutingV1HttpApiClient } from '@helia/delegated-routing-v1-http-api-client'
 import { createDelegatedRoutingV1HttpApiServer } from '@helia/delegated-routing-v1-http-api-server'
 import { ipns } from '@helia/ipns'
 import { generateKeyPair } from '@libp2p/crypto/keys'
 import { start, stop } from '@libp2p/interface'
+import { defaultLogger } from '@libp2p/logger'
 import { expect } from 'aegir/chai'
 import { createIPNSRecord } from 'ipns'
 import first from 'it-first'
@@ -34,7 +33,11 @@ describe('delegated-routing-v1-http-api interop', () => {
     const address = server.server.address()
     const port = typeof address === 'string' ? address : address?.port
 
-    client = createDelegatedRoutingV1HttpApiClient(new URL(`http://127.0.0.1:${port}`))
+    client = delegatedRoutingV1HttpApiClient({
+      url: new URL(`http://127.0.0.1:${port}`)
+    })({
+      logger: defaultLogger()
+    })
 
     for (const node of network) {
       for (const remote of network) {

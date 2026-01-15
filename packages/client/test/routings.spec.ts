@@ -1,7 +1,6 @@
-/* eslint-env mocha */
-
 import { generateKeyPair } from '@libp2p/crypto/keys'
 import { contentRoutingSymbol, peerRoutingSymbol, start, stop } from '@libp2p/interface'
+import { defaultLogger } from '@libp2p/logger'
 import { peerIdFromPrivateKey } from '@libp2p/peer-id'
 import { expect } from 'aegir/chai'
 import { createIPNSRecord, marshalIPNSRecord, multihashToIPNSRoutingKey } from 'ipns'
@@ -9,7 +8,7 @@ import all from 'it-all'
 import { CID } from 'multiformats/cid'
 import { concat as uint8ArrayConcat } from 'uint8arrays/concat'
 import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
-import { createDelegatedRoutingV1HttpApiClient } from '../src/index.js'
+import { delegatedRoutingV1HttpApiClient } from '../src/index.js'
 import type { DelegatedRoutingV1HttpApiClient } from '../src/index.js'
 import type { PeerRouting, ContentRouting } from '@libp2p/interface'
 
@@ -23,7 +22,12 @@ describe('libp2p content-routing', () => {
   let client: DelegatedRoutingV1HttpApiClient
 
   beforeEach(async () => {
-    client = createDelegatedRoutingV1HttpApiClient(new URL(serverUrl), { cacheTTL: 0 })
+    client = delegatedRoutingV1HttpApiClient({
+      url: new URL(serverUrl),
+      cacheTTL: 0
+    })({
+      logger: defaultLogger()
+    })
     await start(client)
   })
 
@@ -250,7 +254,11 @@ describe('libp2p peer-routing', () => {
   let client: DelegatedRoutingV1HttpApiClient
 
   beforeEach(async () => {
-    client = createDelegatedRoutingV1HttpApiClient(new URL(serverUrl))
+    client = delegatedRoutingV1HttpApiClient({
+      url: new URL(serverUrl)
+    })({
+      logger: defaultLogger()
+    })
     await start(client)
   })
 
@@ -295,14 +303,33 @@ describe('libp2p peer-routing', () => {
       expect(peerInfo.multiaddrs.map(ma => ma.toString())).to.deep.equal(records[0].Addrs)
     })
 
-    it('should not get closest peers', async () => {
+    it('should get closest peers', async () => {
       const routing = getPeerRouting(client)
 
       if (routing == null) {
         throw new Error('PeerRouting not found')
       }
 
-      await expect(all(routing.getClosestPeers(Uint8Array.from([0, 1, 2, 3, 4])))).to.eventually.be.empty()
+      const privateKey = await generateKeyPair('Ed25519')
+      const peerId = peerIdFromPrivateKey(privateKey)
+
+      const records = [{
+        Protocol: 'transport-bitswap',
+        Schema: 'peer',
+        Metadata: 'gBI=',
+        ID: peerId.toString(),
+        Addrs: ['/ip4/41.41.41.41/tcp/1234']
+      }]
+
+      // load peer for the router to fetch
+      await fetch(`${process.env.ECHO_SERVER}/add-peers/${peerId.toCID().toString()}`, {
+        method: 'POST',
+        body: records.map(prov => JSON.stringify(prov)).join('\n')
+      })
+
+      const peers = await all(routing.getClosestPeers(peerId.toMultihash().bytes))
+      expect(peers[0].id.toString()).to.equal(records[0].ID)
+      expect(peers[0].multiaddrs.map(ma => ma.toString())).to.deep.equal(records[0].Addrs)
     })
   })
 })
