@@ -83,7 +83,6 @@
  * ```
  */
 
-import { defaultLogger } from '@libp2p/logger'
 import { DelegatedRoutingV1HttpApiClient as DelegatedRoutingV1HttpApiClientClass } from './client.js'
 import type { AbortOptions, ComponentLogger, PeerId } from '@libp2p/interface'
 import type { Multiaddr } from '@multiformats/multiaddr'
