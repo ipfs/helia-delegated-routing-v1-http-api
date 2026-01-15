@@ -1,3 +1,14 @@
+## [@helia/delegated-routing-v1-http-api-server-v5.2.0](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-server-5.1.1...@helia/delegated-routing-v1-http-api-server-5.2.0) (2026-01-15)
+
+### Features
+
+* add get closest peers (IPIP-476) ([#187](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues/187)) ([58d7bb0](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/58d7bb02f4b4648e1c66ae24350e23250329214e))
+
+### Trivial Changes
+
+* bump @types/sinon from 17.0.4 to 20.0.0 ([#182](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues/182)) ([ed51496](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/ed51496912ba97e77448c3f4d3f1eb770cb55c87))
+* bump @types/sinon from 20.0.0 to 21.0.0 ([#184](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues/184)) ([ff7a513](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/ff7a513161515d612765debf2d8cf1c445705fe4))
+
 ## [@helia/delegated-routing-v1-http-api-server-v5.1.1](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-server-5.1.0...@helia/delegated-routing-v1-http-api-server-5.1.1) (2025-10-29)
 
 ### Bug Fixes
