@@ -172,6 +172,7 @@ export interface GetIPNSOptions extends AbortOptions {
 
 export type GetProvidersOptions = FilterOptions & AbortOptions
 export type GetPeersOptions = FilterOptions & AbortOptions
+export type GetClosestPeersOptions = FilterOptions & AbortOptions
 
 export interface DelegatedRoutingV1HttpApiClient {
   /**
@@ -190,6 +191,12 @@ export interface DelegatedRoutingV1HttpApiClient {
    * {@link PeerId}
    */
   getPeers(peerId: PeerId, options?: GetPeersOptions): AsyncGenerator<PeerRecord>
+
+  /**
+   * Returns an async generator of {@link PeerRecord}s of the closest peers to
+   * the supplied key
+   */
+  getClosestPeers (key: CID | PeerId, options?: GetClosestPeersOptions): AsyncGenerator<PeerRecord>
 
   /**
    * Returns a promise of a {@link IPNSRecord} for the given {@link MultihashDigest}

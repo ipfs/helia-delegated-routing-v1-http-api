@@ -49,7 +49,6 @@ const options = {
           providers.set(req.params.cid, data)
           res.end(JSON.stringify({ success: true }))
         } catch (err) {
-          console.error('Error in add-providers:', err)
           res.statusCode = 400
           res.end(JSON.stringify({
             error: err.message,
@@ -123,6 +122,39 @@ const options = {
         }
 
         const records = peers.get(req.params.peerId)
+        if (records) {
+          peers.delete(req.params.peerId)
+          res.end(records)
+        } else {
+          // Return empty JSON response
+          const acceptHeader = req.headers.accept
+          if (acceptHeader?.includes('application/x-ndjson')) {
+            res.setHeader('Content-Type', 'application/x-ndjson')
+            res.end('')
+          } else {
+            res.setHeader('Content-Type', 'application/json')
+            res.end(JSON.stringify({ Peers: [] }))
+          }
+        }
+      })
+      echo.polka.get('/routing/v1/dht/closest/peers/:key', (req, res) => {
+        callCount++
+
+        // Support testing 404 responses for backward compatibility
+        if (req.params.key === TEST_CIDS.PEERS_404) {
+          res.statusCode = 404
+          res.end('Not Found')
+          return
+        }
+
+        // Support testing null Peers field
+        if (req.params.key === TEST_CIDS.PEERS_NULL) {
+          res.setHeader('Content-Type', 'application/json')
+          res.end(JSON.stringify({ Peers: null }))
+          return
+        }
+
+        const records = peers.get(req.params.key)
         if (records) {
           peers.delete(req.params.peerId)
           res.end(records)
