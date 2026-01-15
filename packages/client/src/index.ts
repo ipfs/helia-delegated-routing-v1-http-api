@@ -129,6 +129,11 @@ export interface FilterOptions {
 }
 export interface DelegatedRoutingV1HttpApiClientInit extends FilterOptions {
   /**
+   * The endpoint to which requests will be sent
+   */
+  url: string | URL
+
+  /**
    * A concurrency limit to avoid request flood in web browser (default: 4)
    *
    * @see https://github.com/libp2p/js-libp2p-delegated-content-routing/issues/12
@@ -223,23 +228,7 @@ export interface DelegatedRoutingV1HttpApiClient {
 
 /**
  * Create and return a client to use with a Routing V1 HTTP API server
- *
- * @deprecated use `delegatedRoutingV1HttpApiClient` instead - this function will be removed in a future release
  */
-export function createDelegatedRoutingV1HttpApiClient (url: URL | string, init: Omit<DelegatedRoutingV1HttpApiClientInit, 'url'> = {}): DelegatedRoutingV1HttpApiClient {
-  return new DelegatedRoutingV1HttpApiClientClass({
-    logger: defaultLogger()
-  }, {
-    ...init,
-    url: new URL(url)
-  })
-}
-
-/**
- * Create and return a client to use with a Routing V1 HTTP API server
- *
- * TODO: add `url` to `DelegatedRoutingV1HttpApiClientInit` interface and release as breaking change
- */
-export function delegatedRoutingV1HttpApiClient (init: DelegatedRoutingV1HttpApiClientInit & { url: string | URL }): (components: DelegatedRoutingV1HttpApiClientComponents) => DelegatedRoutingV1HttpApiClient {
+export function delegatedRoutingV1HttpApiClient (init: DelegatedRoutingV1HttpApiClientInit): (components: DelegatedRoutingV1HttpApiClientComponents) => DelegatedRoutingV1HttpApiClient {
   return (components) => new DelegatedRoutingV1HttpApiClientClass(components, init)
 }
