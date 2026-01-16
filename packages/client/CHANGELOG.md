@@ -1,3 +1,9 @@
+## [@helia/delegated-routing-v1-http-api-client-v6.0.1](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-6.0.0...@helia/delegated-routing-v1-http-api-client-6.0.1) (2026-01-16)
+
+### Bug Fixes
+
+* where routing key is not peer id or cid, use a raw CID ([#189](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues/189)) ([2123838](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/2123838be94a5976c65c4729b5720a114178abfd))
+
 ## [@helia/delegated-routing-v1-http-api-client-v6.0.0](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-5.2.1...@helia/delegated-routing-v1-http-api-client-6.0.0) (2026-01-16)
 
 ### ⚠ BREAKING CHANGES
