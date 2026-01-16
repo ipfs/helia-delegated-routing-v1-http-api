@@ -1,3 +1,13 @@
+## [@helia/delegated-routing-v1-http-api-client-v6.0.0](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-5.2.1...@helia/delegated-routing-v1-http-api-client-6.0.0) (2026-01-16)
+
+### ⚠ BREAKING CHANGES
+
+* use `delegatedRoutingV1HttpApiClient` factory
+
+### Bug Fixes
+
+* remove deprecated factory function ([#188](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues/188)) ([24f1cd8](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/24f1cd894f7817ac88f561844daa1dddf71850e4))
+
 ## [@helia/delegated-routing-v1-http-api-client-v5.2.1](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-5.2.0...@helia/delegated-routing-v1-http-api-client-5.2.1) (2026-01-15)
 
 ### Documentation
