@@ -5,6 +5,8 @@ import first from 'it-first'
 import map from 'it-map'
 import { digest } from 'multiformats'
 import { CID } from 'multiformats/cid'
+import * as raw from 'multiformats/codecs/raw'
+import { identity } from 'multiformats/hashes/identity'
 import { equals as uint8ArrayEquals } from 'uint8arrays/equals'
 import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
 import type { DelegatedRoutingV1HttpApiClient } from './index.js'
@@ -123,7 +125,11 @@ export class DelegatedRoutingV1HttpApiClientPeerRouting implements PeerRouting {
     try {
       cidOrPeer = CID.decode(key)
     } catch {
-      cidOrPeer = peerIdFromMultihash(digest.decode(key))
+      try {
+        cidOrPeer = peerIdFromMultihash(digest.decode(key))
+      } catch {
+        cidOrPeer = CID.createV1(raw.code, identity.digest(key))
+      }
     }
 
     for await (const peer of this.client.getClosestPeers(cidOrPeer, options)) {
