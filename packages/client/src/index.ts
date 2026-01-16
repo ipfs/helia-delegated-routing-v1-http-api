@@ -6,12 +6,17 @@
  * @example
  *
  * ```typescript
- * import { createDelegatedRoutingV1HttpApiClient } from '@helia/delegated-routing-v1-http-api-client'
+ * import { delegatedRoutingV1HttpApiClient } from '@helia/delegated-routing-v1-http-api-client'
  * import { CID } from 'multiformats/cid'
+ * import { defaultLogger } from '@libp2p/logger'
  *
- * const client = createDelegatedRoutingV1HttpApiClient('https://example.org')
+ * const client = delegatedRoutingV1HttpApiClient({
+ *   url: 'https://example.org'
+ * })({
+ *   logger: defaultLogger()
+ * })
  *
- * for await (const prov of getProviders(CID.parse('QmFoo'))) {
+ * for await (const prov of client.getProviders(CID.parse('QmFoo'))) {
  *   // ...
  * }
  * ```
@@ -23,15 +28,16 @@
  * @example
  *
  * ```typescript
- * import { createDelegatedRoutingV1HttpApiClient } from '@helia/delegated-routing-v1-http-api-client'
+ * import { delegatedRoutingV1HttpApiClient } from '@helia/delegated-routing-v1-http-api-client'
  * import { createLibp2p } from 'libp2p'
  * import { peerIdFromString } from '@libp2p/peer-id'
  *
- * const client = createDelegatedRoutingV1HttpApiClient('https://example.org')
  * const libp2p = await createLibp2p({
  *   // other config here
  *   services: {
- *     delegatedRouting: client
+ *     delegatedRouting: delegatedRoutingV1HttpApiClient({
+ *       url: 'https://example.org'
+ *     })
  *   }
  * })
  *
@@ -50,7 +56,12 @@
  *
  * ```typescript
  * // disable caching
- * const client = createDelegatedRoutingV1HttpApiClient('https://example.org', { cacheTTL: 0 })
+ * const client = delegatedRoutingV1HttpApiClient({
+ *   url: 'https://example.org'
+ *   cacheTTL: 0
+ * })({
+ *   logger: defaultLogger()
+ * })
  * ```
  *
  * ### Filtering with IPIP-484
@@ -63,18 +74,22 @@
  * @example
  *
  * ```typescript
- * import { createDelegatedRoutingV1HttpApiClient } from '@helia/delegated-routing-v1-http-api-client'
+ * import { delegatedRoutingV1HttpApiClient } from '@helia/delegated-routing-v1-http-api-client'
  * import { createLibp2p } from 'libp2p'
  * import { peerIdFromString } from '@libp2p/peer-id'
+ * import { defaultLogger } from '@libp2p/logger'
  *
  * // globally set filter options
- * const client = createDelegatedRoutingV1HttpApiClient('https://delegated-ipfs.dev', {
+ * const client = delegatedRoutingV1HttpApiClient({
+ *   url: 'https://delegated-ipfs.dev',
  *   filterProtocols: ['transport-bitswap', 'unknown', 'transport-ipfs-gateway-http'],
  *   filterAddrs: ['webtransport', 'webrtc-direct', 'wss']
+ * })({
+ *   logger: defaultLogger()
  * })
  *
  * // per-request filter options
- * for await (const prov of getProviders(CID.parse('bafy'), {
+ * for await (const prov of client.getProviders(CID.parse('bafy'), {
  *   filterProtocols: ['transport-ipfs-gateway-http'],
  *   filterAddrs: ['!p2p-circuit']
  * })) {
@@ -83,7 +98,6 @@
  * ```
  */
 
-import { defaultLogger } from '@libp2p/logger'
 import { DelegatedRoutingV1HttpApiClient as DelegatedRoutingV1HttpApiClientClass } from './client.js'
 import type { AbortOptions, ComponentLogger, PeerId } from '@libp2p/interface'
 import type { Multiaddr } from '@multiformats/multiaddr'
@@ -128,6 +142,11 @@ export interface FilterOptions {
   filterAddrs?: string[]
 }
 export interface DelegatedRoutingV1HttpApiClientInit extends FilterOptions {
+  /**
+   * The endpoint to which requests will be sent
+   */
+  url: string | URL
+
   /**
    * A concurrency limit to avoid request flood in web browser (default: 4)
    *
@@ -223,23 +242,7 @@ export interface DelegatedRoutingV1HttpApiClient {
 
 /**
  * Create and return a client to use with a Routing V1 HTTP API server
- *
- * @deprecated use `delegatedRoutingV1HttpApiClient` instead - this function will be removed in a future release
  */
-export function createDelegatedRoutingV1HttpApiClient (url: URL | string, init: Omit<DelegatedRoutingV1HttpApiClientInit, 'url'> = {}): DelegatedRoutingV1HttpApiClient {
-  return new DelegatedRoutingV1HttpApiClientClass({
-    logger: defaultLogger()
-  }, {
-    ...init,
-    url: new URL(url)
-  })
-}
-
-/**
- * Create and return a client to use with a Routing V1 HTTP API server
- *
- * TODO: add `url` to `DelegatedRoutingV1HttpApiClientInit` interface and release as breaking change
- */
-export function delegatedRoutingV1HttpApiClient (init: DelegatedRoutingV1HttpApiClientInit & { url: string | URL }): (components: DelegatedRoutingV1HttpApiClientComponents) => DelegatedRoutingV1HttpApiClient {
+export function delegatedRoutingV1HttpApiClient (init: DelegatedRoutingV1HttpApiClientInit): (components: DelegatedRoutingV1HttpApiClientComponents) => DelegatedRoutingV1HttpApiClient {
   return (components) => new DelegatedRoutingV1HttpApiClientClass(components, init)
 }

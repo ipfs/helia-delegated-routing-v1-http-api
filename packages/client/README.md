@@ -35,12 +35,17 @@ A client implementation of the IPFS [Delegated Routing V1 HTTP API](https://spec
 ## Example
 
 ```typescript
-import { createDelegatedRoutingV1HttpApiClient } from '@helia/delegated-routing-v1-http-api-client'
+import { delegatedRoutingV1HttpApiClient } from '@helia/delegated-routing-v1-http-api-client'
 import { CID } from 'multiformats/cid'
+import { defaultLogger } from '@libp2p/logger'
 
-const client = createDelegatedRoutingV1HttpApiClient('https://example.org')
+const client = delegatedRoutingV1HttpApiClient({
+  url: 'https://example.org'
+})({
+  logger: defaultLogger()
+})
 
-for await (const prov of getProviders(CID.parse('QmFoo'))) {
+for await (const prov of client.getProviders(CID.parse('QmFoo'))) {
   // ...
 }
 ```
@@ -52,20 +57,40 @@ The client can be configured as a libp2p service, this will enable it as both a 
 ## Example
 
 ```typescript
-import { createDelegatedRoutingV1HttpApiClient } from '@helia/delegated-routing-v1-http-api-client'
+import { delegatedRoutingV1HttpApiClient } from '@helia/delegated-routing-v1-http-api-client'
 import { createLibp2p } from 'libp2p'
 import { peerIdFromString } from '@libp2p/peer-id'
 
-const client = createDelegatedRoutingV1HttpApiClient('https://example.org')
 const libp2p = await createLibp2p({
   // other config here
   services: {
-    delegatedRouting: client
+    delegatedRouting: delegatedRoutingV1HttpApiClient({
+      url: 'https://example.org'
+    })
   }
 })
 
 // later this will use the configured HTTP gateway
 await libp2p.peerRouting.findPeer(peerIdFromString('QmFoo'))
+```
+
+### Caching
+
+By default, the client caches successful (200) delegated routing responses in browser environments (that support the [Cache API](https://developer.mozilla.org/en-US/docs/Web/API/Cache)) for a duration of 5 minutes. The client does this by adding an `x-cache-expires` header to the response object.
+
+If caching is enabled, the client will cache responses for the duration of `cacheTTL` milliseconds.
+If `cacheTTL` is 0, caching is disabled:
+
+## Example
+
+```typescript
+// disable caching
+const client = delegatedRoutingV1HttpApiClient({
+  url: 'https://example.org'
+  cacheTTL: 0
+})({
+  logger: defaultLogger()
+})
 ```
 
 ### Filtering with IPIP-484
@@ -76,18 +101,22 @@ The filter options be set globally, by passing them to the client constructor, o
 ## Example
 
 ```typescript
-import { createDelegatedRoutingV1HttpApiClient } from '@helia/delegated-routing-v1-http-api-client'
+import { delegatedRoutingV1HttpApiClient } from '@helia/delegated-routing-v1-http-api-client'
 import { createLibp2p } from 'libp2p'
 import { peerIdFromString } from '@libp2p/peer-id'
+import { defaultLogger } from '@libp2p/logger'
 
 // globally set filter options
-const client = createDelegatedRoutingV1HttpApiClient('https://delegated-ipfs.dev', {
+const client = delegatedRoutingV1HttpApiClient({
+  url: 'https://delegated-ipfs.dev',
   filterProtocols: ['transport-bitswap', 'unknown', 'transport-ipfs-gateway-http'],
   filterAddrs: ['webtransport', 'webrtc-direct', 'wss']
+})({
+  logger: defaultLogger()
 })
 
 // per-request filter options
-for await (const prov of getProviders(CID.parse('bafy'), {
+for await (const prov of client.getProviders(CID.parse('bafy'), {
   filterProtocols: ['transport-ipfs-gateway-http'],
   filterAddrs: ['!p2p-circuit']
 })) {
