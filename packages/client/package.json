@@ -151,7 +151,7 @@
     "multiformats": "^13.3.6",
     "p-defer": "^4.0.1",
     "p-queue": "^9.0.0",
-    "uint8arrays": "^5.1.0"
+    "uint8arrays": "^6.1.0"
   },
   "devDependencies": {
     "@libp2p/crypto": "^5.1.3",
