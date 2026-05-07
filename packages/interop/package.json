@@ -39,7 +39,7 @@
     "helia": "^6.0.1",
     "ipns": "^10.0.2",
     "it-first": "^3.0.8",
-    "multiformats": "^13.3.6"
+    "multiformats": "^14.0.0"
   },
   "private": true
 }

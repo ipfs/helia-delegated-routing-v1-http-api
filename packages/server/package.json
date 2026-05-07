@@ -161,7 +161,7 @@
     "@libp2p/peer-id": "^6.0.3",
     "fastify": "^5.3.3",
     "ipns": "^10.0.2",
-    "multiformats": "^13.3.6",
+    "multiformats": "^14.0.0",
     "raw-body": "^3.0.0"
   },
   "devDependencies": {
