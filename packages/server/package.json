@@ -160,7 +160,7 @@
     "@libp2p/interface": "^3.0.2",
     "@libp2p/peer-id": "^6.0.3",
     "fastify": "^5.3.3",
-    "ipns": "^10.0.2",
+    "ipns": "^11.0.0",
     "multiformats": "^13.3.6",
     "raw-body": "^3.0.0"
   },
