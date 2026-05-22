@@ -1,6 +1,6 @@
 import { expect } from 'aegir/chai'
 import { stubInterface } from 'sinon-ts'
-import { createDelegatedRoutingV1HttpApiServer } from '../src/index.js'
+import { createDelegatedRoutingV1HttpApiServer } from '../src/index.ts'
 import type { Helia } from '@helia/interface'
 import type { FastifyInstance } from 'fastify'
 import type { StubbedInstance } from 'sinon-ts'

@@ -8,8 +8,7 @@ import all from 'it-all'
 import { CID } from 'multiformats/cid'
 import { concat as uint8ArrayConcat } from 'uint8arrays/concat'
 import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
-import { delegatedRoutingV1HttpApiClient } from '../src/index.js'
-import type { DelegatedRoutingV1HttpApiClient } from '../src/index.js'
+import { delegatedRoutingV1HttpApiClientContentRouting, delegatedRoutingV1HttpApiClientPeerRouting } from '../src/index.ts'
 import type { PeerRouting, ContentRouting } from '@libp2p/interface'
 
 const serverUrl = process.env.ECHO_SERVER
@@ -19,38 +18,31 @@ if (serverUrl == null) {
 }
 
 describe('libp2p content-routing', () => {
-  let client: DelegatedRoutingV1HttpApiClient
+  let routing: ContentRouting
 
   beforeEach(async () => {
-    client = delegatedRoutingV1HttpApiClient({
+    routing = delegatedRoutingV1HttpApiClientContentRouting({
       url: new URL(serverUrl),
       cacheTTL: 0
     })({
       logger: defaultLogger()
     })
-    await start(client)
+
+    await start(routing)
   })
 
   afterEach(async () => {
-    await stop(client)
+    await stop(routing)
 
     const res = await fetch(`${process.env.ECHO_SERVER}/reset-call-count`)
     await res.text()
   })
 
   it('should provide a content routing implementation', () => {
-    const routing = getContentRouting(client)
-
-    expect(routing).to.be.ok()
+    expect(getContentRouting(routing)).to.be.ok()
   })
 
   it('should find providers', async () => {
-    const routing = getContentRouting(client)
-
-    if (routing == null) {
-      throw new Error('ContentRouting not found')
-    }
-
     const providers = [{
       Protocol: 'transport-bitswap',
       Schema: 'bitswap',
@@ -89,12 +81,6 @@ describe('libp2p content-routing', () => {
   })
 
   it('should yield no results if no providers exist', async () => {
-    const routing = getContentRouting(client)
-
-    if (routing == null) {
-      throw new Error('ContentRouting not found')
-    }
-
     const cid = CID.parse('QmawceGscqN4o8Y8Fv26UUmB454kn2bnkXV5tEQYc4jBd7')
 
     // load providers for the router to fetch
@@ -109,12 +95,6 @@ describe('libp2p content-routing', () => {
   })
 
   it('should respect abort signal when finding providers', async () => {
-    const routing = getContentRouting(client)
-
-    if (routing == null) {
-      throw new Error('ContentRouting not found')
-    }
-
     const providers = [{
       ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
       Addrs: ['/ip4/43.43.43.43/tcp/1234']
@@ -145,24 +125,12 @@ describe('libp2p content-routing', () => {
   })
 
   it('should provide without error', async () => {
-    const routing = getContentRouting(client)
-
-    if (routing == null) {
-      throw new Error('ContentRouting not found')
-    }
-
     const cid = CID.parse('QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn')
 
     await expect(routing.provide(cid)).to.eventually.be.undefined()
   })
 
   it('should put ipns records', async () => {
-    const routing = getContentRouting(client)
-
-    if (routing == null) {
-      throw new Error('ContentRouting not found')
-    }
-
     const cid = CID.parse('QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn')
     const privateKey = await generateKeyPair('Ed25519')
     const record = await createIPNSRecord(privateKey, cid, 0, 1000)
@@ -183,12 +151,6 @@ describe('libp2p content-routing', () => {
   })
 
   it('should not put other records', async () => {
-    const routing = getContentRouting(client)
-
-    if (routing == null) {
-      throw new Error('ContentRouting not found')
-    }
-
     const privateKey = await generateKeyPair('Ed25519')
     const key = uint8ArrayConcat([
       uint8ArrayFromString('/an-unknown-key/'),
@@ -201,12 +163,6 @@ describe('libp2p content-routing', () => {
   })
 
   it('should get ipns records', async () => {
-    const routing = getContentRouting(client)
-
-    if (routing == null) {
-      throw new Error('ContentRouting not found')
-    }
-
     const cid = CID.parse('QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn')
     const privateKey = await generateKeyPair('Ed25519')
     const record = await createIPNSRecord(privateKey, cid, 0, 1000)
@@ -217,6 +173,7 @@ describe('libp2p content-routing', () => {
       headers: {
         'Content-Type': 'application/vnd.ipfs.ipns-record'
       },
+      // @ts-expect-error ipns needs a multiformats upgrade
       body: marshalIPNSRecord(record)
     })
 
@@ -230,12 +187,6 @@ describe('libp2p content-routing', () => {
   })
 
   it('should not get unknown records', async () => {
-    const routing = getContentRouting(client)
-
-    if (routing == null) {
-      throw new Error('ContentRouting not found')
-    }
-
     const privateKey = await generateKeyPair('Ed25519')
 
     const key = uint8ArrayConcat([
@@ -251,35 +202,27 @@ describe('libp2p content-routing', () => {
 })
 
 describe('libp2p peer-routing', () => {
-  let client: DelegatedRoutingV1HttpApiClient
+  let routing: PeerRouting
 
   beforeEach(async () => {
-    client = delegatedRoutingV1HttpApiClient({
+    routing = delegatedRoutingV1HttpApiClientPeerRouting({
       url: new URL(serverUrl)
     })({
       logger: defaultLogger()
     })
-    await start(client)
+    await start(routing)
   })
 
   afterEach(async () => {
-    await stop(client)
+    await stop(routing)
   })
 
   describe('peer routing', () => {
     it('should provide a peer routing implementation', () => {
-      const routing = getPeerRouting(client)
-
-      expect(routing).to.be.ok()
+      expect(getPeerRouting(routing)).to.be.ok()
     })
 
     it('should find peer info', async () => {
-      const routing = getPeerRouting(client)
-
-      if (routing == null) {
-        throw new Error('PeerRouting not found')
-      }
-
       const privateKey = await generateKeyPair('Ed25519')
       const peerId = peerIdFromPrivateKey(privateKey)
 
@@ -304,12 +247,6 @@ describe('libp2p peer-routing', () => {
     })
 
     it('should get closest peers', async () => {
-      const routing = getPeerRouting(client)
-
-      if (routing == null) {
-        throw new Error('PeerRouting not found')
-      }
-
       const privateKey = await generateKeyPair('Ed25519')
       const peerId = peerIdFromPrivateKey(privateKey)
 

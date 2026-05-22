@@ -4,7 +4,7 @@ import { ipnsValidator } from 'ipns/validator'
 import { CID } from 'multiformats/cid'
 import { hasCode } from 'multiformats/hashes/digest'
 import getRawBody from 'raw-body'
-import { LIBP2P_KEY_CODEC } from '../../../../constants.js'
+import { LIBP2P_KEY_CODEC } from '../../../../constants.ts'
 import type { Helia } from '@helia/interface'
 import type { FastifyInstance } from 'fastify'
 

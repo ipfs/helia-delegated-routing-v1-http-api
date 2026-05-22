@@ -2,7 +2,7 @@ import { PassThrough } from 'node:stream'
 import { setMaxListeners } from '@libp2p/interface'
 import { peerIdFromString } from '@libp2p/peer-id'
 import { CID } from 'multiformats/cid'
-import { isNotFoundError } from '../../../errors.js'
+import { isNotFoundError } from '../../../errors.ts'
 import type { Helia } from '@helia/interface'
 import type { FastifyInstance } from 'fastify'
 

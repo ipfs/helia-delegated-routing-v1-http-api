@@ -1,16 +1,15 @@
-import { NotFoundError } from '@libp2p/interface'
-import { peerIdFromMultihash } from '@libp2p/peer-id'
-import { marshalIPNSRecord, multihashFromIPNSRoutingKey, unmarshalIPNSRecord } from 'ipns'
+import { contentRoutingSymbol, NotFoundError, peerRoutingSymbol } from '@libp2p/interface'
 import first from 'it-first'
 import map from 'it-map'
 import { digest } from 'multiformats'
 import { CID } from 'multiformats/cid'
 import * as raw from 'multiformats/codecs/raw'
+import * as Digest from 'multiformats/hashes/digest'
 import { identity } from 'multiformats/hashes/identity'
 import { equals as uint8ArrayEquals } from 'uint8arrays/equals'
 import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
-import type { DelegatedRoutingV1HttpApiClient } from './index.js'
-import type { ContentRouting, PeerRouting, AbortOptions, PeerId, PeerInfo, Provider } from '@libp2p/interface'
+import type { DelegatedRoutingV1HttpApiClient } from './index.ts'
+import type { ContentRouting, PeerRouting, AbortOptions, PeerId, PeerInfo, Provider, Startable } from '@libp2p/interface'
 
 const IPNS_PREFIX = uint8ArrayFromString('/ipns/')
 
@@ -21,11 +20,23 @@ function isIPNSKey (key: Uint8Array): boolean {
 /**
  * Wrapper class to convert [http-routing-v1 content events](https://specs.ipfs.tech/routing/http-routing-v1/#response-body) into returned values
  */
-export class DelegatedRoutingV1HttpApiClientContentRouting implements ContentRouting {
+export class DelegatedRoutingV1HttpApiClientContentRouting implements ContentRouting, Startable {
   private readonly client: DelegatedRoutingV1HttpApiClient
 
   constructor (client: DelegatedRoutingV1HttpApiClient) {
     this.client = client
+  }
+
+  get [contentRoutingSymbol] (): ContentRouting {
+    return this
+  }
+
+  async start (): Promise<void> {
+    await this.client.start()
+  }
+
+  async stop (): Promise<void> {
+    await this.client.stop()
   }
 
   async * findProviders (cid: CID, options: AbortOptions = {}): AsyncIterable<Provider> {
@@ -61,11 +72,10 @@ export class DelegatedRoutingV1HttpApiClientContentRouting implements ContentRou
       return
     }
 
-    const digest = multihashFromIPNSRoutingKey(key)
+    const digest = Digest.decode(key.slice(IPNS_PREFIX.length))
     const cid = CID.createV1(0x72, digest)
-    const record = unmarshalIPNSRecord(value)
 
-    await this.client.putIPNS(cid, record, options)
+    await this.client.putIPNS(cid, value, options)
   }
 
   async get (key: Uint8Array, options?: AbortOptions): Promise<Uint8Array> {
@@ -73,13 +83,11 @@ export class DelegatedRoutingV1HttpApiClientContentRouting implements ContentRou
       throw new NotFoundError('Not found')
     }
 
-    const digest = multihashFromIPNSRoutingKey(key)
+    const digest = Digest.decode(key.slice(IPNS_PREFIX.length))
     const cid = CID.createV1(0x72, digest)
 
     try {
-      const record = await this.client.getIPNS(cid, options)
-
-      return marshalIPNSRecord(record)
+      return await this.client.getIPNS(cid, options)
     } catch (err: any) {
       // BadResponseError is thrown when the response had no body, which means
       // the record couldn't be found
@@ -99,15 +107,27 @@ export class DelegatedRoutingV1HttpApiClientContentRouting implements ContentRou
 /**
  * Wrapper class to convert [http-routing-v1](https://specs.ipfs.tech/routing/http-routing-v1/#response-body-0) events into expected libp2p values
  */
-export class DelegatedRoutingV1HttpApiClientPeerRouting implements PeerRouting {
+export class DelegatedRoutingV1HttpApiClientPeerRouting implements PeerRouting, Startable {
   private readonly client: DelegatedRoutingV1HttpApiClient
 
   constructor (client: DelegatedRoutingV1HttpApiClient) {
     this.client = client
   }
 
+  get [peerRoutingSymbol] (): PeerRouting {
+    return this
+  }
+
+  async start (): Promise<void> {
+    await this.client.start()
+  }
+
+  async stop (): Promise<void> {
+    await this.client.stop()
+  }
+
   async findPeer (peerId: PeerId, options: AbortOptions = {}): Promise<PeerInfo> {
-    const peer = await first(this.client.getPeers(peerId, options))
+    const peer = await first(this.client.getPeers(peerId.toCID(), options))
 
     if (peer != null) {
       return {
@@ -120,19 +140,19 @@ export class DelegatedRoutingV1HttpApiClientPeerRouting implements PeerRouting {
   }
 
   async * getClosestPeers (key: Uint8Array, options: AbortOptions = {}): AsyncIterable<PeerInfo> {
-    let cidOrPeer: CID | PeerId
+    let cid: CID
 
     try {
-      cidOrPeer = CID.decode(key)
+      cid = CID.decode(key)
     } catch {
       try {
-        cidOrPeer = peerIdFromMultihash(digest.decode(key))
+        cid = CID.createV1(0x72, digest.decode(key))
       } catch {
-        cidOrPeer = CID.createV1(raw.code, identity.digest(key))
+        cid = CID.createV1(raw.code, identity.digest(key))
       }
     }
 
-    for await (const peer of this.client.getClosestPeers(cidOrPeer, options)) {
+    for await (const peer of this.client.getClosestPeers(cid, options)) {
       yield {
         id: peer.ID,
         multiaddrs: peer.Addrs ?? []

@@ -1,7 +1,7 @@
 import { defaultLogger } from '@libp2p/logger'
 import { expect } from 'aegir/chai'
-import { DelegatedRoutingV1HttpApiClient } from '../src/client.js'
-import { itBrowser } from './fixtures/it.js'
+import { DelegatedRoutingV1HttpApiClient } from '../src/client.ts'
+import { itBrowser } from './fixtures/it.ts'
 
 describe('client', () => {
   itBrowser('should remove cache on stop', async function () {

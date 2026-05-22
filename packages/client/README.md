@@ -130,6 +130,14 @@ for await (const prov of client.getProviders(CID.parse('bafy'), {
 $ npm i @helia/delegated-routing-v1-http-api-client
 ```
 
+## Browser `<script>` tag
+
+Loading this module through a script tag will make its exports available as `HeliaDelegatedRoutingV1HttpApiClient` in the global namespace.
+
+```html
+<script src="https://unpkg.com/@helia/delegated-routing-v1-http-api-client/dist/index.min.js"></script>
+```
+
 # API Docs
 
 - <https://ipfs.github.io/helia-delegated-routing-v1-http-api/modules/_helia_delegated-routing-v1-http-api-client.html>
