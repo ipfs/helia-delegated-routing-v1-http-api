@@ -157,19 +157,19 @@
     "release": "aegir release"
   },
   "dependencies": {
-    "@fastify/cors": "^11.0.1",
-    "@helia/interface": "^6.0.0",
-    "@libp2p/interface": "^3.0.2",
-    "@libp2p/peer-id": "^6.0.3",
-    "fastify": "^5.3.3",
+    "@fastify/cors": "^11.2.0",
+    "@helia/interface": "^6.2.1",
+    "@libp2p/interface": "^3.2.2",
+    "@libp2p/peer-id": "^6.0.9",
+    "fastify": "^5.8.5",
     "ipns": "^11.0.0",
     "multiformats": "^14.0.0",
-    "raw-body": "^3.0.0"
+    "raw-body": "^3.0.2"
   },
   "devDependencies": {
-    "@libp2p/crypto": "^5.1.3",
-    "@multiformats/multiaddr": "^13.0.1",
-    "@types/sinon": "^21.0.0",
+    "@libp2p/crypto": "^5.1.18",
+    "@multiformats/multiaddr": "^13.0.3",
+    "@types/sinon": "^21.0.1",
     "aegir": "^48.0.4",
     "sinon": "^22.0.0",
     "sinon-ts": "^2.0.0",

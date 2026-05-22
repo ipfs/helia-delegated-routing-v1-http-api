@@ -1,7 +1,12 @@
 {
   "$schema": "https://typedoc.org/schema.json",
   "name": "Helia Routing V1 HTTP API",
-  "exclude": [
-    "packages/interop"
-  ]
+    "exclude": [
+      "packages/interop"
+    ],
+  "readme": "./README.md",
+  "headings": {
+    "readme": false,
+    "document": false
+  }
 }
