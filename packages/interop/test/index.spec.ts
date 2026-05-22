@@ -5,12 +5,12 @@ import { generateKeyPair } from '@libp2p/crypto/keys'
 import { start, stop } from '@libp2p/interface'
 import { defaultLogger } from '@libp2p/logger'
 import { expect } from 'aegir/chai'
-import { createIPNSRecord } from 'ipns'
+import { createIPNSRecord, marshalIPNSRecord, unmarshalIPNSRecord } from 'ipns'
 import first from 'it-first'
 import { CID } from 'multiformats/cid'
 import * as raw from 'multiformats/codecs/raw'
 import { sha256 } from 'multiformats/hashes/sha2'
-import { createHelia } from './fixtures/create-helia.js'
+import { createHelia } from './fixtures/create-helia.ts'
 import type { DelegatedRoutingV1HttpApiClient } from '@helia/delegated-routing-v1-http-api-client'
 import type { Libp2p } from '@libp2p/interface'
 import type { KadDHT } from '@libp2p/kad-dht'
@@ -80,7 +80,7 @@ describe('delegated-routing-v1-http-api interop', () => {
   })
 
   it('should find peer info', async () => {
-    const result = await first(client.getPeers(network[2].libp2p.peerId))
+    const result = await first(client.getPeers(network[2].libp2p.peerId.toCID()))
 
     if (result == null) {
       throw new Error('PeerInfo not found')
@@ -96,7 +96,8 @@ describe('delegated-routing-v1-http-api interop', () => {
     const result = await i.publish('key-name', cid)
 
     // use client to resolve the published record
-    const record = await client.getIPNS(result.publicKey.toCID())
+    const buf = await client.getIPNS(result.publicKey.toCID())
+    const record = unmarshalIPNSRecord(buf)
     expect(record.value).to.equal(`/ipfs/${cid}`)
   })
 
@@ -105,8 +106,9 @@ describe('delegated-routing-v1-http-api interop', () => {
     const cid = CID.parse('bafybeiczsscdsbs7ffqz55asqdf3smv6klcw3gofszvwlyarci47bgf354')
     const privateKey = await generateKeyPair('Ed25519')
     const record = await createIPNSRecord(privateKey, cid, 0, 1000 * 60 * 60 * 24)
+    const buf = marshalIPNSRecord(record)
 
-    await client.putIPNS(privateKey.publicKey.toCID(), record)
+    await client.putIPNS(privateKey.publicKey.toCID(), buf)
 
     // resolve the record using a remote host
     const i = ipns(network[8])

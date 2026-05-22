@@ -53,7 +53,7 @@
 
 import cors from '@fastify/cors'
 import fastify from 'fastify'
-import routes from './routes/index.js'
+import routes from './routes/index.ts'
 import type { Helia } from '@helia/interface'
 import type { FastifyListenOptions, FastifyInstance } from 'fastify'
 

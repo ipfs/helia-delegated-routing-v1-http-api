@@ -98,10 +98,10 @@
  * ```
  */
 
-import { DelegatedRoutingV1HttpApiClient as DelegatedRoutingV1HttpApiClientClass } from './client.js'
-import type { AbortOptions, ComponentLogger, PeerId } from '@libp2p/interface'
+import { DelegatedRoutingV1HttpApiClient as DelegatedRoutingV1HttpApiClientClass } from './client.ts'
+import { DelegatedRoutingV1HttpApiClientContentRouting, DelegatedRoutingV1HttpApiClientPeerRouting } from './routings.ts'
+import type { AbortOptions, ComponentLogger, ContentRouting, PeerId, PeerRouting } from '@libp2p/interface'
 import type { Multiaddr } from '@multiformats/multiaddr'
-import type { IPNSRecord } from 'ipns'
 import type { CID } from 'multiformats/cid'
 
 /**
@@ -179,16 +179,7 @@ export interface DelegatedRoutingV1HttpApiClientComponents {
   logger: ComponentLogger
 }
 
-export interface GetIPNSOptions extends AbortOptions {
-  /**
-   * By default incoming IPNS records are validated, pass false here to skip
-   * validation and just return the record.
-   *
-   * @default true
-   */
-  validate?: boolean
-}
-
+export type GetIPNSOptions = AbortOptions
 export type GetProvidersOptions = FilterOptions & AbortOptions
 export type GetPeersOptions = FilterOptions & AbortOptions
 export type GetClosestPeersOptions = FilterOptions & AbortOptions
@@ -207,25 +198,25 @@ export interface DelegatedRoutingV1HttpApiClient {
 
   /**
    * Returns an async generator of {@link PeerRecord}s for the provided
-   * {@link PeerId}
+   * {@link CID}
    */
-  getPeers(peerId: PeerId, options?: GetPeersOptions): AsyncGenerator<PeerRecord>
+  getPeers(cid: CID, options?: GetPeersOptions): AsyncGenerator<PeerRecord>
 
   /**
    * Returns an async generator of {@link PeerRecord}s of the closest peers to
    * the supplied key
    */
-  getClosestPeers (key: CID | PeerId, options?: GetClosestPeersOptions): AsyncGenerator<PeerRecord>
+  getClosestPeers (cid: CID, options?: GetClosestPeersOptions): AsyncGenerator<PeerRecord>
 
   /**
-   * Returns a promise of a {@link IPNSRecord} for the given {@link MultihashDigest}
+   * Returns a promise of a serialized IPNS record for passed CID
    */
-  getIPNS(libp2pKey: CID<unknown, 0x72, 0x00 | 0x12, 1>, options?: GetIPNSOptions): Promise<IPNSRecord>
+  getIPNS(cid: CID, options?: GetIPNSOptions): Promise<Uint8Array<ArrayBuffer>>
 
   /**
-   * Publishes the given {@link IPNSRecord} for the provided {@link MultihashDigest}
+   * Publishes a serialized IPNS record for the passed CID
    */
-  putIPNS(libp2pKey: CID<unknown, 0x72, 0x00 | 0x12, 1>, record: IPNSRecord, options?: AbortOptions): Promise<void>
+  putIPNS(cid: CID, record: Uint8Array, options?: AbortOptions): Promise<void>
 
   /**
    * Create the request/response cache used to ensure duplicate requests aren't
@@ -245,4 +236,12 @@ export interface DelegatedRoutingV1HttpApiClient {
  */
 export function delegatedRoutingV1HttpApiClient (init: DelegatedRoutingV1HttpApiClientInit): (components: DelegatedRoutingV1HttpApiClientComponents) => DelegatedRoutingV1HttpApiClient {
   return (components) => new DelegatedRoutingV1HttpApiClientClass(components, init)
+}
+
+export function delegatedRoutingV1HttpApiClientContentRouting (init: DelegatedRoutingV1HttpApiClientInit): (components: DelegatedRoutingV1HttpApiClientComponents) => ContentRouting {
+  return (components) => new DelegatedRoutingV1HttpApiClientContentRouting(delegatedRoutingV1HttpApiClient(init)(components))
+}
+
+export function delegatedRoutingV1HttpApiClientPeerRouting (init: DelegatedRoutingV1HttpApiClientInit): (components: DelegatedRoutingV1HttpApiClientComponents) => PeerRouting {
+  return (components) => new DelegatedRoutingV1HttpApiClientPeerRouting(delegatedRoutingV1HttpApiClient(init)(components))
 }

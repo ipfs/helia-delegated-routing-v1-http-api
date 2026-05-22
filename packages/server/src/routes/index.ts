@@ -35,10 +35,10 @@
  */
 
 import getDhtClosestPeersV1 from './routing/v1/dht/closest/peers/get.ts'
-import getIpnsV1 from './routing/v1/ipns/get.js'
-import putIpnsV1 from './routing/v1/ipns/put.js'
-import getPeersV1 from './routing/v1/peers/get.js'
-import getProvidersV1 from './routing/v1/providers/get.js'
+import getIpnsV1 from './routing/v1/ipns/get.ts'
+import putIpnsV1 from './routing/v1/ipns/put.ts'
+import getPeersV1 from './routing/v1/peers/get.ts'
+import getProvidersV1 from './routing/v1/providers/get.ts'
 import type { Helia } from '@helia/interface'
 import type { FastifyInstance } from 'fastify'
 

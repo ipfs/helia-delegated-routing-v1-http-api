@@ -45,11 +45,13 @@
   "exports": {
     ".": {
       "types": "./dist/src/index.d.ts",
-      "import": "./dist/src/index.js"
+      "import": "./dist/src/index.js",
+      "module-sync": "./dist/src/index.js"
     },
     "./routes": {
       "types": "./dist/src/routes/index.d.ts",
-      "import": "./dist/src/routes/index.js"
+      "import": "./dist/src/routes/index.js",
+      "module-sync": "./dist/src/routes/index.js"
     }
   },
   "release": {
@@ -160,16 +162,20 @@
     "@libp2p/interface": "^3.0.2",
     "@libp2p/peer-id": "^6.0.3",
     "fastify": "^5.3.3",
-    "ipns": "^10.0.2",
-    "multiformats": "^13.3.6",
+    "ipns": "^11.0.0",
+    "multiformats": "^14.0.0",
     "raw-body": "^3.0.0"
   },
   "devDependencies": {
     "@libp2p/crypto": "^5.1.3",
     "@multiformats/multiaddr": "^13.0.1",
     "@types/sinon": "^21.0.0",
-    "aegir": "^47.0.10",
-    "sinon": "^21.0.0",
-    "sinon-ts": "^2.0.0"
+    "aegir": "^48.0.4",
+    "sinon": "^22.0.0",
+    "sinon-ts": "^2.0.0",
+    "uint8arrays": "^6.1.1"
+  },
+  "overrides": {
+    "multiformats": "^14.0.0"
   }
 }

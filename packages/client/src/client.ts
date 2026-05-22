@@ -1,20 +1,17 @@
-import { InvalidParametersError, NotFoundError, contentRoutingSymbol, isPeerId, peerRoutingSymbol, setMaxListeners } from '@libp2p/interface'
+import { InvalidParametersError, NotFoundError, setMaxListeners } from '@libp2p/interface'
 import { peerIdFromString } from '@libp2p/peer-id'
 import { multiaddr } from '@multiformats/multiaddr'
 import { anySignal } from 'any-signal'
 import toIt from 'browser-readablestream-to-it'
-import { unmarshalIPNSRecord, marshalIPNSRecord, multihashToIPNSRoutingKey } from 'ipns'
-import { ipnsValidator } from 'ipns/validator'
 import { parse as ndjson } from 'it-ndjson'
 import { CID } from 'multiformats/cid'
 import defer from 'p-defer'
 import PQueue from 'p-queue'
-import { BadResponseError, InvalidRequestError } from './errors.js'
-import { DelegatedRoutingV1HttpApiClientContentRouting, DelegatedRoutingV1HttpApiClientPeerRouting } from './routings.js'
-import type { DelegatedRoutingV1HttpApiClient as DelegatedRoutingV1HttpApiClientInterface, DelegatedRoutingV1HttpApiClientInit, GetProvidersOptions, GetPeersOptions, GetIPNSOptions, PeerRecord, DelegatedRoutingV1HttpApiClientComponents, GetClosestPeersOptions } from './index.js'
-import type { ContentRouting, PeerRouting, AbortOptions, PeerId, Logger } from '@libp2p/interface'
+import { withArrayBuffer } from 'uint8arrays/with-array-buffer'
+import { BadResponseError, InvalidRequestError } from './errors.ts'
+import type { DelegatedRoutingV1HttpApiClient as DelegatedRoutingV1HttpApiClientInterface, DelegatedRoutingV1HttpApiClientInit, GetProvidersOptions, GetPeersOptions, GetIPNSOptions, PeerRecord, DelegatedRoutingV1HttpApiClientComponents, GetClosestPeersOptions } from './index.ts'
+import type { AbortOptions, Logger } from '@libp2p/interface'
 import type { Multiaddr } from '@multiformats/multiaddr'
-import type { IPNSRecord } from 'ipns'
 
 const defaultValues = {
   concurrentRequests: 4,
@@ -29,8 +26,6 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
   private readonly httpQueue: PQueue
   private readonly shutDownController: AbortController
   private readonly timeout: number
-  private readonly contentRouting: ContentRouting
-  private readonly peerRouting: PeerRouting
   private readonly filterAddrs?: string[]
   private readonly filterProtocols?: string[]
   private readonly inFlightRequests: Map<string, Promise<Response>>
@@ -55,19 +50,9 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
     this.timeout = init.timeout ?? defaultValues.timeout
     this.filterAddrs = init.filterAddrs
     this.filterProtocols = init.filterProtocols
-    this.contentRouting = new DelegatedRoutingV1HttpApiClientContentRouting(this)
-    this.peerRouting = new DelegatedRoutingV1HttpApiClientPeerRouting(this)
 
     this.cacheName = init.cacheName ?? defaultValues.cacheName
     this.cacheTTL = init.cacheTTL ?? defaultValues.cacheTTL
-  }
-
-  get [contentRoutingSymbol] (): ContentRouting {
-    return this.contentRouting
-  }
-
-  get [peerRoutingSymbol] (): PeerRouting {
-    return this.peerRouting
   }
 
   isStarted (): boolean {
@@ -120,15 +105,14 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
 
       // https://specs.ipfs.tech/routing/http-routing-v1/
       const url = new URL(`${this.url}routing/v1/providers/${cid}`)
-
       this.#addFilterParams(url, options.filterAddrs, options.filterProtocols)
-      const getOptions = {
+
+      const res = await this.#makeRequest(url.toString(), {
         headers: {
           accept: 'application/x-ndjson, application/json;q=0.8'
         },
         signal
-      }
-      const res = await this.#makeRequest(url.toString(), getOptions)
+      })
 
       if (!res.ok) {
         // Per IPIP-0513: Handle 404 as empty results (not an error)
@@ -194,8 +178,8 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
     }
   }
 
-  async * getPeers (peerId: PeerId, options: GetPeersOptions = {}): AsyncGenerator<PeerRecord> {
-    this.log('getPeers starts: %c', peerId)
+  async * getPeers (cid: CID, options: GetPeersOptions = {}): AsyncGenerator<PeerRecord> {
+    this.log('getPeers starts: %c', cid)
 
     const timeoutSignal = AbortSignal.timeout(this.timeout)
     const signal = anySignal([this.shutDownController.signal, timeoutSignal, options.signal])
@@ -212,11 +196,15 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
       await onStart.promise
 
       // https://specs.ipfs.tech/routing/http-routing-v1/
-      const url = new URL(`${this.url}routing/v1/peers/${peerId.toCID().toString()}`)
+      const url = new URL(`${this.url}routing/v1/peers/${cid}`)
       this.#addFilterParams(url, options.filterAddrs, options.filterProtocols)
 
-      const getOptions = { headers: { Accept: 'application/x-ndjson' }, signal }
-      const res = await this.#makeRequest(url.toString(), getOptions)
+      const res = await this.#makeRequest(url.toString(), {
+        headers: {
+          Accept: 'application/x-ndjson'
+        },
+        signal
+      })
 
       // Per IPIP-0513: Handle 404 as empty results (not an error)
       // Old servers return 404, new servers return 200 with empty array
@@ -260,19 +248,17 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
     } finally {
       signal.clear()
       onFinish.resolve()
-      this.log('getPeers finished: %c', peerId)
+      this.log('getPeers finished: %c', cid)
     }
   }
 
-  async * getClosestPeers (key: CID | PeerId, options: GetClosestPeersOptions = {}): AsyncGenerator<PeerRecord> {
+  async * getClosestPeers (key: CID, options: GetClosestPeersOptions = {}): AsyncGenerator<PeerRecord> {
     let target: string
 
-    if (isPeerId(key)) {
-      target = key.toCID().toString()
-    } else if (CID.asCID(key) === key || key instanceof CID) {
+    if (CID.asCID(key) === key || key instanceof CID) {
       target = key.toV1().toString()
     } else {
-      throw new InvalidParametersError('Key must be CID or PeerId')
+      throw new InvalidParametersError('Key must be CID')
     }
 
     this.log('getClosestPeers starts: %s', target)
@@ -295,8 +281,12 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
       const url = new URL(`${this.url}routing/v1/dht/closest/peers/${target}`)
       this.#addFilterParams(url, options.filterAddrs, options.filterProtocols)
 
-      const getOptions = { headers: { Accept: 'application/x-ndjson' }, signal }
-      const res = await this.#makeRequest(url.toString(), getOptions)
+      const res = await this.#makeRequest(url.toString(), {
+        headers: {
+          Accept: 'application/x-ndjson'
+        },
+        signal
+      })
 
       // Per IPIP-0513: Handle 404 as empty results (not an error)
       // Old servers return 404, new servers return 200 with empty array
@@ -344,8 +334,8 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
     }
   }
 
-  async getIPNS (libp2pKey: CID<unknown, 0x72, 0x00 | 0x12, 1>, options: GetIPNSOptions = {}): Promise<IPNSRecord> {
-    this.log('getIPNS starts: %s', libp2pKey)
+  async getIPNS (cid: CID, options: GetIPNSOptions = {}): Promise<Uint8Array<ArrayBuffer>> {
+    this.log('getIPNS starts: %c', cid)
 
     const timeoutSignal = AbortSignal.timeout(this.timeout)
     const signal = anySignal([this.shutDownController.signal, timeoutSignal, options.signal])
@@ -359,13 +349,17 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
     })
 
     // https://specs.ipfs.tech/routing/http-routing-v1/
-    const resource = `${this.url}routing/v1/ipns/${libp2pKey}`
+    const resource = `${this.url}routing/v1/ipns/${cid}`
 
     try {
       await onStart.promise
 
-      const getOptions = { headers: { Accept: 'application/vnd.ipfs.ipns-record' }, signal }
-      const res = await this.#makeRequest(resource, getOptions)
+      const res = await this.#makeRequest(resource, {
+        headers: {
+          Accept: 'application/vnd.ipfs.ipns-record'
+        },
+        signal
+      })
 
       this.log('getIPNS GET %s %d', resource, res.status)
 
@@ -398,13 +392,8 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
       }
 
       const buf = await res.arrayBuffer()
-      const body = new Uint8Array(buf, 0, buf.byteLength)
 
-      if (options.validate !== false) {
-        await ipnsValidator(multihashToIPNSRoutingKey(libp2pKey.multihash), body)
-      }
-
-      return unmarshalIPNSRecord(body)
+      return new Uint8Array(buf, 0, buf.byteLength)
     } catch (err: any) {
       this.log.error('getIPNS GET %s error - %e', resource, err)
 
@@ -412,11 +401,11 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
     } finally {
       signal.clear()
       onFinish.resolve()
-      this.log('getIPNS finished: %s', libp2pKey)
+      this.log('getIPNS finished: %c', cid)
     }
   }
 
-  async putIPNS (libp2pKey: CID<unknown, 0x72, 0x00 | 0x12, 1>, record: IPNSRecord, options: AbortOptions = {}): Promise<void> {
+  async putIPNS (libp2pKey: CID, record: Uint8Array, options: AbortOptions = {}): Promise<void> {
     this.log('putIPNS starts: %c', libp2pKey)
 
     const timeoutSignal = AbortSignal.timeout(this.timeout)
@@ -436,10 +425,14 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
     try {
       await onStart.promise
 
-      const body = marshalIPNSRecord(record)
-
-      const getOptions = { method: 'PUT', headers: { 'Content-Type': 'application/vnd.ipfs.ipns-record' }, body, signal }
-      const res = await this.#makeRequest(resource, getOptions)
+      const res = await this.#makeRequest(resource, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/vnd.ipfs.ipns-record'
+        },
+        body: withArrayBuffer(record),
+        signal
+      })
 
       this.log('putIPNS PUT %s %d', resource, res.status)
 

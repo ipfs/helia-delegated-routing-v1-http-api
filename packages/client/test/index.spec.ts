@@ -1,16 +1,16 @@
 import { generateKeyPair } from '@libp2p/crypto/keys'
 import { start, stop } from '@libp2p/interface'
 import { defaultLogger } from '@libp2p/logger'
-import { peerIdFromPrivateKey, peerIdFromString, peerIdFromCID } from '@libp2p/peer-id'
+import { peerIdFromPrivateKey, peerIdFromString } from '@libp2p/peer-id'
 import { multiaddr } from '@multiformats/multiaddr'
 import { expect } from 'aegir/chai'
 import { createIPNSRecord, marshalIPNSRecord } from 'ipns'
 import all from 'it-all'
 import { CID } from 'multiformats/cid'
 import { isBrowser } from 'wherearewe'
-import { delegatedRoutingV1HttpApiClient } from '../src/index.js'
-import { itBrowser } from './fixtures/it.js'
-import type { DelegatedRoutingV1HttpApiClient } from '../src/index.js'
+import { delegatedRoutingV1HttpApiClient } from '../src/index.ts'
+import { itBrowser } from './fixtures/it.ts'
+import type { DelegatedRoutingV1HttpApiClient } from '../src/index.ts'
 
 // Special test CIDs generated with: echo -n "<purpose>" | ipfs add --cid-version 1 -n -Q
 const TEST_CIDS = {
@@ -337,18 +337,16 @@ describe('delegated-routing-v1-http-api-client', () => {
   it('should return empty array when server returns 404 for peers (old server behavior)', async () => {
     // Test backward compatibility with old servers that return 404
     const peerCid = CID.parse(TEST_CIDS.PEERS_404)
-    const testPeerId = peerIdFromCID(peerCid)
 
-    const peers = await all(client.getPeers(testPeerId))
+    const peers = await all(client.getPeers(peerCid))
     expect(peers).to.be.empty()
   })
 
   it('should handle null Peers field in JSON response', async () => {
     // Some servers might return { Peers: null } instead of empty array
     const peerCid = CID.parse(TEST_CIDS.PEERS_NULL)
-    const testPeerId = peerIdFromCID(peerCid)
 
-    const peers = await all(client.getPeers(testPeerId))
+    const peers = await all(client.getPeers(peerCid))
     expect(peers).to.be.empty()
   })
 
@@ -421,7 +419,7 @@ describe('delegated-routing-v1-http-api-client', () => {
       body: records.map(prov => JSON.stringify(prov)).join('\n')
     })
 
-    const peerRecords = await all(client.getPeers(peerIdFromPrivateKey(privateKey)))
+    const peerRecords = await all(client.getPeers(peerIdFromPrivateKey(privateKey).toCID()))
     expect(peerRecords.map(peerRecord => ({
       ...peerRecord,
       ID: peerRecord.ID.toString(),
@@ -444,29 +442,12 @@ describe('delegated-routing-v1-http-api-client', () => {
       headers: {
         'Content-Type': 'application/vnd.ipfs.ipns-record'
       },
+      // @ts-expect-error ipns needs a multiformats upgrade
       body: marshalIPNSRecord(record)
     })
 
     const ipnsRecord = await client.getIPNS(privateKey.publicKey.toCID())
-    expect(marshalIPNSRecord(ipnsRecord)).to.equalBytes(marshalIPNSRecord(record))
-  })
-
-  it('get ipns record fails with bad record', async () => {
-    const cid = CID.parse('QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn')
-    const privateKey = await generateKeyPair('Ed25519')
-    const otherPrivateKey = await generateKeyPair('Ed25519')
-    const record = await createIPNSRecord(otherPrivateKey, cid, 0, 1000)
-
-    // load record for the router to fetch
-    await fetch(`${process.env.ECHO_SERVER}/add-ipns/${privateKey.publicKey.toCID()}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/vnd.ipfs.ipns-record'
-      },
-      body: marshalIPNSRecord(record)
-    })
-
-    await expect(client.getIPNS(privateKey.publicKey.toCID())).to.be.rejected()
+    expect(ipnsRecord).to.equalBytes(marshalIPNSRecord(record))
   })
 
   it('should throw NotFoundError when IPNS record not found', async () => {
@@ -509,8 +490,9 @@ describe('delegated-routing-v1-http-api-client', () => {
     const cid = CID.parse('QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn')
     const privateKey = await generateKeyPair('Ed25519')
     const record = await createIPNSRecord(privateKey, cid, 0, 1000)
+    const body = marshalIPNSRecord(record)
 
-    await client.putIPNS(privateKey.publicKey.toCID(), record)
+    await client.putIPNS(privateKey.publicKey.toCID(), body)
 
     // load record that our client just PUT to remote server
     const res = await fetch(`${process.env.ECHO_SERVER}/get-ipns/${privateKey.publicKey.toCID()}`, {
@@ -521,7 +503,7 @@ describe('delegated-routing-v1-http-api-client', () => {
     })
 
     const receivedRecord = new Uint8Array(await res.arrayBuffer())
-    expect(marshalIPNSRecord(record)).to.equalBytes(receivedRecord)
+    expect(body).to.equalBytes(receivedRecord)
   })
 
   it('should deduplicate concurrent requests to the same URL', async () => {

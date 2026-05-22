@@ -36,7 +36,7 @@
     "docs:no-publish": "aegir docs --publish false"
   },
   "devDependencies": {
-    "aegir": "^47.0.10",
+    "aegir": "^48.0.4",
     "npm-run-all": "^4.1.5",
     "patch-package": "^8.0.0",
     "rimraf": "^6.0.1"
@@ -44,5 +44,8 @@
   "type": "module",
   "workspaces": [
     "packages/*"
-  ]
+  ],
+  "overrides": {
+    "multiformats": "^14.0.0"
+  }
 }
