@@ -1,3 +1,13 @@
+## [@helia/delegated-routing-v1-http-api-client-v7.0.0](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-6.0.1...@helia/delegated-routing-v1-http-api-client-7.0.0) (2026-05-22)
+
+### ⚠ BREAKING CHANGES
+
+* IPNS records are now accepted/returned in their serialized form
+
+### Bug Fixes
+
+* remove ipns dependency, upgrade multiformats ([#195](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues/195)) ([ea2570e](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/ea2570ea9617f3727157d1d4a528b486dfc738f3))
+
 ## [@helia/delegated-routing-v1-http-api-client-v6.0.1](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-6.0.0...@helia/delegated-routing-v1-http-api-client-6.0.1) (2026-01-16)
 
 ### Bug Fixes
