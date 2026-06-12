@@ -1,4 +1,5 @@
 import { contentRoutingSymbol, NotFoundError, peerRoutingSymbol } from '@libp2p/interface'
+import { peerIdFromCID } from '@libp2p/peer-id'
 import first from 'it-first'
 import map from 'it-map'
 import { digest } from 'multiformats'
@@ -43,7 +44,7 @@ export class DelegatedRoutingV1HttpApiClientContentRouting implements ContentRou
     try {
       yield * map(this.client.getProviders(cid, options), (record) => {
         return {
-          id: record.ID,
+          id: peerIdFromCID(record.ID),
           multiaddrs: record.Addrs ?? [],
           routing: 'delegated-http-routing-v1'
         }
@@ -131,7 +132,7 @@ export class DelegatedRoutingV1HttpApiClientPeerRouting implements PeerRouting, 
 
     if (peer != null) {
       return {
-        id: peer.ID,
+        id: peerIdFromCID(peer.ID),
         multiaddrs: peer.Addrs ?? []
       }
     }
@@ -154,7 +155,7 @@ export class DelegatedRoutingV1HttpApiClientPeerRouting implements PeerRouting, 
 
     for await (const peer of this.client.getClosestPeers(cid, options)) {
       yield {
-        id: peer.ID,
+        id: peerIdFromCID(peer.ID),
         multiaddrs: peer.Addrs ?? []
       }
     }

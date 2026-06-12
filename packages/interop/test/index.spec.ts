@@ -70,7 +70,7 @@ describe('delegated-routing-v1-http-api interop', () => {
 
     for await (const prov of client.getProviders(cid)) {
       // should be a node in this test network
-      if (network.map(node => node.libp2p.peerId.toString()).includes(prov.ID.toString())) {
+      if (network.map(node => node.libp2p.peerId.toCID().equals(prov.ID))) {
         foundProvider = true
         break
       }
@@ -86,10 +86,10 @@ describe('delegated-routing-v1-http-api interop', () => {
       throw new Error('PeerInfo not found')
     }
 
-    expect(result.ID.toString()).to.equal(network[2].libp2p.peerId.toString())
+    expect(result.ID).to.deep.equal(network[2].libp2p.peerId.toCID())
   })
 
-  it.skip('should get an IPNS record', async () => {
+  it('should get an IPNS record', async () => {
     // publish a record using a remote host
     const i = ipns(network[5])
     const cid = CID.parse('bafybeiczsscdsbs7ffqz55asqdf3smv6klcw3gofszvwlyarci47bgf354')
@@ -101,7 +101,7 @@ describe('delegated-routing-v1-http-api interop', () => {
     expect(record.value).to.equal(`/ipfs/${cid}`)
   })
 
-  it.skip('should put an IPNS record', async () => {
+  it('should put an IPNS record', async () => {
     // publish a record using the client
     const cid = CID.parse('bafybeiczsscdsbs7ffqz55asqdf3smv6klcw3gofszvwlyarci47bgf354')
     const privateKey = await generateKeyPair('Ed25519')
