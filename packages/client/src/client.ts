@@ -1,17 +1,20 @@
 import { InvalidParametersError, NotFoundError, setMaxListeners } from '@libp2p/interface'
-import { peerIdFromString } from '@libp2p/peer-id'
 import { multiaddr } from '@multiformats/multiaddr'
 import { anySignal } from 'any-signal'
 import toIt from 'browser-readablestream-to-it'
 import { parse as ndjson } from 'it-ndjson'
+import { base58btc } from 'multiformats/bases/base58'
 import { CID } from 'multiformats/cid'
+import * as Digest from 'multiformats/hashes/digest'
 import defer from 'p-defer'
 import PQueue from 'p-queue'
 import { withArrayBuffer } from 'uint8arrays/with-array-buffer'
+import { CODE_LIBP2P_KEY } from './constants.ts'
 import { BadResponseError, InvalidRequestError } from './errors.ts'
 import type { DelegatedRoutingV1HttpApiClient as DelegatedRoutingV1HttpApiClientInterface, DelegatedRoutingV1HttpApiClientInit, GetProvidersOptions, GetPeersOptions, GetIPNSOptions, PeerRecord, DelegatedRoutingV1HttpApiClientComponents, GetClosestPeersOptions } from './index.ts'
 import type { AbortOptions, Logger } from '@libp2p/interface'
 import type { Multiaddr } from '@multiformats/multiaddr'
+import type { MultihashDigest } from 'multiformats/cid'
 
 const defaultValues = {
   concurrentRequests: 4,
@@ -467,7 +470,7 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
       return {
         ...record,
         Schema: 'peer',
-        ID: peerIdFromString(record.ID),
+        ID: CID.createV1(CODE_LIBP2P_KEY, parseMultihash(record.ID)),
         Addrs: multiaddrs,
         Protocols: protocols
       }
@@ -585,4 +588,10 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
       this.log('%s: %s', key, value)
     }
   }
+}
+
+function parseMultihash (str: string): MultihashDigest {
+  const buf = base58btc.baseDecode(str)
+
+  return Digest.decode(buf)
 }
