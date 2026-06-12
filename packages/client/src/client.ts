@@ -7,7 +7,6 @@ import { parse as ndjson } from 'it-ndjson'
 import { base58btc } from 'multiformats/bases/base58'
 import { CID } from 'multiformats/cid'
 import * as Digest from 'multiformats/hashes/digest'
-import defer from 'p-defer'
 import { withArrayBuffer } from 'uint8arrays/with-array-buffer'
 import { CODE_LIBP2P_KEY } from './constants.ts'
 import { BadResponseError, InvalidRequestError } from './errors.ts'
@@ -94,8 +93,8 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
     const timeoutSignal = AbortSignal.timeout(this.timeout)
     const signal = anySignal([this.shutDownController.signal, timeoutSignal, options.signal])
     setMaxListeners(Infinity, timeoutSignal, signal)
-    const onStart = defer()
-    const onFinish = defer()
+    const onStart = Promise.withResolvers<void>()
+    const onFinish = Promise.withResolvers<void>()
     let found = 0
 
     void this.httpQueue.add(async () => {
@@ -187,8 +186,8 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
     const timeoutSignal = AbortSignal.timeout(this.timeout)
     const signal = anySignal([this.shutDownController.signal, timeoutSignal, options.signal])
     setMaxListeners(Infinity, timeoutSignal, signal)
-    const onStart = defer()
-    const onFinish = defer()
+    const onStart = Promise.withResolvers<void>()
+    const onFinish = Promise.withResolvers<void>()
 
     void this.httpQueue.add(async () => {
       onStart.resolve()
@@ -269,8 +268,8 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
     const timeoutSignal = AbortSignal.timeout(this.timeout)
     const signal = anySignal([this.shutDownController.signal, timeoutSignal, options.signal])
     setMaxListeners(Infinity, timeoutSignal, signal)
-    const onStart = defer()
-    const onFinish = defer()
+    const onStart = Promise.withResolvers<void>()
+    const onFinish = Promise.withResolvers<void>()
 
     void this.httpQueue.add(async () => {
       onStart.resolve()
@@ -343,8 +342,8 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
     const timeoutSignal = AbortSignal.timeout(this.timeout)
     const signal = anySignal([this.shutDownController.signal, timeoutSignal, options.signal])
     setMaxListeners(Infinity, timeoutSignal, signal)
-    const onStart = defer()
-    const onFinish = defer()
+    const onStart = Promise.withResolvers<void>()
+    const onFinish = Promise.withResolvers<void>()
 
     void this.httpQueue.add(async () => {
       onStart.resolve()
@@ -414,8 +413,8 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
     const timeoutSignal = AbortSignal.timeout(this.timeout)
     const signal = anySignal([this.shutDownController.signal, timeoutSignal, options.signal])
     setMaxListeners(Infinity, timeoutSignal, signal)
-    const onStart = defer()
-    const onFinish = defer()
+    const onStart = Promise.withResolvers<void>()
+    const onFinish = Promise.withResolvers<void>()
 
     void this.httpQueue.add(async () => {
       onStart.resolve()
