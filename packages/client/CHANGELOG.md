@@ -1,3 +1,9 @@
+## [@helia/delegated-routing-v1-http-api-client-v8.0.1](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-8.0.0...@helia/delegated-routing-v1-http-api-client-8.0.1) (2026-06-12)
+
+### Bug Fixes
+
+* use Queue from @libp2p/utils ([#201](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues/201)) ([8e6524c](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/8e6524ca928babfde194a58e474864f01df470a7))
+
 ## [@helia/delegated-routing-v1-http-api-client-v8.0.0](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-7.0.1...@helia/delegated-routing-v1-http-api-client-8.0.0) (2026-06-12)
 
 ### ⚠ BREAKING CHANGES
