@@ -100,7 +100,7 @@
 
 import { DelegatedRoutingV1HttpApiClient as DelegatedRoutingV1HttpApiClientClass } from './client.ts'
 import { DelegatedRoutingV1HttpApiClientContentRouting, DelegatedRoutingV1HttpApiClientPeerRouting } from './routings.ts'
-import type { AbortOptions, ComponentLogger, ContentRouting, PeerId, PeerRouting } from '@libp2p/interface'
+import type { AbortOptions, ComponentLogger, ContentRouting, PeerRouting } from '@libp2p/interface'
 import type { Multiaddr } from '@multiformats/multiaddr'
 import type { CID } from 'multiformats/cid'
 
@@ -117,7 +117,7 @@ import type { CID } from 'multiformats/cid'
  */
 export interface PeerRecord {
   Schema: 'peer'
-  ID: PeerId
+  ID: CID
   Addrs: Multiaddr[]
   Protocols: string[]
 }

@@ -1,7 +1,7 @@
 import { generateKeyPair } from '@libp2p/crypto/keys'
 import { start, stop } from '@libp2p/interface'
 import { defaultLogger } from '@libp2p/logger'
-import { peerIdFromPrivateKey, peerIdFromString } from '@libp2p/peer-id'
+import { peerIdFromCID, peerIdFromPrivateKey, peerIdFromString } from '@libp2p/peer-id'
 import { multiaddr } from '@multiformats/multiaddr'
 import { expect } from 'aegir/chai'
 import { createIPNSRecord, marshalIPNSRecord } from 'ipns'
@@ -90,7 +90,7 @@ describe('delegated-routing-v1-http-api-client', () => {
 
     const provs = await all(client.getProviders(cid))
     expect(provs.map(prov => ({
-      id: prov.ID.toString(),
+      id: peerIdFromCID(prov.ID).toString(),
       addrs: prov.Addrs?.map(ma => ma.toString())
     }))).to.deep.equal(providers.map(prov => ({
       id: prov.ID,
@@ -215,7 +215,7 @@ describe('delegated-routing-v1-http-api-client', () => {
       const provs = await all(client.getProviders(cid))
 
       expect(provs).to.have.lengthOf(1, `Failed for Content-Type: ${contentType}`)
-      expect(provs[0].ID.toString()).to.equal(providers[0].ID)
+      expect(peerIdFromCID(provs[0].ID).toString()).to.equal(providers[0].ID)
       expect(provs[0].Addrs[0].toString()).to.equal(providers[0].Addrs[0])
     }
   })
@@ -422,7 +422,7 @@ describe('delegated-routing-v1-http-api-client', () => {
     const peerRecords = await all(client.getPeers(peerIdFromPrivateKey(privateKey).toCID()))
     expect(peerRecords.map(peerRecord => ({
       ...peerRecord,
-      ID: peerRecord.ID.toString(),
+      ID: peerIdFromCID(peerRecord.ID).toString(),
       Addrs: peerRecord.Addrs?.map(ma => ma.toString()) ?? []
     }))).to.deep.equal(peers.map(peerRecord => ({
       ...peerRecord,
@@ -545,7 +545,7 @@ describe('delegated-routing-v1-http-api-client', () => {
     // Verify all results are the same
     results.forEach(resultProviders => {
       expect(resultProviders.map(prov => ({
-        id: prov.ID.toString(),
+        id: peerIdFromCID(prov.ID).toString(),
         addrs: prov.Addrs?.map(ma => ma.toString())
       }))).to.deep.equal(providers.map(prov => ({
         id: prov.ID,
