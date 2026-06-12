@@ -6,7 +6,7 @@ import toIt from 'browser-readablestream-to-it'
 import { parse as ndjson } from 'it-ndjson'
 import { CID } from 'multiformats/cid'
 import defer from 'p-defer'
-import PQueue from 'p-queue'
+import { Queue } from '@libp2p/utils'
 import { withArrayBuffer } from 'uint8arrays/with-array-buffer'
 import { BadResponseError, InvalidRequestError } from './errors.ts'
 import type { DelegatedRoutingV1HttpApiClient as DelegatedRoutingV1HttpApiClientInterface, DelegatedRoutingV1HttpApiClientInit, GetProvidersOptions, GetPeersOptions, GetIPNSOptions, PeerRecord, DelegatedRoutingV1HttpApiClientComponents, GetClosestPeersOptions } from './index.ts'
@@ -23,7 +23,7 @@ const defaultValues = {
 export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpApiClientInterface {
   public readonly url: URL
   private started: boolean
-  private readonly httpQueue: PQueue
+  private readonly httpQueue: Queue
   private readonly shutDownController: AbortController
   private readonly timeout: number
   private readonly filterAddrs?: string[]
@@ -42,7 +42,7 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
     this.started = false
     this.shutDownController = new AbortController()
     setMaxListeners(Infinity, this.shutDownController.signal)
-    this.httpQueue = new PQueue({
+    this.httpQueue = new Queue({
       concurrency: init.concurrentRequests ?? defaultValues.concurrentRequests
     })
     this.inFlightRequests = new Map() // Tracks in-flight requests to avoid duplicate requests
