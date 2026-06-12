@@ -1,3 +1,13 @@
+## [@helia/delegated-routing-v1-http-api-client-v8.0.0](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-7.0.1...@helia/delegated-routing-v1-http-api-client-8.0.0) (2026-06-12)
+
+### ⚠ BREAKING CHANGES
+
+* Providers and peer info now contains any PeerIds as CIDs with the libp2p-key codec
+
+### Bug Fixes
+
+* return PeerIds as CIDs ([#200](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues/200)) ([b97f76c](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/b97f76ce5e409eb0abd91ef587e3f1e2811dca2d))
+
 ## [@helia/delegated-routing-v1-http-api-client-v7.0.1](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-7.0.0...@helia/delegated-routing-v1-http-api-client-7.0.1) (2026-05-22)
 
 ### Bug Fixes
