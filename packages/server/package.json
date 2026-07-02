@@ -176,8 +176,5 @@
     "sinon": "^22.0.0",
     "sinon-ts": "^2.0.0",
     "uint8arrays": "^6.1.1"
-  },
-  "overrides": {
-    "multiformats": "^14.0.0"
   }
 }
