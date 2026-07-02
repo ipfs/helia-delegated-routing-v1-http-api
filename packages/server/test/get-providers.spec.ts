@@ -1,11 +1,9 @@
-import { generateKeyPair } from '@libp2p/crypto/keys'
-import { peerIdFromPrivateKey } from '@libp2p/peer-id'
+import { ed25519Crypto } from '@ipshipyard/crypto'
 import { multiaddr } from '@multiformats/multiaddr'
 import { expect } from 'aegir/chai'
 import { stubInterface } from 'sinon-ts'
 import { createDelegatedRoutingV1HttpApiServer } from '../src/index.ts'
-import type { Helia } from '@helia/interface'
-import type { Provider } from '@libp2p/interface'
+import type { Helia, Provider } from '@helia/interface'
 import type { FastifyInstance } from 'fastify'
 import type { StubbedInstance } from 'sinon-ts'
 
@@ -81,15 +79,18 @@ describe('get providers', () => {
   })
 
   it('GET providers returns providers', async () => {
+    const privateKey1 = await ed25519Crypto().generatePrivateKey()
     const provider1: Provider = {
-      id: peerIdFromPrivateKey(await generateKeyPair('Ed25519')),
+      id: privateKey1.publicKey.toCID(),
       multiaddrs: [
         multiaddr('/ip4/123.123.123.123/tcp/123')
       ],
       routing: 'test-routing'
     }
+
+    const privateKey2 = await ed25519Crypto().generatePrivateKey()
     const provider2: Provider = {
-      id: peerIdFromPrivateKey(await generateKeyPair('Ed25519')),
+      id: privateKey2.publicKey.toCID(),
       multiaddrs: [
         multiaddr('/ip4/123.123.123.123/tcp/123')
       ],
@@ -118,15 +119,18 @@ describe('get providers', () => {
   })
 
   it('GET providers returns provider stream', async () => {
+    const privateKey1 = await ed25519Crypto().generatePrivateKey()
     const provider1: Provider = {
-      id: peerIdFromPrivateKey(await generateKeyPair('Ed25519')),
+      id: privateKey1.publicKey.toCID(),
       multiaddrs: [
         multiaddr('/ip4/123.123.123.123/tcp/123')
       ],
       routing: 'test-routing'
     }
+
+    const privateKey2 = await ed25519Crypto().generatePrivateKey()
     const provider2: Provider = {
-      id: peerIdFromPrivateKey(await generateKeyPair('Ed25519')),
+      id: privateKey2.publicKey.toCID(),
       multiaddrs: [
         multiaddr('/ip4/123.123.123.123/tcp/123')
       ],

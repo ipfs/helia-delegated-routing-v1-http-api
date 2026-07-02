@@ -1,8 +1,8 @@
-import { generateKeyPair } from '@libp2p/crypto/keys'
-import { peerIdFromPrivateKey } from '@libp2p/peer-id'
+import { createIPNSRecord, IPNSEntry } from '@helia/ipns'
+import { ed25519Crypto } from '@ipshipyard/crypto'
 import { expect } from 'aegir/chai'
-import { createIPNSRecord, marshalIPNSRecord } from 'ipns'
 import { CID } from 'multiformats'
+import { base58btc } from 'multiformats/bases/base58'
 import { stubInterface } from 'sinon-ts'
 import { createDelegatedRoutingV1HttpApiServer } from '../src/index.ts'
 import type { Helia } from '@helia/interface'
@@ -38,7 +38,8 @@ describe('get IPNS', () => {
   })
 
   it('GET ipns returns 422 if peer id is not cid', async () => {
-    const res = await fetch(`${url}routing/v1/ipns/${peerIdFromPrivateKey(await generateKeyPair('Ed25519')).toString()}`, {
+    const privateKey = await ed25519Crypto().generatePrivateKey()
+    const res = await fetch(`${url}routing/v1/ipns/${base58btc.baseEncode(privateKey.publicKey.toMultihash().bytes)}`, {
       method: 'GET'
     })
 
@@ -54,16 +55,15 @@ describe('get IPNS', () => {
   })
 
   it('GET ipns returns record', async () => {
-    const privateKey = await generateKeyPair('Ed25519')
-    const peerId = peerIdFromPrivateKey(privateKey)
+    const privateKey = await ed25519Crypto().generatePrivateKey()
     const cid = CID.parse('bafkreifjjcie6lypi6ny7amxnfftagclbuxndqonfipmb64f2km2devei4')
-    const record = await createIPNSRecord(privateKey, cid, 0, 1000)
+    const record = await createIPNSRecord(privateKey, `/ipfs/${cid}`, 0, 1000)
 
     helia.routing.get = async function () {
-      return marshalIPNSRecord(record)
+      return IPNSEntry.encode(record)
     }
 
-    const res = await fetch(`${url}routing/v1/ipns/${peerId.toCID().toString()}`, {
+    const res = await fetch(`${url}routing/v1/ipns/${privateKey.publicKey.toCID()}`, {
       method: 'GET',
       headers: {
         accept: 'application/vnd.ipfs.ipns-record'
@@ -72,11 +72,11 @@ describe('get IPNS', () => {
 
     expect(res.status).to.equal(200)
     const arrayBuffer = await res.arrayBuffer()
-    expect(new Uint8Array(arrayBuffer)).to.equalBytes(marshalIPNSRecord(record))
+    expect(new Uint8Array(arrayBuffer)).to.equalBytes(IPNSEntry.encode(record))
   })
 
   it('GET ipns returns 200 with text/plain if record is not found', async () => {
-    const peerId = peerIdFromPrivateKey(await generateKeyPair('Ed25519'))
+    const privateKey = await ed25519Crypto().generatePrivateKey()
 
     helia.routing.get = async function () {
       const error = new Error('Not found')
@@ -85,7 +85,7 @@ describe('get IPNS', () => {
       throw error
     }
 
-    const res = await fetch(`${url}routing/v1/ipns/${peerId.toCID().toString()}`, {
+    const res = await fetch(`${url}routing/v1/ipns/${privateKey.publicKey.toCID()}`, {
       method: 'GET',
       headers: {
         accept: 'application/vnd.ipfs.ipns-record'

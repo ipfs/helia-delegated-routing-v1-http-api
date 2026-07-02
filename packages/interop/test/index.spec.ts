@@ -1,25 +1,26 @@
 import { delegatedRoutingV1HttpApiClient } from '@helia/delegated-routing-v1-http-api-client'
 import { createDelegatedRoutingV1HttpApiServer } from '@helia/delegated-routing-v1-http-api-server'
-import { ipns } from '@helia/ipns'
-import { generateKeyPair } from '@libp2p/crypto/keys'
+import { ipns, IPNSEntry } from '@helia/ipns'
+import { createIPNSRecord } from '@helia/ipns'
+import { ed25519Crypto } from '@ipshipyard/crypto'
 import { start, stop } from '@libp2p/interface'
 import { defaultLogger } from '@libp2p/logger'
 import { expect } from 'aegir/chai'
-import { createIPNSRecord, marshalIPNSRecord, unmarshalIPNSRecord } from 'ipns'
 import first from 'it-first'
+import last from 'it-last'
 import { CID } from 'multiformats/cid'
 import * as raw from 'multiformats/codecs/raw'
 import { sha256 } from 'multiformats/hashes/sha2'
+import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
 import { createHelia } from './fixtures/create-helia.ts'
 import type { DelegatedRoutingV1HttpApiClient } from '@helia/delegated-routing-v1-http-api-client'
-import type { Libp2p } from '@libp2p/interface'
+import type { HeliaWithLibp2p } from '@helia/libp2p'
 import type { KadDHT } from '@libp2p/kad-dht'
 import type { Keychain } from '@libp2p/keychain'
 import type { FastifyInstance } from 'fastify'
-import type { Helia } from 'helia'
 
 describe('delegated-routing-v1-http-api interop', () => {
-  let network: Array<Helia<Libp2p<{ dht: KadDHT, keychain: Keychain }>>>
+  let network: Array<HeliaWithLibp2p<{ dht: KadDHT, keychain: Keychain }>>
   let server: FastifyInstance
   let client: DelegatedRoutingV1HttpApiClient
 
@@ -70,13 +71,13 @@ describe('delegated-routing-v1-http-api interop', () => {
 
     for await (const prov of client.getProviders(cid)) {
       // should be a node in this test network
-      if (network.map(node => node.libp2p.peerId.toCID().equals(prov.ID))) {
+      if (network.some(node => node.libp2p.peerId.toCID().equals(prov.ID))) {
         foundProvider = true
         break
       }
     }
 
-    expect(foundProvider).to.be.true()
+    expect(foundProvider).to.be.true('did not find provider')
   })
 
   it('should find peer info', async () => {
@@ -97,22 +98,22 @@ describe('delegated-routing-v1-http-api interop', () => {
 
     // use client to resolve the published record
     const buf = await client.getIPNS(result.publicKey.toCID())
-    const record = unmarshalIPNSRecord(buf)
-    expect(record.value).to.equal(`/ipfs/${cid}`)
+    const record = IPNSEntry.decode(buf)
+    expect(record.value).to.equalBytes(uint8ArrayFromString(`/ipfs/${cid}`))
   })
 
   it('should put an IPNS record', async () => {
     // publish a record using the client
     const cid = CID.parse('bafybeiczsscdsbs7ffqz55asqdf3smv6klcw3gofszvwlyarci47bgf354')
-    const privateKey = await generateKeyPair('Ed25519')
-    const record = await createIPNSRecord(privateKey, cid, 0, 1000 * 60 * 60 * 24)
-    const buf = marshalIPNSRecord(record)
+    const privateKey = await ed25519Crypto().generatePrivateKey()
+    const record = await createIPNSRecord(privateKey, `/ipfs/${cid}`, 0, 1000 * 60 * 60 * 24)
+    const buf = IPNSEntry.encode(record)
 
     await client.putIPNS(privateKey.publicKey.toCID(), buf)
 
     // resolve the record using a remote host
     const i = ipns(network[8])
-    const result = await i.resolve(privateKey.publicKey.toCID())
-    expect(result.cid.toString()).to.equal(cid.toString())
+    const result = await last(i.resolve(privateKey.publicKey.toCID()))
+    expect(result?.value).to.equal(`/ipfs/${cid}`)
   })
 })
