@@ -74,7 +74,7 @@ describe('get peers', () => {
 
     const json = await res.json()
     expect(json).to.have.nested.property('Peers[0].Schema', 'peer')
-    expect(json).to.have.nested.property('Peers[0].ID', peer.id.toString())
+    expect(json).to.have.nested.property('Peers[0].ID', base58btc.baseEncode(peer.id.multihash.bytes))
     expect(json).to.have.deep.nested.property('Peers[0].Addrs', peer.multiaddrs.map(ma => ma.toString()))
   })
 
