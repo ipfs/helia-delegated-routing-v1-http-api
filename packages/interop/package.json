@@ -26,8 +26,9 @@
   "devDependencies": {
     "@helia/delegated-routing-v1-http-api-client": "^8.0.0",
     "@helia/delegated-routing-v1-http-api-server": "^6.0.0",
-    "@helia/ipns": "^9.2.1",
-    "@libp2p/crypto": "^5.1.18",
+    "@helia/ipns": "^10.0.0",
+    "@helia/libp2p": "^1.0.1",
+    "@ipshipyard/crypto": "^1.1.0",
     "@libp2p/identify": "^4.1.6",
     "@libp2p/interface": "^3.2.2",
     "@libp2p/kad-dht": "^16.3.0",
@@ -36,13 +37,12 @@
     "@libp2p/ping": "^3.1.5",
     "aegir": "^48.0.4",
     "fastify": "^5.8.5",
-    "helia": "^6.1.4",
+    "helia": "^7.0.0",
     "ipns": "^11.0.0",
     "it-first": "^3.0.11",
-    "multiformats": "^14.0.0"
+    "it-last": "^3.0.11",
+    "multiformats": "^14.0.0",
+    "uint8arrays": "^6.1.1"
   },
-  "private": true,
-  "overrides": {
-    "multiformats": "^14.0.0"
-  }
+  "private": true
 }

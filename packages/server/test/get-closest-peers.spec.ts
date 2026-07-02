@@ -1,3 +1,4 @@
+import { ed25519Crypto } from '@ipshipyard/crypto'
 import { generateKeyPair } from '@libp2p/crypto/keys'
 import { NotFoundError } from '@libp2p/interface'
 import { peerIdFromPrivateKey } from '@libp2p/peer-id'
@@ -6,7 +7,6 @@ import { expect } from 'aegir/chai'
 import { stubInterface } from 'sinon-ts'
 import { createDelegatedRoutingV1HttpApiServer } from '../src/index.ts'
 import type { Helia } from '@helia/interface'
-import type { PeerInfo } from '@libp2p/interface'
 import type { FastifyInstance } from 'fastify'
 import type { StubbedInstance } from 'sinon-ts'
 
@@ -47,8 +47,9 @@ describe('get closest peers', () => {
   })
 
   it('GET peers returns peer records for get peers', async () => {
-    const peer: PeerInfo = {
-      id: peerIdFromPrivateKey(await generateKeyPair('Ed25519')),
+    const privateKey = await ed25519Crypto().generatePrivateKey()
+    const peer = {
+      id: privateKey.publicKey.toCID(),
       multiaddrs: [
         multiaddr('/ip4/123.123.123.123/tcp/123')
       ]
@@ -58,7 +59,7 @@ describe('get closest peers', () => {
       yield peer
     }
 
-    const res = await fetch(`${url}routing/v1/dht/closest/peers/${peer.id.toCID().toString()}`, {
+    const res = await fetch(`${url}routing/v1/dht/closest/peers/${privateKey.publicKey.toCID()}`, {
       method: 'GET'
     })
     expect(res.status).to.equal(200)

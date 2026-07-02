@@ -1,10 +1,10 @@
 import { PassThrough } from 'node:stream'
 import { setMaxListeners } from '@libp2p/interface'
-import { peerIdFromCID } from '@libp2p/peer-id'
+import { base58btc } from 'multiformats/bases/base58'
 import { CID } from 'multiformats/cid'
+import { LIBP2P_KEY_CODEC } from '../../../../constants.ts'
 import { isNotFoundError } from '../errors.ts'
 import type { Helia } from '@helia/interface'
-import type { PeerId } from '@libp2p/interface'
 import type { FastifyInstance } from 'fastify'
 
 interface Params {
@@ -28,7 +28,7 @@ export default function getPeersV1 (fastify: FastifyInstance, helia: Helia): voi
       }
     },
     handler: async (request, reply) => {
-      let peerId: PeerId
+      let cid: CID
       const controller = new AbortController()
       setMaxListeners(Infinity, controller.signal)
 
@@ -38,20 +38,23 @@ export default function getPeersV1 (fastify: FastifyInstance, helia: Helia): voi
 
       try {
         const { peerId: cidStr } = request.params
-        const peerCid = CID.parse(cidStr)
-        peerId = peerIdFromCID(peerCid)
+        cid = CID.parse(cidStr)
+
+        if (cid.code !== LIBP2P_KEY_CODEC) {
+          throw new Error('CID had incorrect codec')
+        }
       } catch (err) {
         fastify.log.error({ err }, 'could not parse CID from params')
         return reply.code(422).type('text/html').send('Unprocessable Entity')
       }
 
       try {
-        const peerInfo = await helia.routing.findPeer(peerId, {
+        const peerInfo = await helia.routing.findPeer(cid, {
           signal: controller.signal
         })
         const peerRecord = {
           Schema: 'peer',
-          ID: peerInfo.id.toString(),
+          ID: base58btc.baseEncode(peerInfo.id.multihash.bytes),
           Addrs: peerInfo.multiaddrs.map(ma => ma.toString())
         }
 

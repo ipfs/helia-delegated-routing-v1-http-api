@@ -1,11 +1,10 @@
-import { generateKeyPair } from '@libp2p/crypto/keys'
-import { peerIdFromPrivateKey } from '@libp2p/peer-id'
+import { ed25519Crypto } from '@ipshipyard/crypto'
 import { multiaddr } from '@multiformats/multiaddr'
 import { expect } from 'aegir/chai'
+import { base58btc } from 'multiformats/bases/base58'
 import { stubInterface } from 'sinon-ts'
 import { createDelegatedRoutingV1HttpApiServer } from '../src/index.ts'
-import type { Helia } from '@helia/interface'
-import type { Provider } from '@libp2p/interface'
+import type { Helia, Provider } from '@helia/interface'
 import type { FastifyInstance } from 'fastify'
 import type { StubbedInstance } from 'sinon-ts'
 
@@ -81,15 +80,18 @@ describe('get providers', () => {
   })
 
   it('GET providers returns providers', async () => {
+    const privateKey1 = await ed25519Crypto().generatePrivateKey()
     const provider1: Provider = {
-      id: peerIdFromPrivateKey(await generateKeyPair('Ed25519')),
+      id: privateKey1.publicKey.toCID(),
       multiaddrs: [
         multiaddr('/ip4/123.123.123.123/tcp/123')
       ],
       routing: 'test-routing'
     }
+
+    const privateKey2 = await ed25519Crypto().generatePrivateKey()
     const provider2: Provider = {
-      id: peerIdFromPrivateKey(await generateKeyPair('Ed25519')),
+      id: privateKey2.publicKey.toCID(),
       multiaddrs: [
         multiaddr('/ip4/123.123.123.123/tcp/123')
       ],
@@ -110,23 +112,26 @@ describe('get providers', () => {
     const json = await res.json()
 
     expect(json).to.have.nested.property('Providers[0].Schema', 'peer')
-    expect(json).to.have.nested.property('Providers[0].ID', provider1.id.toString())
+    expect(json).to.have.nested.property('Providers[0].ID', base58btc.baseEncode(provider1.id.multihash.bytes))
     expect(json).to.have.deep.nested.property('Providers[0].Addrs', provider1.multiaddrs.map(ma => ma.toString()))
     expect(json).to.have.nested.property('Providers[1].Schema', 'peer')
-    expect(json).to.have.nested.property('Providers[1].ID', provider2.id.toString())
+    expect(json).to.have.nested.property('Providers[1].ID', base58btc.baseEncode(provider2.id.multihash.bytes))
     expect(json).to.have.deep.nested.property('Providers[1].Addrs', provider2.multiaddrs.map(ma => ma.toString()))
   })
 
   it('GET providers returns provider stream', async () => {
+    const privateKey1 = await ed25519Crypto().generatePrivateKey()
     const provider1: Provider = {
-      id: peerIdFromPrivateKey(await generateKeyPair('Ed25519')),
+      id: privateKey1.publicKey.toCID(),
       multiaddrs: [
         multiaddr('/ip4/123.123.123.123/tcp/123')
       ],
       routing: 'test-routing'
     }
+
+    const privateKey2 = await ed25519Crypto().generatePrivateKey()
     const provider2: Provider = {
-      id: peerIdFromPrivateKey(await generateKeyPair('Ed25519')),
+      id: privateKey2.publicKey.toCID(),
       multiaddrs: [
         multiaddr('/ip4/123.123.123.123/tcp/123')
       ],
@@ -153,10 +158,10 @@ describe('get providers', () => {
       .map(str => JSON.parse(str))
 
     expect(json).to.have.nested.property('[0].Schema', 'peer')
-    expect(json).to.have.nested.property('[0].ID', provider1.id.toString())
+    expect(json).to.have.nested.property('[0].ID', base58btc.baseEncode(provider1.id.multihash.bytes))
     expect(json).to.have.deep.nested.property('[0].Addrs', provider1.multiaddrs.map(ma => ma.toString()))
     expect(json).to.have.nested.property('[1].Schema', 'peer')
-    expect(json).to.have.nested.property('[1].ID', provider2.id.toString())
+    expect(json).to.have.nested.property('[1].ID', base58btc.baseEncode(provider2.id.multihash.bytes))
     expect(json).to.have.deep.nested.property('[1].Addrs', provider2.multiaddrs.map(ma => ma.toString()))
   })
 })

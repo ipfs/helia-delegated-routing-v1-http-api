@@ -1,7 +1,6 @@
-import { generateKeyPair } from '@libp2p/crypto/keys'
-import { peerIdFromPrivateKey } from '@libp2p/peer-id'
+import { createIPNSRecord, IPNSEntry, multihashToIPNSRoutingKey } from '@helia/ipns'
+import { ed25519Crypto } from '@ipshipyard/crypto'
 import { expect } from 'aegir/chai'
-import { createIPNSRecord, marshalIPNSRecord, multihashToIPNSRoutingKey } from 'ipns'
 import { CID } from 'multiformats'
 import { stubInterface } from 'sinon-ts'
 import { withArrayBuffer } from 'uint8arrays/with-array-buffer'
@@ -39,11 +38,10 @@ describe('put IPNS', () => {
   })
 
   it('PUT ipns puts record', async () => {
-    const privateKey = await generateKeyPair('Ed25519')
-    const peerId = peerIdFromPrivateKey(privateKey)
+    const privateKey = await ed25519Crypto().generatePrivateKey()
     const cid = CID.parse('bafkreifjjcie6lypi6ny7amxnfftagclbuxndqonfipmb64f2km2devei4')
-    const record = await createIPNSRecord(privateKey, cid, 0, 1000)
-    const marshalledRecord = marshalIPNSRecord(record)
+    const record = await createIPNSRecord(privateKey, `/ipfs/${cid}`, 0, 1000)
+    const marshalledRecord = IPNSEntry.encode(record)
 
     let putKey: Uint8Array = new Uint8Array()
     let putValue: Uint8Array = new Uint8Array()
@@ -53,7 +51,7 @@ describe('put IPNS', () => {
       putValue = value
     }
 
-    const res = await fetch(`${url}routing/v1/ipns/${peerId.toCID().toString()}`, {
+    const res = await fetch(`${url}routing/v1/ipns/${privateKey.publicKey.toCID()}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/vnd.ipfs.ipns-record'

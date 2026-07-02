@@ -1,5 +1,6 @@
 import { PassThrough } from 'node:stream'
 import { setMaxListeners } from '@libp2p/interface'
+import { base58btc } from 'multiformats/bases/base58'
 import { CID } from 'multiformats/cid'
 import type { Helia } from '@helia/interface'
 import type { AbortOptions } from '@libp2p/interface'
@@ -107,7 +108,7 @@ async function * streamingHandler (cid: CID, helia: Helia, options?: AbortOption
   for await (const prov of helia.routing.findProviders(cid, options)) {
     yield {
       Schema: 'peer',
-      ID: prov.id.toString(),
+      ID: base58btc.baseEncode(prov.id.multihash.bytes),
       Addrs: prov.multiaddrs.map(ma => ma.toString())
     }
 
@@ -126,7 +127,7 @@ async function nonStreamingHandler (cid: CID, helia: Helia, options?: AbortOptio
     for await (const prov of helia.routing.findProviders(cid, options)) {
       providers.push({
         Schema: 'peer',
-        ID: prov.id.toString(),
+        ID: base58btc.baseEncode(prov.id.multihash.bytes),
         Addrs: prov.multiaddrs.map(ma => ma.toString())
       })
 

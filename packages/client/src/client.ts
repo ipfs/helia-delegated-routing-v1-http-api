@@ -40,7 +40,7 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
    * Create a new DelegatedContentRouting instance
    */
   constructor (components: DelegatedRoutingV1HttpApiClientComponents, init: DelegatedRoutingV1HttpApiClientInit & { url: string | URL }) {
-    this.log = components.logger.forComponent('delegated-routing-v1-http-api-client')
+    this.log = components.logger.forComponent('helia:delegated-routing-v1-http-api-client')
     this.started = false
     this.shutDownController = new AbortController()
     setMaxListeners(Infinity, this.shutDownController.signal)

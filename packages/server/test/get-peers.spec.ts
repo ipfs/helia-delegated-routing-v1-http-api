@@ -1,11 +1,10 @@
-import { generateKeyPair } from '@libp2p/crypto/keys'
-import { peerIdFromPrivateKey } from '@libp2p/peer-id'
+import { ed25519Crypto } from '@ipshipyard/crypto'
 import { multiaddr } from '@multiformats/multiaddr'
 import { expect } from 'aegir/chai'
+import { base58btc } from 'multiformats/bases/base58'
 import { stubInterface } from 'sinon-ts'
 import { createDelegatedRoutingV1HttpApiServer } from '../src/index.ts'
 import type { Helia } from '@helia/interface'
-import type { PeerInfo } from '@libp2p/interface'
 import type { FastifyInstance } from 'fastify'
 import type { StubbedInstance } from 'sinon-ts'
 
@@ -38,7 +37,9 @@ describe('get peers', () => {
   })
 
   it('GET peers returns 422 if peer id is not cid', async () => {
-    const res = await fetch(`${url}routing/v1/peers/${peerIdFromPrivateKey(await generateKeyPair('Ed25519')).toString()}`, {
+    const privateKey = await ed25519Crypto().generatePrivateKey()
+
+    const res = await fetch(`${url}routing/v1/peers/${base58btc.baseEncode(privateKey.publicKey.toMultihash().bytes)}`, {
       method: 'GET'
     })
 
@@ -54,8 +55,9 @@ describe('get peers', () => {
   })
 
   it('GET peers returns peer records for get peers', async () => {
-    const peer: PeerInfo = {
-      id: peerIdFromPrivateKey(await generateKeyPair('Ed25519')),
+    const privateKey = await ed25519Crypto().generatePrivateKey()
+    const peer = {
+      id: privateKey.publicKey.toCID(),
       multiaddrs: [
         multiaddr('/ip4/123.123.123.123/tcp/123')
       ]
@@ -65,19 +67,19 @@ describe('get peers', () => {
       return peer
     }
 
-    const res = await fetch(`${url}routing/v1/peers/${peer.id.toCID().toString()}`, {
+    const res = await fetch(`${url}routing/v1/peers/${peer.id}`, {
       method: 'GET'
     })
     expect(res.status).to.equal(200)
 
     const json = await res.json()
     expect(json).to.have.nested.property('Peers[0].Schema', 'peer')
-    expect(json).to.have.nested.property('Peers[0].ID', peer.id.toString())
+    expect(json).to.have.nested.property('Peers[0].ID', base58btc.baseEncode(peer.id.multihash.bytes))
     expect(json).to.have.deep.nested.property('Peers[0].Addrs', peer.multiaddrs.map(ma => ma.toString()))
   })
 
   it('GET peers returns 200 with empty array if peer is not found', async () => {
-    const peerId = peerIdFromPrivateKey(await generateKeyPair('Ed25519'))
+    const privateKey = await ed25519Crypto().generatePrivateKey()
 
     helia.routing.findPeer = async function () {
       const error = new Error('Not found')
@@ -86,7 +88,7 @@ describe('get peers', () => {
       throw error
     }
 
-    const res = await fetch(`${url}routing/v1/peers/${peerId.toCID().toString()}`, {
+    const res = await fetch(`${url}routing/v1/peers/${privateKey.publicKey.toCID()}`, {
       method: 'GET'
     })
     expect(res.status).to.equal(200)
@@ -96,7 +98,7 @@ describe('get peers', () => {
   })
 
   it('GET peers returns 200 with empty NDJSON if peer is not found when streaming', async () => {
-    const peerId = peerIdFromPrivateKey(await generateKeyPair('Ed25519'))
+    const privateKey = await ed25519Crypto().generatePrivateKey()
 
     helia.routing.findPeer = async function () {
       const error = new Error('Not found')
@@ -105,7 +107,7 @@ describe('get peers', () => {
       throw error
     }
 
-    const res = await fetch(`${url}routing/v1/peers/${peerId.toCID().toString()}`, {
+    const res = await fetch(`${url}routing/v1/peers/${privateKey.publicKey.toCID()}`, {
       method: 'GET',
       headers: {
         accept: 'application/x-ndjson'
