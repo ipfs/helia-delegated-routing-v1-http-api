@@ -164,7 +164,7 @@
     "fastify": "^5.8.5",
     "ipns": "^11.0.0",
     "multiformats": "^14.0.0",
-    "raw-body": "^3.0.2"
+    "raw-body": "^4.0.0"
   },
   "devDependencies": {
     "@helia/ipns": "^10.0.2",
