@@ -1,3 +1,13 @@
+## [@helia/delegated-routing-v1-http-api-server-v7.0.1](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-server-7.0.0...@helia/delegated-routing-v1-http-api-server-7.0.1) (2026-07-31)
+
+### Trivial Changes
+
+* fix up build ([dc733f2](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/dc733f2f7bee14b19762caa5e69ee4d9da81c340))
+
+### Dependencies
+
+* bump raw-body from 3.0.2 to 4.0.0 ([#204](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues/204)) ([b518f46](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/b518f467daed6980c82d35dfb1c8f5dbcab3b6b0))
+
 ## [@helia/delegated-routing-v1-http-api-server-v7.0.0](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-server-6.0.1...@helia/delegated-routing-v1-http-api-server-7.0.0) (2026-07-02)
 
 ### ⚠ BREAKING CHANGES
