@@ -52,7 +52,8 @@ describe('get closest peers', () => {
       id: privateKey.publicKey.toCID(),
       multiaddrs: [
         multiaddr('/ip4/123.123.123.123/tcp/123')
-      ]
+      ],
+      router: 'test'
     }
 
     helia.routing.getClosestPeers = async function * () {

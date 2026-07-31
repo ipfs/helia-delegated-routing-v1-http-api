@@ -86,7 +86,8 @@ describe('get providers', () => {
       multiaddrs: [
         multiaddr('/ip4/123.123.123.123/tcp/123')
       ],
-      routing: 'test-routing'
+      router: 'test-routing',
+      fallback: false
     }
 
     const privateKey2 = await ed25519Crypto().generatePrivateKey()
@@ -95,7 +96,8 @@ describe('get providers', () => {
       multiaddrs: [
         multiaddr('/ip4/123.123.123.123/tcp/123')
       ],
-      routing: 'test-routing'
+      router: 'test-routing',
+      fallback: false
     }
 
     helia.routing.findProviders = async function * () {
@@ -126,7 +128,8 @@ describe('get providers', () => {
       multiaddrs: [
         multiaddr('/ip4/123.123.123.123/tcp/123')
       ],
-      routing: 'test-routing'
+      router: 'test-routing',
+      fallback: false
     }
 
     const privateKey2 = await ed25519Crypto().generatePrivateKey()
@@ -135,7 +138,8 @@ describe('get providers', () => {
       multiaddrs: [
         multiaddr('/ip4/123.123.123.123/tcp/123')
       ],
-      routing: 'test-routing'
+      router: 'test-routing',
+      fallback: false
     }
 
     helia.routing.findProviders = async function * () {
