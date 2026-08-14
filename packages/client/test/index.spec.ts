@@ -1,10 +1,10 @@
-import { generateKeyPair } from '@libp2p/crypto/keys'
+import { createIPNSRecord, IPNSEntry } from '@helia/ipns'
+import { ed25519Crypto } from '@ipshipyard/crypto'
 import { start, stop } from '@libp2p/interface'
 import { defaultLogger } from '@libp2p/logger'
-import { peerIdFromCID, peerIdFromPrivateKey, peerIdFromString } from '@libp2p/peer-id'
+import { peerIdFromCID, peerIdFromString } from '@libp2p/peer-id'
 import { multiaddr } from '@multiformats/multiaddr'
 import { expect } from 'aegir/chai'
-import { createIPNSRecord, marshalIPNSRecord } from 'ipns'
 import all from 'it-all'
 import { CID } from 'multiformats/cid'
 import { isBrowser } from 'wherearewe'
@@ -65,16 +65,16 @@ describe('delegated-routing-v1-http-api-client', () => {
       Protocol: 'transport-bitswap',
       Schema: 'bitswap',
       Metadata: 'gBI=',
-      ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
+      ID: (await ed25519Crypto().generatePrivateKey()).publicKey.toString(),
       Addrs: ['/ip4/41.41.41.41/tcp/1234']
     }, {
       Protocol: 'transport-bitswap',
       Schema: 'peer',
       Metadata: 'gBI=',
-      ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
+      ID: (await ed25519Crypto().generatePrivateKey()).publicKey.toString(),
       Addrs: ['/ip4/42.42.42.42/tcp/1234']
     }, {
-      ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
+      ID: (await ed25519Crypto().generatePrivateKey()).publicKey.toString(),
       Addrs: ['/ip4/43.43.43.43/tcp/1234']
     }]
 
@@ -188,7 +188,7 @@ describe('delegated-routing-v1-http-api-client', () => {
       Protocol: 'transport-bitswap',
       Schema: 'bitswap',
       Metadata: 'gBI=',
-      ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
+      ID: (await ed25519Crypto().generatePrivateKey()).publicKey.toString(),
       Addrs: ['/ip4/41.41.41.41/tcp/1234']
     }]
 
@@ -225,16 +225,16 @@ describe('delegated-routing-v1-http-api-client', () => {
       Protocol: 'transport-bitswap',
       Schema: 'bitswap',
       Metadata: 'gBI=',
-      ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
+      ID: (await ed25519Crypto().generatePrivateKey()).publicKey.toString(),
       Addrs: []
     }, {
       Protocol: 'transport-bitswap',
       Schema: 'peer',
       Metadata: 'gBI=',
-      ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
+      ID: (await ed25519Crypto().generatePrivateKey()).publicKey.toString(),
       Addrs: ['/ip4/42.42.42.42/tcp/1234']
     }, {
-      ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
+      ID: (await ed25519Crypto().generatePrivateKey()).publicKey.toString(),
       Addrs: []
     }]
 
@@ -351,7 +351,7 @@ describe('delegated-routing-v1-http-api-client', () => {
   })
 
   it('should conform records to peer schema', async () => {
-    const privateKey = await generateKeyPair('Ed25519')
+    const privateKey = await ed25519Crypto().generatePrivateKey()
 
     const records = [{
       Protocol: 'transport-bitswap',
@@ -375,11 +375,11 @@ describe('delegated-routing-v1-http-api-client', () => {
       Protocol: 'transport-bitswap',
       Schema: 'peer',
       Metadata: 'gBI=',
-      ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
+      ID: (await ed25519Crypto().generatePrivateKey()).publicKey.toString(),
       Addrs: ['/ip4/42.42.42.42/tcp/1234']
     }, {
       Schema: 'peer',
-      ID: (await generateKeyPair('Ed25519')).publicKey.toString()
+      ID: (await ed25519Crypto().generatePrivateKey()).publicKey.toString()
     }]
 
     const peers = [{
@@ -419,7 +419,7 @@ describe('delegated-routing-v1-http-api-client', () => {
       body: records.map(prov => JSON.stringify(prov)).join('\n')
     })
 
-    const peerRecords = await all(client.getPeers(peerIdFromPrivateKey(privateKey).toCID()))
+    const peerRecords = await all(client.getPeers(privateKey.publicKey.toCID()))
     expect(peerRecords.map(peerRecord => ({
       ...peerRecord,
       ID: peerIdFromCID(peerRecord.ID).toString(),
@@ -433,8 +433,8 @@ describe('delegated-routing-v1-http-api-client', () => {
 
   it('should get ipns record', async () => {
     const cid = CID.parse('QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn')
-    const privateKey = await generateKeyPair('Ed25519')
-    const record = await createIPNSRecord(privateKey, cid, 0, 1000)
+    const privateKey = await ed25519Crypto().generatePrivateKey()
+    const record = await createIPNSRecord(privateKey, `/ipfs/${cid}`, 0, 1000)
 
     // load record for the router to fetch
     await fetch(`${process.env.ECHO_SERVER}/add-ipns/${privateKey.publicKey.toCID()}`, {
@@ -442,16 +442,15 @@ describe('delegated-routing-v1-http-api-client', () => {
       headers: {
         'Content-Type': 'application/vnd.ipfs.ipns-record'
       },
-      // @ts-expect-error ipns needs a multiformats upgrade
-      body: marshalIPNSRecord(record)
+      body: IPNSEntry.encode(record)
     })
 
     const ipnsRecord = await client.getIPNS(privateKey.publicKey.toCID())
-    expect(ipnsRecord).to.equalBytes(marshalIPNSRecord(record))
+    expect(ipnsRecord).to.equalBytes(IPNSEntry.encode(record))
   })
 
   it('should throw NotFoundError when IPNS record not found', async () => {
-    const privateKey = await generateKeyPair('Ed25519')
+    const privateKey = await ed25519Crypto().generatePrivateKey()
 
     // Try to get a record that doesn't exist
     // The mock server will return 200 with text/plain "Record not found"
@@ -488,9 +487,9 @@ describe('delegated-routing-v1-http-api-client', () => {
 
   it('should put ipns', async () => {
     const cid = CID.parse('QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn')
-    const privateKey = await generateKeyPair('Ed25519')
-    const record = await createIPNSRecord(privateKey, cid, 0, 1000)
-    const body = marshalIPNSRecord(record)
+    const privateKey = await ed25519Crypto().generatePrivateKey()
+    const record = await createIPNSRecord(privateKey, `/ipfs/${cid}`, 0, 1000)
+    const body = IPNSEntry.encode(record)
 
     await client.putIPNS(privateKey.publicKey.toCID(), body)
 
@@ -512,7 +511,7 @@ describe('delegated-routing-v1-http-api-client', () => {
       Protocol: 'transport-bitswap',
       Schema: 'bitswap',
       Metadata: 'gBI=',
-      ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
+      ID: (await ed25519Crypto().generatePrivateKey()).publicKey.toString(),
       Addrs: ['/ip4/41.41.41.41/tcp/1234']
     }]
 
@@ -569,7 +568,7 @@ describe('delegated-routing-v1-http-api-client', () => {
       Protocol: 'transport-bitswap',
       Schema: 'bitswap',
       Metadata: 'gBI=',
-      ID: (await generateKeyPair('Ed25519')).publicKey.toString(),
+      ID: (await ed25519Crypto().generatePrivateKey()).publicKey.toString(),
       Addrs: ['/ip4/41.41.41.41/tcp/1234']
     }]
 

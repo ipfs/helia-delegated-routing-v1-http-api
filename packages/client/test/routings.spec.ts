@@ -1,9 +1,10 @@
+import { createIPNSRecord, IPNSEntry, multihashToIPNSRoutingKey } from '@helia/ipns'
+import { ed25519Crypto } from '@ipshipyard/crypto'
 import { generateKeyPair } from '@libp2p/crypto/keys'
 import { contentRoutingSymbol, peerRoutingSymbol, start, stop } from '@libp2p/interface'
 import { defaultLogger } from '@libp2p/logger'
 import { peerIdFromPrivateKey } from '@libp2p/peer-id'
 import { expect } from 'aegir/chai'
-import { createIPNSRecord, marshalIPNSRecord, multihashToIPNSRoutingKey } from 'ipns'
 import all from 'it-all'
 import { CID } from 'multiformats/cid'
 import { concat as uint8ArrayConcat } from 'uint8arrays/concat'
@@ -132,11 +133,11 @@ describe('libp2p content-routing', () => {
 
   it('should put ipns records', async () => {
     const cid = CID.parse('QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn')
-    const privateKey = await generateKeyPair('Ed25519')
-    const record = await createIPNSRecord(privateKey, cid, 0, 1000)
+    const privateKey = await ed25519Crypto().generatePrivateKey()
+    const record = await createIPNSRecord(privateKey, `/ipfs/${cid}`, 0, 1000)
     const key = multihashToIPNSRoutingKey(privateKey.publicKey.toMultihash())
 
-    await routing.put(key, marshalIPNSRecord(record))
+    await routing.put(key, IPNSEntry.encode(record))
 
     // load record that our client just PUT to remote server
     const res = await fetch(`${process.env.ECHO_SERVER}/get-ipns/${privateKey.publicKey.toCID()}`, {
@@ -147,7 +148,7 @@ describe('libp2p content-routing', () => {
     })
 
     const receivedRecord = new Uint8Array(await res.arrayBuffer())
-    expect(marshalIPNSRecord(record)).to.equalBytes(receivedRecord)
+    expect(IPNSEntry.encode(record)).to.equalBytes(receivedRecord)
   })
 
   it('should not put other records', async () => {
@@ -164,8 +165,8 @@ describe('libp2p content-routing', () => {
 
   it('should get ipns records', async () => {
     const cid = CID.parse('QmUNLLsPACCz1vLxQVkXqqLX5R1X345qqfHbsf67hvA3Nn')
-    const privateKey = await generateKeyPair('Ed25519')
-    const record = await createIPNSRecord(privateKey, cid, 0, 1000)
+    const privateKey = await ed25519Crypto().generatePrivateKey()
+    const record = await createIPNSRecord(privateKey, `/ipfs/${cid}`, 0, 1000)
 
     // load record for the router to fetch
     await fetch(`${process.env.ECHO_SERVER}/add-ipns/${privateKey.publicKey.toCID()}`, {
@@ -173,8 +174,7 @@ describe('libp2p content-routing', () => {
       headers: {
         'Content-Type': 'application/vnd.ipfs.ipns-record'
       },
-      // @ts-expect-error ipns needs a multiformats upgrade
-      body: marshalIPNSRecord(record)
+      body: IPNSEntry.encode(record)
     })
 
     const key = uint8ArrayConcat([
@@ -183,7 +183,7 @@ describe('libp2p content-routing', () => {
     ])
 
     const value = await routing.get(key)
-    expect(value).to.equalBytes(marshalIPNSRecord(record))
+    expect(value).to.equalBytes(IPNSEntry.encode(record))
   })
 
   it('should not get unknown records', async () => {

@@ -159,20 +159,22 @@
   "dependencies": {
     "@fastify/cors": "^11.2.0",
     "@helia/interface": "^7.0.0",
+    "@helia/ipns": "^10.0.8",
     "@libp2p/interface": "^3.2.2",
     "@libp2p/peer-id": "^6.0.9",
     "fastify": "^5.8.5",
-    "ipns": "^11.0.0",
     "multiformats": "^14.0.0",
     "raw-body": "^4.0.0"
   },
   "devDependencies": {
-    "@helia/ipns": "^10.0.2",
     "@ipshipyard/crypto": "^1.1.0",
+    "@ipshipyard/keychain": "^1.0.2",
     "@libp2p/crypto": "^5.1.18",
     "@multiformats/multiaddr": "^13.0.3",
     "@types/sinon": "^22.0.0",
+    "abort-error": "^1.0.2",
     "aegir": "^48.0.4",
+    "datastore-core": "^12.0.1",
     "sinon": "^22.0.0",
     "sinon-ts": "^2.0.0",
     "uint8arrays": "^6.1.1"
