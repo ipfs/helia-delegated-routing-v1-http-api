@@ -94,6 +94,7 @@ describe('delegated-routing-v1-http-api interop', () => {
     // publish a record using a remote host
     const i = ipns(network[5])
     const cid = CID.parse('bafybeiczsscdsbs7ffqz55asqdf3smv6klcw3gofszvwlyarci47bgf354')
+
     const result = await i.publish('key-name', cid)
 
     // use client to resolve the published record

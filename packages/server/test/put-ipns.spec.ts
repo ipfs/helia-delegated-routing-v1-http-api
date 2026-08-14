@@ -1,10 +1,13 @@
 import { createIPNSRecord, IPNSEntry, multihashToIPNSRoutingKey } from '@helia/ipns'
 import { ed25519Crypto } from '@ipshipyard/crypto'
+import { keychain } from '@ipshipyard/keychain'
 import { expect } from 'aegir/chai'
+import { MemoryDatastore } from 'datastore-core'
 import { CID } from 'multiformats'
 import { stubInterface } from 'sinon-ts'
 import { withArrayBuffer } from 'uint8arrays/with-array-buffer'
 import { createDelegatedRoutingV1HttpApiServer } from '../src/index.ts'
+import { getCrypto } from './fixtures/get-crypto.ts'
 import type { Helia } from '@helia/interface'
 import type { FastifyInstance } from 'fastify'
 import type { StubbedInstance } from 'sinon-ts'
@@ -15,7 +18,13 @@ describe('put IPNS', () => {
   let url: URL
 
   beforeEach(async () => {
-    helia = stubInterface<Helia>()
+    const datastore = new MemoryDatastore()
+    helia = stubInterface<Helia>({
+      keychain: keychain()({
+        datastore,
+        getCrypto
+      })
+    })
     server = await createDelegatedRoutingV1HttpApiServer(helia, {
       listen: {
         host: '127.0.0.1',

@@ -1,5 +1,5 @@
+import { multihashToIPNSRoutingKey } from '@helia/ipns'
 import { setMaxListeners } from '@libp2p/interface'
-import { multihashToIPNSRoutingKey } from 'ipns'
 import { CID } from 'multiformats/cid'
 import { hasCode } from 'multiformats/hashes/digest'
 import { LIBP2P_KEY_CODEC } from '../../../../constants.ts'

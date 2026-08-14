@@ -1,6 +1,6 @@
+import { multihashToIPNSRoutingKey } from '@helia/ipns'
+import { ipnsValidator } from '@helia/ipns'
 import { setMaxListeners } from '@libp2p/interface'
-import { multihashToIPNSRoutingKey } from 'ipns'
-import { ipnsValidator } from 'ipns/validator'
 import { CID } from 'multiformats/cid'
 import { hasCode } from 'multiformats/hashes/digest'
 import getRawBody from 'raw-body'
@@ -65,7 +65,10 @@ export default function putIpnsV1 (fastify: FastifyInstance, helia: Helia): void
       // @ts-expect-error request.body does not have a type
       const body: Uint8Array = request.body
       const routingKey = multihashToIPNSRoutingKey(cid.multihash)
-      await ipnsValidator(routingKey, body)
+
+      await ipnsValidator(routingKey, body, helia.keychain, {
+        signal: controller.signal
+      })
 
       await helia.routing.put(routingKey, body, {
         signal: controller.signal
