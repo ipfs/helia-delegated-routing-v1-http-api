@@ -7,6 +7,7 @@ import { parse as ndjson } from 'it-ndjson'
 import { base58btc } from 'multiformats/bases/base58'
 import { CID } from 'multiformats/cid'
 import * as Digest from 'multiformats/hashes/digest'
+import { raceSignal } from 'race-signal'
 import { withArrayBuffer } from 'uint8arrays/with-array-buffer'
 import { CODE_LIBP2P_KEY } from './constants.ts'
 import { BadResponseError, InvalidRequestError } from './errors.ts'
@@ -103,7 +104,7 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
     })
 
     try {
-      await onStart.promise
+      await raceSignal(onStart.promise, signal)
 
       // https://specs.ipfs.tech/routing/http-routing-v1/
       const url = new URL(`${this.url}routing/v1/providers/${cid}`)
@@ -151,7 +152,7 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
       }
 
       if (contentType.startsWith('application/json')) {
-        const body = await res.json()
+        const body = await raceSignal(res.json(), signal)
         // Handle null/undefined Providers from servers (both old and new may return empty arrays)
         const providers = body.Providers ?? []
 
@@ -163,6 +164,10 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
           }
         }
       } else if (contentType.includes('application/x-ndjson')) {
+        signal.addEventListener('abort', () => {
+          res?.body?.cancel()
+        })
+
         for await (const provider of ndjson(toIt(res.body))) {
           const record = this.#conformToPeerSchema(provider)
           if (record != null) {
@@ -195,7 +200,7 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
     })
 
     try {
-      await onStart.promise
+      await raceSignal(onStart.promise, signal)
 
       // https://specs.ipfs.tech/routing/http-routing-v1/
       const url = new URL(`${this.url}routing/v1/peers/${cid}`)
@@ -227,7 +232,7 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
 
       const contentType = res.headers.get('Content-Type')
       if (contentType?.startsWith('application/json')) {
-        const body = await res.json()
+        const body = await raceSignal(res.json(), signal)
         // Handle null/undefined Peers from servers (both old and new may return empty arrays)
         const peers = body.Peers ?? []
 
@@ -238,6 +243,10 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
           }
         }
       } else {
+        signal.addEventListener('abort', () => {
+          res.body?.cancel()
+        })
+
         for await (const peer of ndjson(toIt(res.body))) {
           const record = this.#conformToPeerSchema(peer)
           if (record != null) {
@@ -277,7 +286,7 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
     })
 
     try {
-      await onStart.promise
+      await raceSignal(onStart.promise, signal)
 
       // https://specs.ipfs.tech/routing/http-routing-v1/
       const url = new URL(`${this.url}routing/v1/dht/closest/peers/${target}`)
@@ -309,7 +318,7 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
 
       const contentType = res.headers.get('Content-Type')
       if (contentType?.startsWith('application/json')) {
-        const body = await res.json()
+        const body = await raceSignal(res.json(), signal)
         // Handle null/undefined Peers from servers (both old and new may return empty arrays)
         const peers = body.Peers ?? []
 
@@ -320,6 +329,10 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
           }
         }
       } else {
+        signal.addEventListener('abort', () => {
+          res.body?.cancel()
+        })
+
         for await (const peer of ndjson(toIt(res.body))) {
           const record = this.#conformToPeerSchema(peer)
           if (record != null) {
@@ -354,7 +367,7 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
     const resource = `${this.url}routing/v1/ipns/${cid}`
 
     try {
-      await onStart.promise
+      await raceSignal(onStart.promise, signal)
 
       const res = await this.#makeRequest(resource, {
         headers: {
@@ -393,7 +406,7 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
         throw new BadResponseError('GET ipns response had no body')
       }
 
-      const buf = await res.arrayBuffer()
+      const buf = await raceSignal(res.arrayBuffer(), signal)
 
       return new Uint8Array(buf, 0, buf.byteLength)
     } catch (err: any) {
@@ -425,7 +438,7 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
     const resource = `${this.url}routing/v1/ipns/${libp2pKey}`
 
     try {
-      await onStart.promise
+      await raceSignal(onStart.promise, signal)
 
       const res = await this.#makeRequest(resource, {
         method: 'PUT',
@@ -505,7 +518,7 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
 
     // Only try to use cache for GET requests
     if (requestMethod === 'GET') {
-      const cachedResponse = await this.cache?.match(url)
+      const cachedResponse = await raceSignal(this.cache?.match(url), options.signal)
 
       if (cachedResponse != null) {
         // Check if the cached response has expired
@@ -517,8 +530,9 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
           return cachedResponse
         } else {
           this.log('evicting cached response for %s', key)
+
           // Remove expired response from cache
-          await this.cache?.delete(url)
+          await raceSignal(this.cache?.delete(url), options.signal)
         }
       } else if (this.cache != null) {
         this.log('cache miss for %s', key)
@@ -528,7 +542,7 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
     // Check if there's already an in-flight request for this URL
     const existingRequest = this.inFlightRequests.get(key)
     if (existingRequest != null) {
-      const response = await existingRequest
+      const response = await raceSignal(existingRequest, options.signal)
       this.log('deduplicating outgoing request for %s', key)
       return response.clone()
     }
@@ -554,7 +568,7 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
           headers
         })
 
-        await this.cache.put(url, cachedResponse)
+        await raceSignal(this.cache.put(url, cachedResponse), options.signal)
       }
       return response
     }).finally(() => {
@@ -563,7 +577,7 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
     })
 
     this.inFlightRequests.set(key, requestPromise)
-    const response = await requestPromise
+    const response = await raceSignal(requestPromise, options.signal)
     return response
   }
 
