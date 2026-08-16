@@ -1,3 +1,9 @@
+## [@helia/delegated-routing-v1-http-api-client-v9.0.2](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-9.0.1...@helia/delegated-routing-v1-http-api-client-9.0.2) (2026-08-16)
+
+### Bug Fixes
+
+* abort in-flight requests ([#206](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues/206)) ([65e9ca5](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/65e9ca564b189d0c0fe53b83b8033935d0971550)), closes [#198](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues/198)
+
 ## [@helia/delegated-routing-v1-http-api-client-v9.0.1](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-client-9.0.0...@helia/delegated-routing-v1-http-api-client-9.0.1) (2026-08-16)
 
 ### Bug Fixes
