@@ -1,3 +1,9 @@
+## [@helia/delegated-routing-v1-http-api-server-v7.0.2](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-server-7.0.1...@helia/delegated-routing-v1-http-api-server-7.0.2) (2026-08-16)
+
+### Bug Fixes
+
+* remove legacy ipns module ([#205](https://github.com/ipfs/helia-delegated-routing-v1-http-api/issues/205)) ([82874ac](https://github.com/ipfs/helia-delegated-routing-v1-http-api/commit/82874aca195ee8ec2d17cdd1afb556f9987069e6))
+
 ## [@helia/delegated-routing-v1-http-api-server-v7.0.1](https://github.com/ipfs/helia-delegated-routing-v1-http-api/compare/@helia/delegated-routing-v1-http-api-server-7.0.0...@helia/delegated-routing-v1-http-api-server-7.0.1) (2026-07-31)
 
 ### Trivial Changes
