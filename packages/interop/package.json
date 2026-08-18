@@ -27,7 +27,7 @@
     "@helia/delegated-routing-v1-http-api-client": "^9.0.0",
     "@helia/delegated-routing-v1-http-api-server": "^7.0.0",
     "@helia/ipns": "^10.0.8",
-    "@helia/libp2p": "^1.0.1",
+    "@helia/libp2p": "^2.0.0",
     "@ipshipyard/crypto": "^1.1.0",
     "@libp2p/identify": "^4.1.6",
     "@libp2p/interface": "^3.2.2",
