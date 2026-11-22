@@ -164,11 +164,9 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
           }
         }
       } else if (contentType.includes('application/x-ndjson')) {
-        signal.addEventListener('abort', () => {
-          res?.body?.cancel()
-        })
-
         for await (const provider of ndjson(toIt(res.body))) {
+          signal.throwIfAborted()
+
           const record = this.#conformToPeerSchema(provider)
           if (record != null) {
             found++
@@ -243,11 +241,9 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
           }
         }
       } else {
-        signal.addEventListener('abort', () => {
-          res.body?.cancel()
-        })
-
         for await (const peer of ndjson(toIt(res.body))) {
+          signal.throwIfAborted()
+
           const record = this.#conformToPeerSchema(peer)
           if (record != null) {
             yield record
@@ -329,11 +325,9 @@ export class DelegatedRoutingV1HttpApiClient implements DelegatedRoutingV1HttpAp
           }
         }
       } else {
-        signal.addEventListener('abort', () => {
-          res.body?.cancel()
-        })
-
         for await (const peer of ndjson(toIt(res.body))) {
+          signal.throwIfAborted()
+
           const record = this.#conformToPeerSchema(peer)
           if (record != null) {
             yield record
