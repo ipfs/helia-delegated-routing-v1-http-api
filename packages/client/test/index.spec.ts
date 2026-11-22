@@ -7,7 +7,7 @@ import { multiaddr } from '@multiformats/multiaddr'
 import { expect } from 'aegir/chai'
 import all from 'it-all'
 import { CID } from 'multiformats/cid'
-import { isBrowser } from 'wherearewe'
+import { isBrowser, isNode } from 'wherearewe'
 import { delegatedRoutingV1HttpApiClient } from '../src/index.ts'
 import { itBrowser } from './fixtures/it.ts'
 import type { DelegatedRoutingV1HttpApiClient } from '../src/index.ts'
@@ -17,6 +17,7 @@ const TEST_CIDS = {
   // Providers endpoint test CIDs
   PROVIDERS_404: 'bafkreig3o4e7r4bpsc3hqirlzjeuie3w25tfjgmp6ufeaabwvuial3r4h4', // return404providers
   PROVIDERS_NULL: 'bafkreicyicgkpqid2qs3kfc277f4tsx5tew3e63fgv7fn6t74sicjkv76i', // returnnullproviders
+  PROVIDERS_SLOW: 'bafkreibqcwpgefttqr72saqufav6ajp6dggcykbcwde7nfyt3hsiqqgcly', // returnslowproviders
 
   // Peers endpoint test CIDs (libp2p-key format)
   PEERS_404: 'k2k4r8pqu6ui9p0d0fewul7462tsb0pa57pi238gunrjxpfrg6zawrho', // return404peers
@@ -96,6 +97,56 @@ describe('delegated-routing-v1-http-api-client', () => {
       id: prov.ID,
       addrs: prov.Addrs
     })))
+  })
+
+  it('should abort a streaming providers request without an unhandled rejection', async () => {
+    const cid = CID.parse(TEST_CIDS.PROVIDERS_SLOW)
+    const controller = new AbortController()
+    const rejections: unknown[] = []
+    const onRejection = (evt: any): void => {
+      rejections.push(evt?.reason ?? evt)
+    }
+
+    if (isNode) {
+      process.on('unhandledRejection', onRejection)
+    } else {
+      globalThis.addEventListener('unhandledrejection', onRejection)
+    }
+
+    let seen = 0
+    let seenAfterAbort = 0
+    let error: any
+
+    try {
+      for await (const provider of client.getProviders(cid, { signal: controller.signal })) {
+        expect(provider).to.have.property('ID')
+        seen++
+
+        if (controller.signal.aborted) {
+          seenAfterAbort++
+        }
+
+        // abort as soon as the first provider arrives, while the server is
+        // still streaming
+        controller.abort()
+      }
+    } catch (err: any) {
+      error = err
+    } finally {
+      // give a stray `.cancel()` rejection time to surface
+      await new Promise((resolve) => setTimeout(resolve, 100))
+
+      if (isNode) {
+        process.off('unhandledRejection', onRejection)
+      } else {
+        globalThis.removeEventListener('unhandledrejection', onRejection)
+      }
+    }
+
+    expect(seen).to.be.greaterThan(0)
+    expect(seenAfterAbort).to.equal(0, 'yielded providers after abort')
+    expect(error).to.have.property('name', 'AbortError')
+    expect(rejections).to.be.empty()
   })
 
   it('should return empty array when no providers found (200 with empty JSON array)', async () => {

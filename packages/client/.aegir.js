@@ -6,6 +6,7 @@ const TEST_CIDS = {
   // Providers endpoint test CIDs
   PROVIDERS_404: 'bafkreig3o4e7r4bpsc3hqirlzjeuie3w25tfjgmp6ufeaabwvuial3r4h4', // return404providers
   PROVIDERS_NULL: 'bafkreicyicgkpqid2qs3kfc277f4tsx5tew3e63fgv7fn6t74sicjkv76i', // returnnullproviders
+  PROVIDERS_SLOW: 'bafkreibqcwpgefttqr72saqufav6ajp6dggcykbcwde7nfyt3hsiqqgcly', // returnslowproviders
 
   // Peers endpoint test CIDs (libp2p-key format)
   PEERS_404: 'k2k4r8pqu6ui9p0d0fewul7462tsb0pa57pi238gunrjxpfrg6zawrho', // return404peers
@@ -73,6 +74,25 @@ const options = {
           if (req.params.cid === TEST_CIDS.PROVIDERS_NULL) {
             res.setHeader('Content-Type', 'application/json')
             res.end(JSON.stringify({ Providers: null }))
+            return
+          }
+
+          // Support testing aborts mid-stream: keep writing providers until the
+          // client goes away
+          if (req.params.cid === TEST_CIDS.PROVIDERS_SLOW) {
+            res.setHeader('Content-Type', 'application/x-ndjson')
+            const write = () => {
+              res.write(JSON.stringify({
+                ID: '12D3KooWPrharWa46De82HhYjB55E4LyvfbXVjqaEDyu7yetHE6J',
+                Addrs: ['/ip4/44.44.44.44/tcp/1234']
+              }) + '\n')
+            }
+            write()
+            const interval = setInterval(write, 10)
+            req.on('close', () => {
+              clearInterval(interval)
+              res.end()
+            })
             return
           }
 
